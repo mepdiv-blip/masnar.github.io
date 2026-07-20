@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ProyekKu - Keuangan & Laporan</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#14532D">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ProyekKu">
+    <meta name="application-name" content="MONPROF">
+    <meta name="description" content="Aplikasi Keuangan Proyek & Laporan Harian">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Manifest akan di-generate via JS -->
+
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { jakarta: ['Plus Jakarta Sans','sans-serif'] }
+            }
+        }
+    }
+    </script>
+    <style>
+        :root {
+            --primary: #14532D;
+            --primary-l: #166534;
+            --primary-ll: #22C55E;
+            --accent: #D97706;
+            --accent-l: #F59E0B;
+            --bg: #F1F5F0;
+            --surface: #FFFFFF;
+            --text: #1E293B;
+            --muted: #64748B;
+            --danger: #DC2626;
+            --success: #16A34A;
+            --radius: 14px;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin:0; overflow:hidden; height:100dvh; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+
+        .view { display:none; height:calc(100dvh - 132px); overflow-y:auto; padding:16px 16px 24px; scroll-behavior:smooth; }
+        .view.active { display:block; animation: fadeUp .3s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes bounceIn { 0%{transform:scale(.3);opacity:0} 50%{transform:scale(1.05)} 70%{transform:scale(.9)} 100%{transform:scale(1);opacity:1} }
+
+        .card { background:var(--surface); border-radius:var(--radius); box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04); transition:transform .15s,box-shadow .15s; }
+        .card:active { transform:scale(.98); }
+        .card-accent { border-left:4px solid var(--accent); }
+
+        .stat-card { position:relative; overflow:hidden; }
+        .stat-card::before { content:''; position:absolute; top:-20px; right:-20px; width:80px; height:80px; border-radius:50%; opacity:.08; }
+        .stat-card.green::before { background:var(--success); }
+        .stat-card.amber::before { background:var(--accent); }
+        .stat-card.red::before { background:var(--danger); }
+        .stat-card.teal::before { background:var(--primary-ll); }
+
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid #e2e8f0; display:flex; z-index:100; padding:6px 0 env(safe-area-inset-bottom,8px); box-shadow:0 -2px 10px rgba(0,0,0,.05); }
+        .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 0; cursor:pointer; transition:all .2s; position:relative; }
+        .nav-item i { font-size:20px; color:var(--muted); transition:all .2s; }
+        .nav-item span { font-size:10px; font-weight:600; color:var(--muted); margin-top:2px; transition:all .2s; }
+        .nav-item.active i { color:var(--primary-ll); }
+        .nav-item.active span { color:var(--primary-ll); }
+        .nav-item.active::after { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:28px; height:3px; background:var(--primary-ll); border-radius:0 0 3px 3px; }
+
+        .app-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-l) 100%); color:white; padding:16px 20px 14px; position:relative; }
+        .app-header::after { content:''; position:absolute; bottom:-16px; left:0; right:0; height:16px; background:var(--bg); border-radius:16px 16px 0 0; }
+
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:none; align-items:flex-end; justify-content:center; animation:fadeIn .2s; }
+        .modal-overlay.show { display:flex; }
+        .modal-sheet { background:var(--surface); border-radius:20px 20px 0 0; width:100%; max-width:500px; max-height:90dvh; overflow-y:auto; padding:20px; animation:slideUp .3s ease; }
+        .modal-handle { width:40px; height:4px; background:#d1d5db; border-radius:4px; margin:0 auto 16px; }
+
+        .form-input { width:100%; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-family:inherit; font-size:14px; transition:border-color .2s; background:#f8fafc; }
+        .form-input:focus { outline:none; border-color:var(--primary-ll); background:white; box-shadow:0 0 0 3px rgba(34,197,94,.1); }
+        .form-label { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; display:block; }
+
+        .btn-primary { background:var(--primary); color:white; border:none; padding:12px 24px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; width:100%; }
+        .btn-primary:active { transform:scale(.97); background:var(--primary-l); }
+        .btn-accent { background:var(--accent); color:white; border:none; padding:12px 24px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; }
+        .btn-accent:active { transform:scale(.97); }
+        .btn-outline { background:transparent; color:var(--primary); border:2px solid var(--primary-ll); padding:10px 24px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; }
+        .btn-danger { background:var(--danger); color:white; border:none; padding:8px 16px; border-radius:8px; font-family:inherit; font-weight:600; font-size:12px; cursor:pointer; }
+        .btn-install { background:linear-gradient(135deg, var(--primary-ll), var(--primary-l)); color:white; border:none; padding:14px 28px; border-radius:12px; font-family:inherit; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 4px 14px rgba(34,197,94,.3); }
+
+        .progress-bar { height:8px; background:#e2e8f0; border-radius:8px; overflow:hidden; }
+        .progress-fill { height:100%; border-radius:8px; transition:width .5s ease; }
+
+        .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:12px 20px; border-radius:10px; color:white; font-weight:600; font-size:13px; z-index:999; animation:fadeUp .3s ease; box-shadow:0 4px 12px rgba(0,0,0,.15); display:flex; align-items:center; gap:8px; max-width:90%; }
+        .toast.success { background:var(--success); }
+        .toast.error { background:var(--danger); }
+        .toast.info { background:var(--primary); }
+
+        .tag { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+        .tag-income { background:#dcfce7; color:#166534; }
+        .tag-expense { background:#fef2f2; color:#991b1b; }
+
+        .img-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; border:2px solid #e2e8f0; cursor:pointer; transition:transform .2s; }
+        .img-thumb:active { transform:scale(.95); }
+
+        .empty-state { text-align:center; padding:40px 20px; }
+        .empty-state i { font-size:48px; color:#cbd5e1; margin-bottom:12px; }
+        .empty-state h3 { font-size:16px; font-weight:700; color:var(--muted); margin-bottom:4px; }
+        .empty-state p { font-size:13px; color:#94a3b8; }
+
+        .sub-view { display:none; }
+        .sub-view.active { display:block; animation:fadeUp .25s ease; }
+
+        .upload-area { border:2px dashed #cbd5e1; border-radius:12px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; background:#f8fafc; }
+        .upload-area:hover { border-color:var(--primary-ll); background:#f0fdf4; }
+        .upload-area.has-image { border-style:solid; border-color:var(--primary-ll); padding:8px; }
+
+        /* Install Banner */
+        .install-banner { position:fixed; bottom:72px; left:12px; right:12px; background:linear-gradient(135deg,#14532D,#166534); color:white; border-radius:16px; padding:16px; z-index:150; box-shadow:0 8px 30px rgba(0,0,0,.25); animation:slideUp .4s ease; }
+        .install-banner.hide { display:none; }
+
+        /* Splash screen */
+        .splash { position:fixed; inset:0; background:linear-gradient(135deg,#14532D,#166534); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .5s; }
+        .splash.fade-out { opacity:0; pointer-events:none; }
+        .splash-logo { animation:bounceIn .6s ease; }
+
+        /* Step indicator */
+        .step-num { width:32px; height:32px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0; }
+
+        @media(min-width:500px) {
+            .modal-sheet { border-radius:20px; margin:20px; max-height:85dvh; }
+            .modal-overlay { align-items:center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash" class="splash">
+        <div class="splash-logo">
+            <div class="w-20 h-20 bg-white/15 rounded-2xl flex items-center justify-center mb-4 mx-auto backdrop-blur-sm border border-white/20">
+                <i class="fas fa-hard-hat text-4xl text-amber-400"></i>
+            </div>
+            <h1 class="text-2xl font-black text-white text-center tracking-tight">ProyekKu</h1>
+            <p class="text-xs text-green-200 text-center mt-1 font-medium">Keuangan & Laporan Proyek</p>
+        </div>
+        <div class="mt-8">
+            <div class="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin mx-auto" style="border-width:3px;"></div>
+        </div>
+    </div>
+
+    <div id="app" class="font-jakarta" style="height:100dvh;display:flex;flex-direction:column;opacity:0;transition:opacity .3s;">
+
+        <!-- Header -->
+        <header class="app-header" id="app-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-lg font-black tracking-tight flex items-center gap-2">
+                        <i class="fas fa-hard-hat text-amber-400 text-sm"></i> ProyekKu
+                    </h1>
+                    <p class="text-xs opacity-70 font-medium" id="header-subtitle">Keuangan & Laporan Proyek</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="install-btn-header" onclick="promptInstall()" class="hidden w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Install Aplikasi">
+                        <i class="fas fa-download text-sm"></i>
+                    </button>
+                    <button onclick="showExportView()" class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Export PDF">
+                        <i class="fas fa-file-pdf text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main style="flex:1;overflow:hidden;position:relative;">
+
+            <!-- ========== DASHBOARD ========== -->
+            <div id="view-dashboard" class="view active">
+                <div id="dashboard-content"></div>
+            </div>
+
+            <!-- ========== PROYEK ========== -->
+            <div id="view-projects" class="view">
+                <div id="project-list-view">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-black">Daftar Proyek</h2>
+                        <button onclick="openProjectModal()" class="btn-accent text-xs px-4 py-2"><i class="fas fa-plus mr-1"></i> Tambah</button>
+                    </div>
+                    <div id="project-list"></div>
+                </div>
+                <div id="project-detail-view" class="sub-view">
+                    <button onclick="closeProjectDetail()" class="flex items-center gap-2 text-sm font-bold mb-3" style="color:var(--primary-ll)">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+                    </button>
+                    <div id="project-detail-content"></div>
+                </div>
+            </div>
+
+            <!-- ========== LAPORAN ========== -->
+            <div id="view-reports" class="view">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-black">Laporan Harian</h2>
+                    <button onclick="openReportModal()" class="btn-accent text-xs px-4 py-2"><i class="fas fa-plus mr-1"></i> Tambah</button>
+                </div>
+                <div id="report-list"></div>
+            </div>
+
+            <!-- ========== EXPORT ========== -->
+            <div id="view-export" class="view">
+                <h2 class="text-lg font-black mb-4">Export & Kirim PDF</h2>
+                <div class="card p-5 mb-4">
+                    <div class="mb-4">
+                        <label class="form-label">Pilih Proyek</label>
+                        <select id="export-project" class="form-input"></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label class="form-label">Dari Tanggal</label>
+                            <input type="date" id="export-from" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Sampai Tanggal</label>
+                            <input type="date" id="export-to" class="form-input">
+                        </div>
+                    </div>
+                    <div class="mb-5">
+                        <label class="form-label">Jenis Laporan</label>
+                        <div class="flex gap-2 mt-1 flex-wrap">
+                            <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition">
+                                <input type="radio" name="export-type" value="finance" checked class="accent-green-600"> <span class="text-xs font-bold">Keuangan</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition">
+                                <input type="radio" name="export-type" value="daily" class="accent-amber-600"> <span class="text-xs font-bold">Harian</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition">
+                                <input type="radio" name="export-type" value="full" class="accent-blue-600"> <span class="text-xs font-bold">Lengkap</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="generatePDF(true)" class="btn-primary flex-1 flex items-center justify-center gap-2">
+                            <i class="fas fa-share"></i> Kirim PDF
+                        </button>
+                        <button onclick="generatePDF(false)" class="btn-outline flex-1 flex items-center justify-center gap-2">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panduan Instalasi -->
+                <div class="card p-5 mb-4" style="border-left:4px solid var(--primary-ll);">
+                    <h3 class="font-black text-sm mb-3 flex items-center gap-2" style="color:var(--primary);"><i class="fas fa-mobile-alt"></i> Install di Android</h3>
+                    <div id="install-guide"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('dashboard')">
+                <i class="fas fa-home"></i><span>Beranda</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('projects')">
+                <i class="fas fa-building"></i><span>Proyek</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('reports')">
+                <i class="fas fa-clipboard-list"></i><span>Laporan</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('export')">
+                <i class="fas fa-file-pdf"></i><span>Export</span>
+            </div>
+        </nav>
+
+        <!-- Install Banner -->
+        <div id="install-banner" class="install-banner hide">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-hard-hat text-amber-400 text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm">Install ProyekKu</p>
+                    <p class="text-xs opacity-80">Akses cepat dari home screen Android</p>
+                </div>
+                <button onclick="dismissInstallBanner()" class="text-white/60 text-lg px-2"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="flex gap-2 mt-3">
+                <button onclick="promptInstall()" class="flex-1 bg-white text-green-800 font-bold text-xs py-2.5 rounded-lg">Install Sekarang</button>
+                <button onclick="dismissInstallBanner()" class="px-4 bg-white/15 text-white font-semibold text-xs py-2.5 rounded-lg">Nanti</button>
+            </div>
+        </div>
+
+        <!-- ========== MODAL: TAMBAH PROYEK ========== -->
+        <div id="modal-project" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-project')">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <h3 class="text-base font-black mb-4" id="modal-project-title">Tambah Proyek Baru</h3>
+                <input type="hidden" id="project-edit-id">
+                <div class="mb-3">
+                    <label class="form-label">Nama Proyek</label>
+                    <input type="text" id="project-name" class="form-input" placeholder="Contoh: Renovasi Kantor">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Deskripsi</label>
+                    <textarea id="project-desc" class="form-input" rows="2" placeholder="Keterangan singkat proyek"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Budget (Rp)</label>
+                    <input type="number" id="project-budget" class="form-input" placeholder="0" min="0">
+                </div>
+                <button onclick="saveProject()" class="btn-primary">Simpan Proyek</button>
+            </div>
+        </div>
+
+        <!-- ========== MODAL: TAMBAH TRANSAKSI ========== -->
+        <div id="modal-transaction" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-transaction')">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <h3 class="text-base font-black mb-4">Tambah Transaksi</h3>
+                <input type="hidden" id="tx-project-id">
+                <div class="mb-3">
+                    <label class="form-label">Jenis</label>
+                    <div class="flex gap-2">
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="income" class="hidden peer">
+                            <div class="peer-checked:bg-green-100 peer-checked:border-green-500 peer-checked:text-green-800 border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-bold transition bg-gray-50">
+                                <i class="fas fa-arrow-down mr-1"></i> Pemasukan
+                            </div>
+                        </label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="expense" class="hidden peer" checked>
+                            <div class="peer-checked:bg-red-100 peer-checked:border-red-500 peer-checked:text-red-800 border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-bold transition bg-gray-50">
+                                <i class="fas fa-arrow-up mr-1"></i> Pengeluaran
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Jumlah (Rp)</label>
+                    <input type="number" id="tx-amount" class="form-input" placeholder="0" min="0">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Keterangan</label>
+                    <input type="text" id="tx-desc" class="form-input" placeholder="Contoh: Beli semen">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" id="tx-date" class="form-input">
+                </div>
+                <button onclick="saveTransaction()" class="btn-primary">Simpan Transaksi</button>
+            </div>
+        </div>
+
+        <!-- ========== MODAL: TAMBAH LAPORAN ========== -->
+        <div id="modal-report" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-report')">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <h3 class="text-base font-black mb-4">Tambah Laporan Harian</h3>
+                <input type="hidden" id="report-edit-id">
+                <div class="mb-3">
+                    <label class="form-label">Pilih Proyek</label>
+                    <select id="report-project" class="form-input"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Judul Laporan</label>
+                    <input type="text" id="report-title" class="form-input" placeholder="Contoh: Progress pondasi">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Isi Laporan</label>
+                    <textarea id="report-content" class="form-input" rows="4" placeholder="Deskripsikan pekerjaan hari ini..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" id="report-date" class="form-input">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Upload Foto</label>
+                    <div id="upload-area" class="upload-area" onclick="document.getElementById('report-image').click()">
+                        <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-gray-500">Tap untuk ambil foto / pilih dari galeri</p>
+                    </div>
+                    <input type="file" id="report-image" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this)">
+                </div>
+                <button onclick="saveReport()" class="btn-primary">Simpan Laporan</button>
+            </div>
+        </div>
+
+        <!-- ========== MODAL: IMAGE VIEWER ========== -->
+        <div id="modal-image" class="modal-overlay" onclick="closeModal('modal-image')" style="align-items:center;background:rgba(0,0,0,.9);">
+            <img id="image-viewer-img" src="" style="max-width:95%;max-height:85dvh;border-radius:12px;object-fit:contain;">
+            <button onclick="closeModal('modal-image')" class="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- ========== MODAL: KONFIRMASI HAPUS ========== -->
+        <div id="modal-confirm" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-confirm')" style="align-items:center;">
+            <div class="modal-sheet" style="border-radius:20px;max-width:340px;margin:20px;">
+                <div class="text-center mb-4">
+                    <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3"><i class="fas fa-trash text-red-500 text-xl"></i></div>
+                    <h3 class="text-base font-black mb-1">Hapus Data?</h3>
+                    <p class="text-xs text-gray-500" id="confirm-msg">Data yang dihapus tidak dapat dikembalikan.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('modal-confirm')" class="btn-outline flex-1 py-3">Batal</button>
+                    <button id="confirm-btn" class="flex-1 py-3 rounded-xl font-bold text-white text-sm" style="background:var(--danger);">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ==================== PWA: GENERATE MANIFEST & ICON ====================
+(function generateManifest() {
+    // Buat ikon via Canvas
+    function makeIcon(size) {
+        const c = document.createElement('canvas');
+        c.width = size; c.height = size;
+        const ctx = c.getContext('2d');
+        // Background
+        const grad = ctx.createLinearGradient(0,0,size,size);
+        grad.addColorStop(0,'#14532D');
+        grad.addColorStop(1,'#166534');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(0,0,size,size,size*0.2);
+        ctx.fill();
+        // Icon helm
+        ctx.fillStyle = '#F59E0B';
+        ctx.font = `bold ${size*0.45}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🏗', size/2, size*0.42);
+        // Teks
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `bold ${size*0.18}px sans-serif`;
+        ctx.fillText('PK', size/2, size*0.78);
+        return c.toDataURL('image/png');
+    }
+
+    const icon192 = makeIcon(192);
+    const icon512 = makeIcon(512);
+
+    const manifest = {
+        name: 'ProyekKu - Keuangan & Laporan',
+        short_name: 'ProyekKu',
+        description: 'Aplikasi Keuangan Proyek & Laporan Harian',
+        start_url: './index.html',
+        scope: './',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#14532D',
+        theme_color: '#14532D',
+        categories: ['business','productivity'],
+        icons: [
+            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ],
+        screenshots: [],
+        prefer_related_applications: false
+    };
+
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = url;
+    document.head.appendChild(link);
+
+    // Apple touch icon
+    const apple = document.createElement('link');
+    apple.rel = 'apple-touch-icon';
+    apple.href = icon192;
+    document.head.appendChild(apple);
+
+    // Favicon
+    const fav = document.createElement('link');
+    fav.rel = 'icon';
+    fav.type = 'image/png';
+    fav.href = icon192;
+    document.head.appendChild(fav);
+})();
+
+// ==================== PWA: REGISTER SERVICE WORKER ====================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('[PWA] Service Worker terdaftar:', reg.scope);
+                // Cek update
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'activated') {
+                            showToast('Aplikasi diperbarui! Refresh untuk update.','info');
+                        }
+                    });
+                });
+            })
+            .catch(err => {
+                console.log('[PWA] SW gagal (mungkin local file):', err.message);
+            });
+    });
+}
+
+// ==================== PWA: INSTALL PROMPT ====================
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Tampilkan banner install
+    document.getElementById('install-banner').classList.remove('hide');
+    document.getElementById('install-btn-header').classList.remove('hidden');
+    document.getElementById('install-btn-header').style.display = 'flex';
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    document.getElementById('install-banner').classList.add('hide');
+    document.getElementById('install-btn-header').classList.add('hidden');
+    showToast('ProyekKu berhasil di-install!','success');
+});
+
+function promptInstall() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(result => {
+            if (result.outcome === 'accepted') {
+                showToast('Menginstall ProyekKu...','success');
+            }
+            deferredPrompt = null;
+            document.getElementById('install-banner').classList.add('hide');
+        });
+    } else {
+        showToast('Buka di Chrome → tap menu → "Install App"','info');
+    }
+}
+
+function dismissInstallBanner() {
+    document.getElementById('install-banner').classList.add('hide');
+    localStorage.setItem('pk_install_dismissed', '1');
+}
+
+// ==================== DATABASE ====================
+const DB = {
+    get(key) { try { return JSON.parse(localStorage.getItem('pk_'+key) || '[]'); } catch { return []; } },
+    set(key, data) { try { localStorage.setItem('pk_'+key, JSON.stringify(data)); } catch(e) { showToast('Penyimpanan penuh! Hapus beberapa data.','error'); } },
+    id() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+};
+
+// ==================== STATE ====================
+let currentTab = 'dashboard';
+let currentProjectId = null;
+let uploadedImage = null;
+
+// ==================== UTILITAS ====================
+function formatRp(n) { return 'Rp ' + (Number(n)||0).toLocaleString('id-ID'); }
+function formatDate(d) { if(!d) return '-'; const dt=new Date(d); return dt.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
+function formatDateFull(d) { if(!d) return '-'; const dt=new Date(d); return dt.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+
+function showToast(msg, type='info') {
+    const old = document.querySelector('.toast');
+    if(old) old.remove();
+    const icons = {success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fas ${icons[type]}"></i> ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 2800);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function confirmDelete(msg, callback) {
+    document.getElementById('confirm-msg').textContent = msg;
+    const btn = document.getElementById('confirm-btn');
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.addEventListener('click', () => { callback(); closeModal('modal-confirm'); });
+    openModal('modal-confirm');
+}
+
+// ==================== NAVIGASI ====================
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-'+tab).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach((n,i) => {
+        const tabs = ['dashboard','projects','reports','export'];
+        n.classList.toggle('active', tabs[i]===tab);
+    });
+    const subtitles = {
+        dashboard:'Keuangan & Laporan Proyek',
+        projects:'Kelola Proyek Anda',
+        reports:'Catatan Aktivitas Harian',
+        export:'Export & Kirim PDF'
+    };
+    document.getElementById('header-subtitle').textContent = subtitles[tab];
+    renderCurrentView();
+}
+
+function renderCurrentView() {
+    switch(currentTab) {
+        case 'dashboard': renderDashboard(); break;
+        case 'projects': renderProjectList(); break;
+        case 'reports': renderReportList(); break;
+        case 'export': populateExportSelect(); renderInstallGuide(); break;
+    }
+}
+
+function showExportView() { switchTab('export'); }
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+    const projects = DB.get('projects');
+    const txs = DB.get('transactions');
+    const reports = DB.get('reports');
+
+    let totalBudget=0, totalIncome=0, totalExpense=0;
+    projects.forEach(p => {
+        totalBudget += Number(p.budget)||0;
+        const pTxs = txs.filter(t=>t.projectId===p.id);
+        pTxs.forEach(t=>{ if(t.type==='income') totalIncome+=Number(t.amount)||0; else totalExpense+=Number(t.amount)||0; });
+    });
+    const balance = totalIncome - totalExpense;
+
+    const recentTx = [...txs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+
+    let html = `
+        <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="card stat-card teal p-4">
+                <p class="text-xs font-bold text-gray-400 uppercase">Total Budget</p>
+                <p class="text-lg font-black mt-1" style="color:var(--primary)">${formatRp(totalBudget)}</p>
+            </div>
+            <div class="card stat-card green p-4">
+                <p class="text-xs font-bold text-gray-400 uppercase">Pemasukan</p>
+                <p class="text-lg font-black mt-1 text-green-600">${formatRp(totalIncome)}</p>
+            </div>
+            <div class="card stat-card red p-4">
+                <p class="text-xs font-bold text-gray-400 uppercase">Pengeluaran</p>
+                <p class="text-lg font-black mt-1 text-red-600">${formatRp(totalExpense)}</p>
+            </div>
+            <div class="card stat-card amber p-4">
+                <p class="text-xs font-bold text-gray-400 uppercase">Saldo</p>
+                <p class="text-lg font-black mt-1" style="color:${balance>=0?'var(--success)':'var(--danger)'}">${formatRp(balance)}</p>
+            </div>
+        </div>`;
+
+    // Proyek progress
+    if(projects.length > 0) {
+        html += `<h3 class="text-sm font-black mb-3 text-gray-500 uppercase tracking-wider">Progress Proyek</h3>`;
+        projects.forEach(p => {
+            const pTxs = txs.filter(t=>t.projectId===p.id);
+            let spent=0; pTxs.forEach(t=>{ if(t.type==='expense') spent+=Number(t.amount)||0; });
+            const pct = p.budget > 0 ? Math.min(100, (spent/p.budget)*100) : 0;
+            const barColor = pct > 90 ? 'bg-red-500' : pct > 70 ? 'bg-amber-500' : 'bg-green-500';
+            html += `
+            <div class="card p-4 mb-3 cursor-pointer" onclick="switchTab('projects');setTimeout(()=>openProjectDetail('${p.id}'),200)">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="font-bold text-sm">${p.name}</p>
+                        <p class="text-xs text-gray-400">${formatRp(spent)} / ${formatRp(p.budget)}</p>
+                    </div>
+                    <span class="text-xs font-black ${pct>90?'text-red-500':pct>70?'text-amber-500':'text-green-500'}">${Math.round(pct)}%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill ${barColor}" style="width:${pct}%"></div></div>
+            </div>`;
+        });
+    }
+
+    // Transaksi terakhir
+    if(recentTx.length > 0) {
+        html += `<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>`;
+        recentTx.forEach(tx => {
+            const proj = projects.find(p=>p.id===tx.projectId);
+            html += `
+            <div class="card card-accent p-3 mb-2 flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold truncate">${tx.description||'-'}</p>
+                    <p class="text-xs text-gray-400">${proj?proj.name:'-'} &middot; ${formatDate(tx.date)}</p>
+                </div>
+                <span class="tag ${tx.type==='income'?'tag-income':'tag-expense'} ml-2 whitespace-nowrap">
+                    ${tx.type==='income'?'+':'-'} ${formatRp(tx.amount)}
+                </span>
+            </div>`;
+        });
+    }
+
+    // Laporan terakhir
+    const recentReports = [...reports].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+    if(recentReports.length > 0) {
+        html += `<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Laporan Terbaru</h3>`;
+        recentReports.forEach(r => {
+            const proj = projects.find(p=>p.id===r.projectId);
+            html += `
+            <div class="card p-3 mb-2 flex items-center gap-3">
+                ${r.image?`<img src="${r.image}" class="img-thumb" onclick="viewImageBySrc('${r.image.replace(/'/g,"\\'")}')">`:'<div class="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-gray-300"></i></div>'}
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold truncate">${r.title}</p>
+                    <p class="text-xs text-gray-400">${proj?proj.name:'-'} &middot; ${formatDate(r.date)}</p>
+                </div>
+            </div>`;
+        });
+    }
+
+    if(projects.length===0) {
+        html += `
+        <div class="empty-state mt-8">
+            <i class="fas fa-folder-open"></i>
+            <h3>Belum Ada Proyek</h3>
+            <p>Mulai dengan menambahkan proyek pertama Anda</p>
+            <button onclick="switchTab('projects');setTimeout(openProjectModal,300)" class="btn-accent mt-4 text-sm px-6 py-3"><i class="fas fa-plus mr-2"></i>Buat Proyek</button>
+        </div>`;
+    }
+
+    document.getElementById('dashboard-content').innerHTML = html;
+}
+
+// ==================== PROYEK ====================
+function renderProjectList() {
+    const projects = DB.get('projects');
+    const txs = DB.get('transactions');
+    const list = document.getElementById('project-list');
+
+    if(projects.length === 0) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-building"></i><h3>Belum Ada Proyek</h3><p>Tambahkan proyek untuk mulai mencatat keuangan</p></div>`;
+        return;
+    }
+
+    let html = '';
+    projects.forEach(p => {
+        const pTxs = txs.filter(t=>t.projectId===p.id);
+        let income=0, expense=0;
+        pTxs.forEach(t=>{ if(t.type==='income') income+=Number(t.amount)||0; else expense+=Number(t.amount)||0; });
+        const pct = p.budget>0 ? Math.min(100,(expense/p.budget)*100) : 0;
+
+        html += `
+        <div class="card p-4 mb-3 cursor-pointer" onclick="openProjectDetail('${p.id}')">
+            <div class="flex justify-between items-start mb-1">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-base">${p.name}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">${p.description||'Tanpa deskripsi'}</p>
+                </div>
+                <button onclick="event.stopPropagation();editProject('${p.id}')" class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600"><i class="fas fa-pen text-xs"></i></button>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+                <div class="bg-green-50 rounded-lg p-2"><p class="text-xs text-green-600 font-bold">Masuk</p><p class="text-xs font-black text-green-700">${formatRp(income)}</p></div>
+                <div class="bg-red-50 rounded-lg p-2"><p class="text-xs text-red-600 font-bold">Keluar</p><p class="text-xs font-black text-red-700">${formatRp(expense)}</p></div>
+                <div class="bg-amber-50 rounded-lg p-2"><p class="text-xs text-amber-600 font-bold">Sisa</p><p class="text-xs font-black text-amber-700">${formatRp(p.budget-expense)}</p></div>
+            </div>
+            <div class="progress-bar mt-3"><div class="progress-fill ${pct>90?'bg-red-500':pct>70?'bg-amber-500':'bg-green-500'}" style="width:${pct}%"></div></div>
+            <p class="text-xs text-gray-400 mt-1 text-right">${Math.round(pct)}% terpakai</p>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+function openProjectModal(editId) {
+    document.getElementById('project-edit-id').value = '';
+    document.getElementById('project-name').value = '';
+    document.getElementById('project-desc').value = '';
+    document.getElementById('project-budget').value = '';
+    document.getElementById('modal-project-title').textContent = 'Tambah Proyek Baru';
+
+    if(editId) {
+        const p = DB.get('projects').find(x=>x.id===editId);
+        if(p) {
+            document.getElementById('project-edit-id').value = p.id;
+            document.getElementById('project-name').value = p.name;
+            document.getElementById('project-desc').value = p.description||'';
+            document.getElementById('project-budget').value = p.budget||'';
+            document.getElementById('modal-project-title').textContent = 'Edit Proyek';
+        }
+    }
+    openModal('modal-project');
+}
+
+function editProject(id) { openProjectModal(id); }
+
+function saveProject() {
+    const name = document.getElementById('project-name').value.trim();
+    const desc = document.getElementById('project-desc').value.trim();
+    const budget = Number(document.getElementById('project-budget').value)||0;
+    const editId = document.getElementById('project-edit-id').value;
+
+    if(!name) { showToast('Nama proyek wajib diisi','error'); return; }
+
+    let projects = DB.get('projects');
+    if(editId) {
+        const idx = projects.findIndex(p=>p.id===editId);
+        if(idx>=0) { projects[idx].name=name; projects[idx].description=desc; projects[idx].budget=budget; }
+    } else {
+        projects.push({ id:DB.id(), name, description:desc, budget, createdAt:todayStr() });
+    }
+    DB.set('projects', projects);
+    closeModal('modal-project');
+    showToast(editId?'Proyek diperbarui':'Proyek ditambahkan','success');
+    renderCurrentView();
+}
+
+function deleteProject(id) {
+    confirmDelete('Proyek dan semua transaksi terkait akan dihapus.', ()=>{
+        let projects = DB.get('projects').filter(p=>p.id!==id);
+        let txs = DB.get('transactions').filter(t=>t.projectId!==id);
+        let reports = DB.get('reports').filter(r=>r.projectId!==id);
+        DB.set('projects', projects);
+        DB.set('transactions', txs);
+        DB.set('reports', reports);
+        showToast('Proyek dihapus','success');
+        closeProjectDetail();
+        renderCurrentView();
+    });
+}
+
+// ==================== DETAIL PROYEK ====================
+function openProjectDetail(id) {
+    currentProjectId = id;
+    document.getElementById('project-list-view').style.display = 'none';
+    document.getElementById('project-detail-view').classList.add('active');
+    renderProjectDetail();
+}
+
+function closeProjectDetail() {
+    document.getElementById('project-list-view').style.display = 'block';
+    document.getElementById('project-detail-view').classList.remove('active');
+    currentProjectId = null;
+    renderProjectList();
+}
+
+function renderProjectDetail() {
+    const projects = DB.get('projects');
+    const p = projects.find(x=>x.id===currentProjectId);
+    if(!p) return;
+
+    const txs = DB.get('transactions').filter(t=>t.projectId===p.id).sort((a,b)=>b.date.localeCompare(a.date));
+    let income=0, expense=0;
+    txs.forEach(t=>{ if(t.type==='income') income+=Number(t.amount)||0; else expense+=Number(t.amount)||0; });
+    const pct = p.budget>0?Math.min(100,(expense/p.budget)*100):0;
+
+    let html = `
+    <div class="card p-4 mb-4" style="border-left:4px solid var(--primary-ll);">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 class="font-black text-lg">${p.name}</h3>
+                <p class="text-xs text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p>
+            </div>
+            <button onclick="deleteProject('${p.id}')" class="btn-danger text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="card p-3 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Pemasukan</p><p class="text-sm font-black text-green-700">${formatRp(income)}</p></div>
+        <div class="card p-3 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Pengeluaran</p><p class="text-sm font-black text-red-700">${formatRp(expense)}</p></div>
+    </div>
+    <div class="card p-3 mb-4">
+        <div class="flex justify-between text-xs mb-1"><span class="font-bold text-gray-500">Budget: ${formatRp(p.budget)}</span><span class="font-black ${pct>90?'text-red-500':'text-green-600'}">${Math.round(pct)}%</span></div>
+        <div class="progress-bar"><div class="progress-fill ${pct>90?'bg-red-500':pct>70?'bg-amber-500':'bg-green-500'}" style="width:${pct}%"></div></div>
+        <p class="text-xs text-gray-400 mt-1">Sisa: ${formatRp(p.budget-expense)}</p>
+    </div>
+
+    <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-black text-gray-500 uppercase">Riwayat Transaksi</h4>
+        <button onclick="openTransactionModal('${p.id}')" class="text-xs font-bold px-3 py-1.5 rounded-lg" style="background:var(--accent);color:white;"><i class="fas fa-plus mr-1"></i>Tambah</button>
+    </div>`;
+
+    if(txs.length === 0) {
+        html += `<div class="empty-state py-8"><i class="fas fa-receipt" style="font-size:32px;"></i><h3 style="font-size:14px;">Belum ada transaksi</h3></div>`;
+    } else {
+        txs.forEach(tx => {
+            html += `
+            <div class="card card-accent p-3 mb-2 flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold truncate">${tx.description||'-'}</p>
+                    <p class="text-xs text-gray-400">${formatDate(tx.date)}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="tag ${tx.type==='income'?'tag-income':'tag-expense'}">${tx.type==='income'?'+':'-'}${formatRp(tx.amount)}</span>
+                    <button onclick="deleteTransaction('${tx.id}')" class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-times text-xs"></i></button>
+                </div>
+            </div>`;
+        });
+    }
+
+    document.getElementById('project-detail-content').innerHTML = html;
+}
+
+// ==================== TRANSAKSI ====================
+function openTransactionModal(projectId) {
+    document.getElementById('tx-project-id').value = projectId;
+    document.getElementById('tx-amount').value = '';
+    document.getElementById('tx-desc').value = '';
+    document.getElementById('tx-date').value = todayStr();
+    document.querySelectorAll('input[name="tx-type"]')[1].checked = true;
+    openModal('modal-transaction');
+}
+
+function saveTransaction() {
+    const projectId = document.getElementById('tx-project-id').value;
+    const type = document.querySelector('input[name="tx-type"]:checked').value;
+    const amount = Number(document.getElementById('tx-amount').value)||0;
+    const description = document.getElementById('tx-desc').value.trim();
+    const date = document.getElementById('tx-date').value;
+
+    if(!amount) { showToast('Jumlah wajib diisi','error'); return; }
+    if(!date) { showToast('Tanggal wajib diisi','error'); return; }
+
+    let txs = DB.get('transactions');
+    txs.push({ id:DB.id(), projectId, type, amount, description, date });
+    DB.set('transactions', txs);
+    closeModal('modal-transaction');
+    showToast('Transaksi ditambahkan','success');
+    renderProjectDetail();
+}
+
+function deleteTransaction(id) {
+    confirmDelete('Hapus transaksi ini?', ()=>{
+        let txs = DB.get('transactions').filter(t=>t.id!==id);
+        DB.set('transactions', txs);
+        showToast('Transaksi dihapus','success');
+        renderProjectDetail();
+    });
+}
+
+// ==================== LAPORAN HARIAN ====================
+function renderReportList() {
+    const reports = DB.get('reports').sort((a,b)=>b.date.localeCompare(a.date));
+    const projects = DB.get('projects');
+    const list = document.getElementById('report-list');
+
+    if(reports.length === 0) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-clipboard-list"></i><h3>Belum Ada Laporan</h3><p>Catat aktivitas harian proyek Anda</p></div>`;
+        return;
+    }
+
+    const grouped = {};
+    reports.forEach(r => {
+        if(!grouped[r.date]) grouped[r.date]=[];
+        grouped[r.date].push(r);
+    });
+
+    let html = '';
+    Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).forEach(date => {
+        html += `<p class="text-xs font-black text-gray-400 uppercase mb-2 mt-4 first:mt-0">${formatDateFull(date)}</p>`;
+        grouped[date].forEach(r => {
+            const proj = projects.find(p=>p.id===r.projectId);
+            html += `
+            <div class="card p-4 mb-3">
+                <div class="flex items-start gap-3">
+                    ${r.image?`<img src="${r.image}" class="img-thumb flex-shrink-0" onclick="viewImageBySrc('${r.image.replace(/'/g,"\\'")}')">`:'<div class="w-14 h-14 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-green-300 text-lg"></i></div>'}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start">
+                            <p class="font-bold text-sm">${r.title}</p>
+                            <button onclick="deleteReport('${r.id}')" class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
+                        <p class="text-xs text-amber-600 font-bold mt-0.5">${proj?proj.name:'-'}</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">${r.content}</p>
+                    </div>
+                </div>
+            </div>`;
+        });
+    });
+    list.innerHTML = html;
+}
+
+function openReportModal() {
+    const projects = DB.get('projects');
+    if(projects.length === 0) { showToast('Buat proyek terlebih dahulu','error'); return; }
+
+    document.getElementById('report-edit-id').value = '';
+    document.getElementById('report-title').value = '';
+    document.getElementById('report-content').value = '';
+    document.getElementById('report-date').value = todayStr();
+    uploadedImage = null;
+
+    const sel = document.getElementById('report-project');
+    sel.innerHTML = projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+
+    const area = document.getElementById('upload-area');
+    area.classList.remove('has-image');
+    area.innerHTML = `<i class="fas fa-camera text-2xl text-gray-400 mb-2"></i><p class="text-xs font-semibold text-gray-500">Tap untuk ambil foto / pilih dari galeri</p>`;
+    document.getElementById('report-image').value = '';
+
+    openModal('modal-report');
+}
+
+function handleImageUpload(input) {
+    if(!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if(!file.type.startsWith('image/')) { showToast('File harus berupa gambar','error'); return; }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            const maxW = 800;
+            if(w > maxW) { h = (h*maxW)/w; w = maxW; }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            uploadedImage = canvas.toDataURL('image/jpeg', 0.7);
+
+            const area = document.getElementById('upload-area');
+            area.classList.add('has-image');
+            area.innerHTML = `<img src="${uploadedImage}" style="width:100%;border-radius:8px;max-height:200px;object-fit:cover;">
+                <p class="text-xs font-semibold text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>Foto dipilih — tap untuk ganti</p>`;
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function saveReport() {
+    const projectId = document.getElementById('report-project').value;
+    const title = document.getElementById('report-title').value.trim();
+    const content = document.getElementById('report-content').value.trim();
+    const date = document.getElementById('report-date').value;
+
+    if(!title) { showToast('Judul laporan wajib diisi','error'); return; }
+    if(!date) { showToast('Tanggal wajib diisi','error'); return; }
+
+    let reports = DB.get('reports');
+    reports.push({ id:DB.id(), projectId, title, content, image:uploadedImage, date, createdAt:todayStr() });
+    DB.set('reports', reports);
+    closeModal('modal-report');
+    uploadedImage = null;
+    showToast('Laporan disimpan','success');
+    renderReportList();
+}
+
+function deleteReport(id) {
+    confirmDelete('Hapus laporan ini?', ()=>{
+        let reports = DB.get('reports').filter(r=>r.id!==id);
+        DB.set('reports', reports);
+        showToast('Laporan dihapus','success');
+        renderReportList();
+    });
+}
+
+function viewImageBySrc(src) {
+    document.getElementById('image-viewer-img').src=src; openModal('modal-image');
+}
+
+// ==================== EXPORT PDF ====================
+function populateExportSelect() {
+    const projects = DB.get('projects');
+    const sel = document.getElementById('export-project');
+    sel.innerHTML = `<option value="">-- Semua Proyek --</option>` + projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    document.getElementById('export-from').value = '';
+    document.getElementById('export-to').value = '';
+}
+
+async function generatePDF(share) {
+    const projId = document.getElementById('export-project').value;
+    const fromDate = document.getElementById('export-from').value;
+    const toDate = document.getElementById('export-to').value;
+    const type = document.querySelector('input[name="export-type"]:checked').value;
+
+    const projects = DB.get('projects');
+    const txs = DB.get('transactions');
+    const reports = DB.get('reports');
+
+    let filteredProjects = projId ? projects.filter(p=>p.id===projId) : projects;
+    let filteredTxs = txs.filter(t=> !projId || t.projectId===projId);
+    let filteredReports = reports.filter(r=> !projId || r.projectId===projId);
+
+    if(fromDate) { filteredTxs = filteredTxs.filter(t=>t.date>=fromDate); filteredReports = filteredReports.filter(r=>r.date>=fromDate); }
+    if(toDate) { filteredTxs = filteredTxs.filter(t=>t.date<=toDate); filteredReports = filteredReports.filter(r=>r.date<=toDate); }
+
+    if(filteredProjects.length===0) { showToast('Tidak ada data untuk di-export','error'); return; }
+
+    showToast('Membuat PDF...','info');
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p','mm','a4');
+        const pageW = doc.internal.pageSize.getWidth();
+        const margin = 15;
+        let y = 15;
+
+        function addHeader(title) {
+            doc.setFillColor(20,83,45);
+            doc.rect(0,0,pageW,32,'F');
+            doc.setTextColor(255,255,255);
+            doc.setFontSize(18);
+            doc.setFont('helvetica','bold');
+            doc.text('ProyekKu', margin, 14);
+            doc.setFontSize(10);
+            doc.setFont('helvetica','normal');
+            doc.text(title, margin, 22);
+            doc.setFontSize(8);
+            doc.text('Dicetak: ' + new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}), margin, 28);
+            doc.setTextColor(0,0,0);
+            y = 40;
+        }
+
+        function checkPage(needed) {
+            if(y + needed > 275) { doc.addPage(); y = 15; }
+        }
+
+        if(type==='finance' || type==='full') {
+            addHeader('Laporan Keuangan Proyek');
+
+            filteredProjects.forEach(p => {
+                checkPage(60);
+                const pTxs = filteredTxs.filter(t=>t.projectId===p.id);
+                let inc=0, exp=0;
+                pTxs.forEach(t=>{ if(t.type==='income') inc+=Number(t.amount)||0; else exp+=Number(t.amount)||0; });
+
+                doc.setFontSize(13);
+                doc.setFont('helvetica','bold');
+                doc.setTextColor(20,83,45);
+                doc.text(p.name, margin, y);
+                y += 5;
+                doc.setFontSize(9);
+                doc.setFont('helvetica','normal');
+                doc.setTextColor(100,100,100);
+                doc.text(p.description||'Tanpa deskripsi', margin, y);
+                y += 8;
+
+                doc.setFillColor(241,245,240);
+                doc.roundedRect(margin, y, pageW-2*margin, 22, 3, 3, 'F');
+                doc.setFontSize(9);
+                doc.setFont('helvetica','bold');
+                doc.setTextColor(22,101,52);
+                doc.text('Budget: ' + formatRp(p.budget), margin+4, y+6);
+                doc.setTextColor(22,163,74);
+                doc.text('Pemasukan: ' + formatRp(inc), margin+4, y+12);
+                doc.setTextColor(220,38,38);
+                doc.text('Pengeluaran: ' + formatRp(exp), margin+4, y+18);
+                doc.setTextColor(217,119,6);
+                doc.text('Sisa: ' + formatRp(p.budget - exp), margin+80, y+6);
+                doc.setTextColor(30,41,59);
+                const pct = p.budget>0?Math.round((exp/p.budget)*100):0;
+                doc.text('Terpakai: ' + pct + '%', margin+80, y+12);
+                y += 28;
+
+                if(pTxs.length > 0) {
+                    const tableData = pTxs.sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[
+                        formatDate(t.date),
+                        t.description||'-',
+                        t.type==='income'?'Pemasukan':'Pengeluaran',
+                        (t.type==='income'?'+ ':'- ')+formatRp(t.amount)
+                    ]);
+                    doc.autoTable({
+                        startY: y,
+                        head: [['Tanggal','Keterangan','Jenis','Jumlah']],
+                        body: tableData,
+                        margin:{left:margin, right:margin},
+                        styles:{fontSize:8, cellPadding:2},
+                        headStyles:{fillColor:[20,83,45], textColor:255, fontStyle:'bold'},
+                        alternateRowStyles:{fillColor:[248,250,246]},
+                        columnStyles:{ 3:{halign:'right'} }
+                    });
+                    y = doc.lastAutoTable.finalY + 8;
+                } else {
+                    doc.setFontSize(9);
+                    doc.setTextColor(150,150,150);
+                    doc.text('Belum ada transaksi', margin, y+5);
+                    y += 12;
+                }
+            });
+        }
+
+        if(type==='daily' || type==='full') {
+            if(type==='full') { doc.addPage(); }
+            addHeader('Laporan Harian Proyek');
+
+            if(filteredReports.length===0) {
+                doc.setFontSize(10);
+                doc.setTextColor(150,150,150);
+                doc.text('Tidak ada laporan harian dalam periode ini.', margin, y);
+            }
+
+            const grouped = {};
+            filteredReports.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
+                if(!grouped[r.date]) grouped[r.date]=[];
+                grouped[r.date].push(r);
+            });
+
+            Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).forEach(date => {
+                checkPage(30);
+                doc.setFillColor(217,119,6);
+                doc.roundedRect(margin, y, pageW-2*margin, 7, 2, 2, 'F');
+                doc.setFontSize(9);
+                doc.setFont('helvetica','bold');
+                doc.setTextColor(255,255,255);
+                doc.text(formatDateFull(date), margin+3, y+5);
+                doc.setTextColor(0,0,0);
+                y += 10;
+
+                grouped[date].forEach(r => {
+                    checkPage(40);
+                    const proj = projects.find(p=>p.id===r.projectId);
+
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica','bold');
+                    doc.setTextColor(30,41,59);
+                    doc.text(r.title, margin, y);
+                    y += 4;
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica','normal');
+                    doc.setTextColor(100,100,100);
+                    doc.text('Proyek: '+(proj?proj.name:'-'), margin, y);
+                    y += 4;
+
+                    doc.setTextColor(50,50,50);
+                    const lines = doc.splitTextToSize(r.content||'', pageW-2*margin);
+                    doc.text(lines, margin, y);
+                    y += lines.length * 3.5 + 2;
+
+                    if(r.image) {
+                        try {
+                            checkPage(50);
+                            doc.addImage(r.image, 'JPEG', margin, y, 60, 45);
+                            y += 49;
+                        } catch(e) {
+                            doc.setTextColor(200,50,50);
+                            doc.text('[Gagal memuat gambar]', margin, y);
+                            y += 5;
+                        }
+                    }
+
+                    doc.setDrawColor(230,230,230);
+                    doc.line(margin, y, pageW-margin, y);
+                    y += 5;
+                });
+            });
+        }
+
+        const pageCount = doc.internal.getNumberOfPages();
+        for(let i=1; i<=pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(180,180,180);
+            doc.text('ProyekKu - Laporan dibuat secara otomatis', margin, 290);
+            doc.text('Halaman '+i+' / '+pageCount, pageW-margin, 290, {align:'right'});
+        }
+
+        if(share) {
+            try {
+                const pdfBlob = doc.output('blob');
+                const file = new File([pdfBlob], 'laporan-proyekku.pdf', {type:'application/pdf'});
+                if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+                    await navigator.share({
+                        title: 'Laporan ProyekKu',
+                        text: 'Laporan keuangan dan harian proyek',
+                        files: [file]
+                    });
+                    showToast('PDF berhasil dikirim!','success');
+                } else {
+                    doc.save('laporan-proyekku.pdf');
+                    showToast('Browser tidak mendukung share. File diunduh.','info');
+                }
+            } catch(e) {
+                if(e.name!=='AbortError') {
+                    doc.save('laporan-proyekku.pdf');
+                    showToast('Share gagal. File diunduh.','info');
+                }
+            }
+        } else {
+            doc.save('laporan-proyekku.pdf');
+            showToast('PDF berhasil diunduh!','success');
+        }
+    } catch(e) {
+        console.error(e);
+        showToast('Gagal membuat PDF: '+e.message,'error');
+    }
+}
+
+// ==================== PANDUAN INSTALASI ====================
+function renderInstallGuide() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const guide = document.getElementById('install-guide');
+
+    if(isStandalone) {
+        guide.innerHTML = `
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
+                <p class="font-bold text-sm text-green-800">ProyekKu Sudah Terinstall</p>
+                <p class="text-xs text-green-600 mt-1">Aplikasi berjalan sebagai standalone app</p>
+            </div>`;
+        return;
+    }
+
+    guide.innerHTML = `
+        <div class="space-y-4 mt-2">
+            <div class="flex gap-3 items-start">
+                <div class="step-num">1</div>
+                <div>
+                    <p class="font-bold text-sm">Host File di Web Server</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Upload <code class="bg-gray-100 px-1 rounded">index.html</code> dan <code class="bg-gray-100 px-1 rounded">sw.js</code> ke hosting yang mendukung HTTPS (GitHub Pages, Netlify, Vercel, dsb)</p>
+                </div>
+            </div>
+            <div class="flex gap-3 items-start">
+                <div class="step-num">2</div>
+                <div>
+                    <p class="font-bold text-sm">Buka di Chrome Android</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Akses URL via Chrome — akan muncul banner install otomatis, atau tap <i class="fas fa-ellipsis-v text-xs"></i> menu → <strong>"Install app"</strong></p>
+                </div>
+            </div>
+            <div class="flex gap-3 items-start">
+                <div class="step-num">3</div>
+                <div>
+                    <p class="font-bold text-sm">App Terinstall</p>
+                    <p class="text-xs text-gray-500 mt-0.5">ProyekKu muncul di home screen, berjalan fullscreen seperti app native, dan bisa dipakai offline</p>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 rounded-xl p-3 mt-3" style="border:1px solid #fde68a;">
+                <p class="text-xs font-bold text-amber-800 mb-1"><i class="fas fa-tools mr-1"></i> Cara Cepat: GitHub Pages</p>
+                <ol class="text-xs text-amber-700 space-y-1 pl-4 list-decimal">
+                    <li>Buat repo baru di GitHub</li>
+                    <li>Upload <code>index.html</code> dan <code>sw.js</code></li>
+                    <li>Settings → Pages → Source: main branch</li>
+                    <li>Buka <code>username.github.io/repo</code> di Chrome Android</li>
+                    <li>Tap menu → "Install app"</li>
+                </ol>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-3 mt-2" style="border:1px solid #bfdbfe;">
+                <p class="text-xs font-bold text-blue-800 mb-1"><i class="fas fa-cube mr-1"></i> Bikin APK (Opsional)</p>
+                <p class="text-xs text-blue-700">Setelah PWA berjalan, gunakan <strong>PWABuilder.com</strong> (by Microsoft) untuk mengkonversi ke APK Android yang bisa diinstal langsung tanpa Play Store.</p>
+            </div>
+        </div>`;
+}
+
+// ==================== SPLASH & INIT ====================
+window.addEventListener('load', () => {
+    // Splash screen
+    setTimeout(() => {
+        document.getElementById('splash').classList.add('fade-out');
+        document.getElementById('app').style.opacity = '1';
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+        }, 500);
+    }, 1200);
+
+    // Render awal
+    renderDashboard();
+
+    // Jangan tampilkan banner install jika sudah di-dismiss
+    if(localStorage.getItem('pk_install_dismissed') === '1') {
+        document.getElementById('install-banner').classList.add('hide');
+    }
+});
+</script>
+</body>
+</html>
