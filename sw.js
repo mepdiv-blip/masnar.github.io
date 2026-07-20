@@ -1,8 +1,8 @@
 // =============================================
-// ProyekKu Service Worker v3 - PWABuilder Ready
+// OmnarPro Service Worker v3 - PWABuilder Ready
 // =============================================
 
-const CACHE_NAME = 'proyekku-v3';
+const CACHE_NAME = 'OmnarPro-v3';
 const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 hari
 
 // File utama yang WAJIB di-cache (app shell)
