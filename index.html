@@ -543,6 +543,71 @@ async function gNotaPDF(share){
     }
 }
 
+
+        // Tabel barang
+        if(o.items&&o.items.length>0){
+            var tD=o.items.map(function(it,idx){return[String(idx+1),it.nama,String(it.qty),it.satuan]});
+            if(ha&&doc.autoTable){
+                doc.autoTable({
+                    startY:y,
+                    head:[['No','Nama Barang','Qty','Satuan']],
+                    body:tD,
+                    margin:{left:mg,right:mg},
+                    styles:{fontSize:10,cellPadding:3,lineColor:[200,200,200],lineWidth:0.2},
+                    headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:9},
+                    alternateRowStyles:{fillColor:[248,250,246]},
+                    columnStyles:{
+                        0:{cellWidth:15,halign:'center'},
+                        1:{cellWidth:60},
+                        2:{cellWidth:25,halign:'center',fontStyle:'bold'},
+                        3:{cellWidth:30,halign:'center'}
+                    }
+                });
+                y=doc.lastAutoTable.finalY+15;
+            }else{
+                y+=5;
+            }
+        }
+
+        // Tanda tangan
+        doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(30,41,59);
+        doc.text('Pemesan,',mg+10,y);doc.text('Mengetahui,',pw-mg-50,y);y+=30;
+        doc.setDrawColor(30,41,59);doc.setLineWidth(0.3);
+        doc.line(mg+5,y,mg+55,y);doc.line(pw-mg-60,y,pw-mg-10,y);y+=5;
+        doc.setFont('helvetica','bold');
+        doc.text(o.pemesan,mg+10,y);doc.text('____________',pw-mg-60,y);
+
+        // Footer
+        doc.setFontSize(7);doc.setTextColor(180,180,180);
+        doc.text('OmnarPRO - Nota Pesanan Barang',10,291);
+
+        hL();
+        var fn='Nota-'+o.tahap.replace(/\s+/g,'-')+'.pdf';
+        var bl;
+        try{bl=doc.output('blob')}catch(e1){try{var ab=doc.output('arraybuffer');bl=new Blob([ab],{type:'application/pdf'})}catch(e2){hL();toast('Gagal membuat PDF','e');return}}
+
+        if(!bl||bl.size<100){hL();toast('File PDF tidak valid','e');return}
+
+        if(share){
+            // Kirim via Web Share API (WhatsApp, Email, dll)
+            try{
+                var f=new File([bl],fn,{type:'application/pdf'});
+                if(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){
+                    await navigator.share({title:'Nota Pesanan '+o.tahap,text:'Nota pesanan barang untuk proyek '+(pj?pj.name:''),files:[f]});
+                    toast('Nota berhasil dikirim!','s');return;
+                }
+            }catch(e){if(e.name==='AbortError')return}
+            // Fallback download jika share gagal
+            await tDL(bl,fn);toast('Share tidak tersedia. File diunduh.','i');
+        }else{
+            // Download langsung
+            await tDL(bl,fn);toast('Nota PDF berhasil diunduh! ('+Math.round(bl.size/1024)+' KB)','s');
+        }
+    }catch(e){
+        hL();console.error('Nota PDF Error:',e);toast('Gagal membuat PDF Nota','e');
+    }
+}
+
 // ========== EXPORT ==========
 function pES(){var ps=DB.g('projects');var h='<option value="">-- Semua Proyek --</option>';for(var i=0;i<ps.length;i++){h+='<option value="'+ps[i].id+'">'+ps[i].name+'</option>'}document.getElementById('ep').innerHTML=h;document.getElementById('ef').value='';document.getElementById('et').value=''}
 function rIG(){var g=document.getElementById('iguide');g.innerHTML='<div class="space-y-4 mt-2"><div class="flex gap-3 items-start"><div class="w-8 h-8 rounded-full bg-green-800 text-white flex items-center justify-center font-black text-sm flex-shrink-0">1</div><div><p class="font-bold">Host di HTTPS</p><p class="text-sm text-gray-500">GitHub Pages, Netlify, Vercel</p></div></div><div class="flex gap-3 items-start"><div class="w-8 h-8 rounded-full bg-green-800 text-white flex items-center justify-center font-black text-sm flex-shrink-0">2</div><div><p class="font-bold">Buka di Chrome Android</p><p class="text-sm text-gray-500">Tap menu → Install app</p></div></div><div class="flex gap-3 items-start"><div class="w-8 h-8 rounded-full bg-green-800 text-white flex items-center justify-center font-black text-sm flex-shrink-0">3</div><div><p class="font-bold">Siap!</p><p class="text-sm text-gray-500">Fullscreen & offline</p></div></div></div>'}
