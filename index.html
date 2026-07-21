@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OmnarPRO">
     <meta name="application-name" content="OmnarPRO">
-    <meta name="description" content="Aplikasi Keuangan Proyek & Laporan Harian">
 
     <link rel="stylesheet" href="css/fontawesome.min.css">
     <link rel="stylesheet" href="css/plus-jakarta.css">
@@ -40,146 +39,153 @@
             --muted: #64748B;
             --danger: #DC2626;
             --success: #16A34A;
-            --radius: 14px;
+            --radius: 16px;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin:0; overflow:hidden; height:100dvh; }
-        ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100dvh; font-size: 15px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        .view { display:none; height:calc(100dvh - 132px); overflow-y:auto; padding:16px 16px 24px; scroll-behavior:smooth; }
-        .view.active { display:block; animation: fadeUp .3s ease; }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        @keyframes bounceIn { 0%{transform:scale(.3);opacity:0} 50%{transform:scale(1.05)} 70%{transform:scale(.9)} 100%{transform:scale(1);opacity:1} }
+        .view { display: none; height: calc(100dvh - 78px); overflow-y: auto; padding: 18px 16px 30px; scroll-behavior: smooth; }
+        .view.active { display: block; animation: fadeUp .3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+        @keyframes bounceIn { 0% { transform: scale(.3); opacity: 0 } 50% { transform: scale(1.05) } 70% { transform: scale(.9) } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.03) } }
 
-        .card { background:var(--surface); border-radius:var(--radius); box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04); transition:transform .15s,box-shadow .15s; }
-        .card:active { transform:scale(.98); }
-        .card-accent { border-left:4px solid var(--accent); }
+        .card { background: var(--surface); border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
+        .card:active { transform: scale(.985); }
+        .card-accent { border-left: 5px solid var(--accent); }
 
-        .stat-card { position:relative; overflow:hidden; }
-        .stat-card::before { content:''; position:absolute; top:-20px; right:-20px; width:80px; height:80px; border-radius:50%; opacity:.08; }
-        .stat-card.green::before { background:var(--success); }
-        .stat-card.amber::before { background:var(--accent); }
-        .stat-card.red::before { background:var(--danger); }
-        .stat-card.teal::before { background:var(--primary-ll); }
+        .stat-card { position: relative; overflow: hidden; }
+        .stat-card::after { content: ''; position: absolute; bottom: -10px; right: -10px; width: 60px; height: 60px; border-radius: 50%; opacity: .07; }
+        .stat-card.green::after { background: var(--success); }
+        .stat-card.amber::after { background: var(--accent); }
+        .stat-card.red::after { background: var(--danger); }
+        .stat-card.teal::after { background: var(--primary-ll); }
 
-        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid #e2e8f0; display:flex; z-index:100; padding:6px 0 env(safe-area-inset-bottom,8px); box-shadow:0 -2px 10px rgba(0,0,0,.05); }
-        .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 0; cursor:pointer; transition:all .2s; position:relative; }
-        .nav-item i { font-size:20px; color:var(--muted); transition:all .2s; }
-        .nav-item span { font-size:10px; font-weight:600; color:var(--muted); margin-top:2px; transition:all .2s; }
-        .nav-item.active i { color:var(--primary-ll); }
-        .nav-item.active span { color:var(--primary-ll); }
-        .nav-item.active::after { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:28px; height:3px; background:var(--primary-ll); border-radius:0 0 3px 3px; }
+        /* Bottom Nav - lebih besar */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid #e2e8f0; display: flex; z-index: 100; padding: 4px 0 env(safe-area-inset-bottom,6px); box-shadow: 0 -2px 12px rgba(0,0,0,.06); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0 4px; cursor: pointer; transition: all .2s; position: relative; }
+        .nav-item i { font-size: 20px; color: var(--muted); transition: all .2s; }
+        .nav-item span { font-size: 9px; font-weight: 700; color: var(--muted); margin-top: 3px; transition: all .2s; letter-spacing: .3px; }
+        .nav-item.active i { color: var(--primary-ll); transform: scale(1.1); }
+        .nav-item.active span { color: var(--primary-ll); font-weight: 800; }
+        .nav-item.active::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 30px; height: 3px; background: var(--primary-ll); border-radius: 0 0 4px 4px; }
 
-        .app-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-l) 100%); color:white; padding:16px 20px 14px; position:relative; }
-        .app-header::after { content:''; position:absolute; bottom:-16px; left:0; right:0; height:16px; background:var(--bg); border-radius:16px 16px 0 0; }
+        /* Header - lebih besar */
+        .app-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-l) 100%); color: white; padding: 14px 18px 12px; position: relative; }
+        .app-header::after { content: ''; position: absolute; bottom: -14px; left: 0; right: 0; height: 14px; background: var(--bg); border-radius: 14px 14px 0 0; }
 
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:none; align-items:flex-end; justify-content:center; animation:fadeIn .2s; }
-        .modal-overlay.show { display:flex; }
-        .modal-sheet { background:var(--surface); border-radius:20px 20px 0 0; width:100%; max-width:500px; max-height:90dvh; overflow-y:auto; padding:20px; animation:slideUp .3s ease; }
-        .modal-handle { width:40px; height:4px; background:#d1d5db; border-radius:4px; margin:0 auto 16px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 200; display: none; align-items: flex-end; justify-content: center; animation: fadeIn .2s; }
+        .modal-overlay.show { display: flex; }
+        .modal-sheet { background: var(--surface); border-radius: 22px 22px 0 0; width: 100%; max-width: 520px; max-height: 92dvh; overflow-y: auto; padding: 22px; animation: slideUp .3s ease; }
+        .modal-handle { width: 44px; height: 5px; background: #d1d5db; border-radius: 5px; margin: 0 auto 18px; }
 
-        .form-input { width:100%; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-family:inherit; font-size:14px; transition:border-color .2s; background:#f8fafc; }
-        .form-input:focus { outline:none; border-color:var(--primary-ll); background:white; box-shadow:0 0 0 3px rgba(34,197,94,.1); }
-        .form-label { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; display:block; }
+        /* Form - lebih besar */
+        .form-input { width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 16px; transition: border-color .2s; background: #f8fafc; }
+        .form-input:focus { outline: none; border-color: var(--primary-ll); background: white; box-shadow: 0 0 0 4px rgba(34,197,94,.1); }
+        .form-label { font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; display: block; }
 
-        .btn-primary { background:var(--primary); color:white; border:none; padding:12px 24px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; width:100%; }
-        .btn-primary:active { transform:scale(.97); background:var(--primary-l); }
-        .btn-accent { background:var(--accent); color:white; border:none; padding:12px 24px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; }
-        .btn-accent:active { transform:scale(.97); }
-        .btn-outline { background:transparent; color:var(--primary); border:2px solid var(--primary-ll); padding:10px 24px; border-radius:10px; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; }
-        .btn-danger { background:var(--danger); color:white; border:none; padding:8px 16px; border-radius:8px; font-family:inherit; font-weight:600; font-size:12px; cursor:pointer; }
+        /* Buttons - lebih besar */
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-family: inherit; font-weight: 800; font-size: 15px; cursor: pointer; transition: all .2s; width: 100%; letter-spacing: .3px; }
+        .btn-primary:active { transform: scale(.97); background: var(--primary-l); }
+        .btn-accent { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; transition: all .2s; }
+        .btn-accent:active { transform: scale(.97); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary-ll); padding: 12px 24px; border-radius: 12px; font-family: inherit; font-weight: 800; font-size: 15px; cursor: pointer; transition: all .2s; }
+        .btn-danger { background: var(--danger); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; transition: all .15s; }
+        .btn-sm:active { transform: scale(.95); }
 
-        .progress-bar { height:8px; background:#e2e8f0; border-radius:8px; overflow:hidden; }
-        .progress-fill { height:100%; border-radius:8px; transition:width .5s ease; }
+        .progress-bar { height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; transition: width .5s ease; }
 
-        .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:12px 20px; border-radius:10px; color:white; font-weight:600; font-size:13px; z-index:999; animation:fadeUp .3s ease; box-shadow:0 4px 12px rgba(0,0,0,.15); display:flex; align-items:center; gap:8px; max-width:90%; }
-        .toast.success { background:var(--success); }
-        .toast.error { background:var(--danger); }
-        .toast.info { background:var(--primary); }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 14px 22px; border-radius: 12px; color: white; font-weight: 700; font-size: 14px; z-index: 999; animation: fadeUp .3s ease; box-shadow: 0 6px 16px rgba(0,0,0,.2); display: flex; align-items: center; gap: 8px; max-width: 92%; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--primary); }
 
-        .tag { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
-        .tag-income { background:#dcfce7; color:#166534; }
-        .tag-expense { background:#fef2f2; color:#991b1b; }
+        .tag { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; }
+        .tag-income { background: #dcfce7; color: #166534; }
+        .tag-expense { background: #fef2f2; color: #991b1b; }
 
-        .img-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; border:2px solid #e2e8f0; cursor:pointer; transition:transform .2s; }
-        .img-thumb:active { transform:scale(.95); }
+        .img-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 2px solid #e2e8f0; cursor: pointer; }
 
-        .empty-state { text-align:center; padding:40px 20px; }
-        .empty-state i { font-size:48px; color:#cbd5e1; margin-bottom:12px; }
-        .empty-state h3 { font-size:16px; font-weight:700; color:var(--muted); margin-bottom:4px; }
-        .empty-state p { font-size:13px; color:#94a3b8; }
+        .empty-state { text-align: center; padding: 50px 24px; }
+        .empty-state i { font-size: 52px; color: #cbd5e1; margin-bottom: 14px; }
+        .empty-state h3 { font-size: 18px; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
+        .empty-state p { font-size: 14px; color: #94a3b8; }
 
-        .sub-view { display:none; }
-        .sub-view.active { display:block; animation:fadeUp .25s ease; }
+        .sub-view { display: none; }
+        .sub-view.active { display: block; animation: fadeUp .25s ease; }
 
-        .upload-area { border:2px dashed #cbd5e1; border-radius:12px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; background:#f8fafc; }
-        .upload-area:hover { border-color:var(--primary-ll); background:#f0fdf4; }
-        .upload-area.has-image { border-style:solid; border-color:var(--primary-ll); padding:8px; }
+        .upload-area { border: 2px dashed #cbd5e1; border-radius: 14px; padding: 28px; text-align: center; cursor: pointer; transition: all .2s; background: #f8fafc; }
+        .upload-area.has-image { border-style: solid; border-color: var(--primary-ll); padding: 10px; }
 
-        .install-banner { position:fixed; bottom:72px; left:12px; right:12px; background:linear-gradient(135deg,#14532D,#166534); color:white; border-radius:16px; padding:16px; z-index:150; box-shadow:0 8px 30px rgba(0,0,0,.25); animation:slideUp .4s ease; }
-        .install-banner.hide { display:none; }
+        .install-banner { position: fixed; bottom: 78px; left: 12px; right: 12px; background: linear-gradient(135deg,#14532D,#166534); color: white; border-radius: 18px; padding: 18px; z-index: 150; box-shadow: 0 8px 30px rgba(0,0,0,.25); animation: slideUp .4s ease; }
+        .install-banner.hide { display: none; }
 
-        .splash { position:fixed; inset:0; background:linear-gradient(135deg,#14532D,#166534); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .5s; }
-        .splash.fade-out { opacity:0; pointer-events:none; }
+        .splash { position: fixed; inset: 0; background: linear-gradient(135deg,#14532D,#166534); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .5s; }
+        .splash.fade-out { opacity: 0; pointer-events: none; }
+        .step-num { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
 
-        .step-num { width:32px; height:32px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0; }
+        /* Offline indicator */
+        .offline-bar { position: fixed; top: 0; left: 0; right: 0; background: #DC2626; color: white; text-align: center; padding: 6px 16px; font-size: 12px; font-weight: 700; z-index: 10000; transform: translateY(-100%); transition: transform .3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .offline-bar.show { transform: translateY(0); }
 
         /* Tabel keuangan */
-        .fin-table { width:100%; border-collapse:collapse; font-size:11px; }
-        .fin-table th { background:var(--primary); color:white; padding:8px 6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; }
-        .fin-table td { padding:7px 6px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
-        .fin-table tr:nth-child(even) td { background:#f8fafc; }
-        .fin-table .col-income { color:#16A34A; font-weight:700; text-align:right; }
-        .fin-table .col-expense { color:#DC2626; font-weight:700; text-align:right; }
-        .fin-table .col-empty { color:#cbd5e1; text-align:right; }
-        .fin-table .row-total td { background:#f0fdf4!important; font-weight:800; border-top:2px solid var(--primary-ll); font-size:12px; }
-        .fin-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px; border:1px solid #e2e8f0; }
+        .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .fin-table th { background: var(--primary); color: white; padding: 10px 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; }
+        .fin-table td { padding: 9px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .fin-table tr:nth-child(even) td { background: #f8fafc; }
+        .fin-table .col-income { color: #16A34A; font-weight: 800; text-align: right; }
+        .fin-table .col-expense { color: #DC2626; font-weight: 800; text-align: right; }
+        .fin-table .col-empty { color: #cbd5e1; text-align: right; }
+        .fin-table .row-total td { background: #f0fdf4 !important; font-weight: 900; border-top: 2px solid var(--primary-ll); font-size: 14px; }
+        .fin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid #e2e8f0; }
+
+        /* Nota pesanan */
+        .nota { background: white; border: 2px solid #1E293B; border-radius: 0; padding: 20px; position: relative; }
+        .nota::before { content: ''; position: absolute; top: -1px; left: 20px; right: 20px; height: 4px; background: var(--primary); }
+        .nota-title { text-align: center; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; color: var(--primary); }
+        .nota-subtitle { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 1px; margin-bottom: 16px; }
+        .nota-row { display: flex; padding: 4px 0; font-size: 14px; }
+        .nota-label { width: 100px; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+        .nota-value { font-weight: 700; color: var(--text); }
+        .nota-separator { border: none; border-top: 2px dashed #cbd5e1; margin: 12px 0; }
+        .nota-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+        .nota-table th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 12px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid #1E293B; }
+        .nota-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+        .nota-table .col-no { width: 36px; text-align: center; font-weight: 700; color: var(--muted); }
+        .nota-table .col-qty { width: 60px; text-align: center; font-weight: 800; }
+        .nota-table .col-sat { width: 70px; text-align: center; font-weight: 600; color: var(--muted); }
+        .nota-sign { display: flex; justify-content: space-between; margin-top: 40px; padding: 0 20px; }
+        .nota-sign-box { text-align: center; min-width: 120px; }
+        .nota-sign-line { border-bottom: 1px solid #1E293B; margin-bottom: 4px; height: 50px; }
+        .nota-sign-name { font-size: 13px; font-weight: 700; }
+
+        .item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .item-row input { font-size: 15px; }
 
         @media(min-width:500px) {
-            .modal-sheet { border-radius:20px; margin:20px; max-height:85dvh; }
-            .modal-overlay { align-items:center; }
+            .modal-sheet { border-radius: 22px; margin: 20px; max-height: 85dvh; }
+            .modal-overlay { align-items: center; }
         }
-/* Offline indicator */
-.offline-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #DC2626;
-    color: white;
-    text-align: center;
-    padding: 6px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    z-index: 10000;
-    transform: translateY(-100%);
-    transition: transform .3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-.offline-bar.show {
-    transform: translateY(0);
-}
     </style>
 </head>
 <body>
-    <!-- Splash -->
+    <div id="offline-bar" class="offline-bar"><i class="fas fa-wifi-slash"></i><span>Offline Mode — Data tersimpan lokal</span></div>
+
     <div id="splash" class="splash">
         <div style="animation:bounceIn .6s ease">
-            <div class="w-20 h-20 bg-white/15 rounded-2xl flex items-center justify-center mb-4 mx-auto" style="border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);">
-                <i class="fas fa-chart-line text-4xl text-amber-400"></i>
+            <div class="w-24 h-24 bg-white/15 rounded-2xl flex items-center justify-center mb-5 mx-auto" style="border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);">
+                <i class="fas fa-chart-line text-5xl text-amber-400"></i>
             </div>
-            <h1 class="text-2xl font-black text-white text-center tracking-tight">OmnarPRO</h1>
-            <p class="text-xs text-green-200 text-center mt-1 font-medium">Keuangan & Laporan Proyek</p>
+            <h1 class="text-3xl font-black text-white text-center tracking-tight">OmnarPRO</h1>
+            <p class="text-sm text-green-200 text-center mt-2 font-medium">Keuangan & Laporan Proyek</p>
         </div>
-        <div class="mt-8">
-            <div class="w-8 h-8 rounded-full animate-spin mx-auto" style="border:3px solid rgba(255,255,255,.3);border-top-color:white;"></div>
-        </div>
+        <div class="mt-10"><div class="w-10 h-10 rounded-full animate-spin mx-auto" style="border:4px solid rgba(255,255,255,.3);border-top-color:white;"></div></div>
     </div>
 
     <div id="app" class="font-jakarta" style="height:100dvh;display:flex;flex-direction:column;opacity:0;transition:opacity .3s;">
@@ -187,26 +193,27 @@
         <header class="app-header">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-lg font-black tracking-tight flex items-center gap-2">
-                        <i class="fas fa-chart-line text-amber-400 text-sm"></i> OmnarPRO
-                    </h1>
-                    <p class="text-xs opacity-70 font-medium" id="header-subtitle">Keuangan & Laporan Proyek</p>
+                    <h1 class="text-xl font-black tracking-tight flex items-center gap-2"><i class="fas fa-chart-line text-amber-400"></i> OmnarPRO</h1>
+                    <p class="text-xs opacity-70 font-semibold" id="header-subtitle">Keuangan & Laporan Proyek</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="install-btn-header" onclick="promptInstall()" class="hidden w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Install"><i class="fas fa-download text-sm"></i></button>
-                    <button onclick="showExportView()" class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Export PDF"><i class="fas fa-file-pdf text-sm"></i></button>
+                    <button id="install-btn-header" onclick="promptInstall()" class="hidden w-10 h-10 rounded-full bg-white/15 flex items-center justify-center" title="Install"><i class="fas fa-download text-sm"></i></button>
+                    <button onclick="showExportView()" class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center" title="Export PDF"><i class="fas fa-file-pdf text-sm"></i></button>
                 </div>
             </div>
         </header>
 
         <main style="flex:1;overflow:hidden;position:relative;">
+
+            <!-- DASHBOARD -->
             <div id="view-dashboard" class="view active"><div id="dashboard-content"></div></div>
 
+            <!-- PROYEK -->
             <div id="view-projects" class="view">
                 <div id="project-list-view">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-black">Daftar Proyek</h2>
-                        <button onclick="openProjectModal()" class="btn-accent text-xs px-4 py-2"><i class="fas fa-plus mr-1"></i> Tambah</button>
+                        <h2 class="text-xl font-black">Daftar Proyek</h2>
+                        <button onclick="openProjectModal()" class="btn-accent"><i class="fas fa-plus mr-1"></i> Tambah</button>
                     </div>
                     <div id="project-list"></div>
                 </div>
@@ -216,28 +223,40 @@
                 </div>
             </div>
 
+            <!-- PESAN BARANG -->
+            <div id="view-orders" class="view">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-black">Pesan Barang</h2>
+                    <button onclick="openOrderModal()" class="btn-accent"><i class="fas fa-plus mr-1"></i> Buat Nota</button>
+                </div>
+                <div id="order-list"></div>
+            </div>
+
+            <!-- LAPORAN -->
             <div id="view-reports" class="view">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-black">Laporan Harian</h2>
-                    <button onclick="openReportModal()" class="btn-accent text-xs px-4 py-2"><i class="fas fa-plus mr-1"></i> Tambah</button>
+                    <h2 class="text-xl font-black">Laporan Harian</h2>
+                    <button onclick="openReportModal()" class="btn-accent"><i class="fas fa-plus mr-1"></i> Tambah</button>
                 </div>
                 <div id="report-list"></div>
             </div>
 
+            <!-- EXPORT -->
             <div id="view-export" class="view">
-                <h2 class="text-lg font-black mb-4">Export & Kirim PDF</h2>
+                <h2 class="text-xl font-black mb-4">Export & Kirim PDF</h2>
                 <div class="card p-5 mb-4">
                     <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="export-project" class="form-input"></select></div>
                     <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div><label class="form-label">Dari Tanggal</label><input type="date" id="export-from" class="form-input"></div>
-                        <div><label class="form-label">Sampai Tanggal</label><input type="date" id="export-to" class="form-input"></div>
+                        <div><label class="form-label">Dari</label><input type="date" id="export-from" class="form-input"></div>
+                        <div><label class="form-label">Sampai</label><input type="date" id="export-to" class="form-input"></div>
                     </div>
                     <div class="mb-5">
                         <label class="form-label">Jenis Laporan</label>
                         <div class="flex gap-2 mt-1 flex-wrap">
-                            <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition"><input type="radio" name="export-type" value="finance" checked class="accent-green-600"><span class="text-xs font-bold">Keuangan</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition"><input type="radio" name="export-type" value="daily" class="accent-amber-600"><span class="text-xs font-bold">Harian</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition"><input type="radio" name="export-type" value="full" class="accent-blue-600"><span class="text-xs font-bold">Lengkap</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2.5 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition"><input type="radio" name="export-type" value="finance" checked class="accent-green-600"><span class="text-xs font-bold">Keuangan</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2.5 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition"><input type="radio" name="export-type" value="daily" class="accent-amber-600"><span class="text-xs font-bold">Harian</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-purple-50 px-3 py-2.5 rounded-lg border-2 border-purple-200 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-100 transition"><input type="radio" name="export-type" value="orders" class="accent-purple-600"><span class="text-xs font-bold">Pesanan</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2.5 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition"><input type="radio" name="export-type" value="full" class="accent-blue-600"><span class="text-xs font-bold">Lengkap</span></label>
                         </div>
                     </div>
                     <div class="flex gap-3">
@@ -255,6 +274,7 @@
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-home"></i><span>Beranda</span></div>
             <div class="nav-item" onclick="switchTab('projects')"><i class="fas fa-building"></i><span>Proyek</span></div>
+            <div class="nav-item" onclick="switchTab('orders')"><i class="fas fa-boxes-stacked"></i><span>Pesan</span></div>
             <div class="nav-item" onclick="switchTab('reports')"><i class="fas fa-clipboard-list"></i><span>Laporan</span></div>
             <div class="nav-item" onclick="switchTab('export')"><i class="fas fa-file-pdf"></i><span>Export</span></div>
         </nav>
@@ -262,7 +282,7 @@
         <div id="install-banner" class="install-banner hide">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-chart-line text-amber-400 text-lg"></i></div>
-                <div class="flex-1 min-w-0"><p class="font-bold text-sm">Install OmnarPRO</p><p class="text-xs opacity-80">Akses cepat dari home screen</p></div>
+                <div class="flex-1 min-w-0"><p class="font-bold">Install OmnarPRO</p><p class="text-xs opacity-80">Akses cepat dari home screen</p></div>
                 <button onclick="dismissInstallBanner()" class="text-white/60 text-lg px-2"><i class="fas fa-times"></i></button>
             </div>
             <div class="flex gap-2 mt-3">
@@ -275,11 +295,11 @@
         <div id="modal-project" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-project')">
             <div class="modal-sheet">
                 <div class="modal-handle"></div>
-                <h3 class="text-base font-black mb-4" id="modal-project-title">Tambah Proyek Baru</h3>
+                <h3 class="text-lg font-black mb-5" id="modal-project-title">Tambah Proyek Baru</h3>
                 <input type="hidden" id="project-edit-id">
-                <div class="mb-3"><label class="form-label">Nama Proyek</label><input type="text" id="project-name" class="form-input" placeholder="Contoh: Renovasi Kantor"></div>
-                <div class="mb-3"><label class="form-label">Deskripsi</label><textarea id="project-desc" class="form-input" rows="2" placeholder="Keterangan singkat"></textarea></div>
-                <div class="mb-4"><label class="form-label">Budget (Rp)</label><input type="number" id="project-budget" class="form-input" placeholder="0" min="0"></div>
+                <div class="mb-4"><label class="form-label">Nama Proyek</label><input type="text" id="project-name" class="form-input" placeholder="Contoh: Renovasi Kantor"></div>
+                <div class="mb-4"><label class="form-label">Deskripsi</label><textarea id="project-desc" class="form-input" rows="2" placeholder="Keterangan singkat"></textarea></div>
+                <div class="mb-5"><label class="form-label">Budget (Rp)</label><input type="number" id="project-budget" class="form-input" placeholder="0" min="0"></div>
                 <button onclick="saveProject()" class="btn-primary">Simpan Proyek</button>
             </div>
         </div>
@@ -288,26 +308,63 @@
         <div id="modal-transaction" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-transaction')">
             <div class="modal-sheet">
                 <div class="modal-handle"></div>
-                <h3 class="text-base font-black mb-4">Tambah Transaksi</h3>
+                <h3 class="text-lg font-black mb-5">Tambah Transaksi</h3>
                 <input type="hidden" id="tx-project-id">
-                <div class="mb-3">
+                <div class="mb-4">
                     <label class="form-label">Jenis</label>
-                    <div class="flex gap-2">
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="income" class="hidden peer"><div class="peer-checked:bg-green-100 peer-checked:border-green-500 peer-checked:text-green-800 border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-down mr-1"></i> Pemasukan</div></label>
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="expense" class="hidden peer" checked><div class="peer-checked:bg-red-100 peer-checked:border-red-500 peer-checked:text-red-800 border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-up mr-1"></i> Pengeluaran</div></label>
+                    <div class="flex gap-3">
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="income" class="hidden peer"><div class="peer-checked:bg-green-100 peer-checked:border-green-500 peer-checked:text-green-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-down mr-1"></i> Pemasukan</div></label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="expense" class="hidden peer" checked><div class="peer-checked:bg-red-100 peer-checked:border-red-500 peer-checked:text-red-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-up mr-1"></i> Pengeluaran</div></label>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Metode Pembayaran</label>
-                    <div class="flex gap-2">
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-method" value="cash" class="hidden peer" checked><div class="peer-checked:bg-emerald-100 peer-checked:border-emerald-500 peer-checked:text-emerald-800 border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-money-bill-wave mr-1"></i> Cash</div></label>
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-method" value="transfer" class="hidden peer"><div class="peer-checked:bg-blue-100 peer-checked:border-blue-500 peer-checked:text-blue-800 border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-building-columns mr-1"></i> Transfer</div></label>
+                <div class="mb-4">
+                    <label class="form-label">Metode</label>
+                    <div class="flex gap-3">
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-method" value="cash" class="hidden peer" checked><div class="peer-checked:bg-emerald-100 peer-checked:border-emerald-500 peer-checked:text-emerald-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-money-bill-wave mr-1"></i> Cash</div></label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-method" value="transfer" class="hidden peer"><div class="peer-checked:bg-blue-100 peer-checked:border-blue-500 peer-checked:text-blue-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-building-columns mr-1"></i> Transfer</div></label>
                     </div>
                 </div>
-                <div class="mb-3"><label class="form-label">Jumlah (Rp)</label><input type="number" id="tx-amount" class="form-input" placeholder="0" min="0"></div>
-                <div class="mb-3"><label class="form-label">Keterangan</label><input type="text" id="tx-desc" class="form-input" placeholder="Contoh: Beli semen"></div>
-                <div class="mb-4"><label class="form-label">Tanggal</label><input type="date" id="tx-date" class="form-input"></div>
+                <div class="mb-4"><label class="form-label">Jumlah (Rp)</label><input type="number" id="tx-amount" class="form-input" placeholder="0" min="0"></div>
+                <div class="mb-4"><label class="form-label">Keterangan</label><input type="text" id="tx-desc" class="form-input" placeholder="Contoh: Beli semen"></div>
+                <div class="mb-5"><label class="form-label">Tanggal</label><input type="date" id="tx-date" class="form-input"></div>
                 <button onclick="saveTransaction()" class="btn-primary">Simpan Transaksi</button>
+            </div>
+        </div>
+
+        <!-- MODAL: PESAN BARANG -->
+        <div id="modal-order" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-order')">
+            <div class="modal-sheet">
+                <div class="modal-handle"></div>
+                <h3 class="text-lg font-black mb-5">Buat Nota Pesanan</h3>
+                <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="order-project" class="form-input"></select></div>
+                <div class="mb-4"><label class="form-label">Tahap Pekerjaan</label><input type="text" id="order-tahap" class="form-input" placeholder="Contoh: Pondasi, Plesteran, Atap"></div>
+                <div class="mb-4"><label class="form-label">Nama Pemesan</label><input type="text" id="order-pemesan" class="form-input" placeholder="Contoh: Ahmad, Tim Site"></div>
+                <div class="mb-4"><label class="form-label">Tanggal</label><input type="date" id="order-date" class="form-input"></div>
+
+                <div class="mb-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="form-label mb-0">Daftar Barang</label>
+                        <button onclick="addOrderItem()" class="btn-sm bg-amber-500 text-white"><i class="fas fa-plus mr-1"></i>Tambah</button>
+                    </div>
+                    <div id="order-items-container"></div>
+                </div>
+
+                <button onclick="saveOrder()" class="btn-primary mt-4">Simpan Nota Pesanan</button>
+            </div>
+        </div>
+
+        <!-- MODAL: LIHAT NOTA -->
+        <div id="modal-nota" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-nota')">
+            <div class="modal-sheet" style="max-height:95dvh;">
+                <div class="modal-handle"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-black">Detail Nota</h3>
+                    <div class="flex gap-2">
+                        <button onclick="printNota()" class="btn-sm bg-blue-600 text-white"><i class="fas fa-print mr-1"></i>Cetak</button>
+                        <button onclick="closeModal('modal-nota')" class="btn-sm bg-gray-200 text-gray-600"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div id="nota-content"></div>
             </div>
         </div>
 
@@ -315,17 +372,17 @@
         <div id="modal-report" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-report')">
             <div class="modal-sheet">
                 <div class="modal-handle"></div>
-                <h3 class="text-base font-black mb-4">Tambah Laporan Harian</h3>
+                <h3 class="text-lg font-black mb-5">Tambah Laporan Harian</h3>
                 <input type="hidden" id="report-edit-id">
-                <div class="mb-3"><label class="form-label">Pilih Proyek</label><select id="report-project" class="form-input"></select></div>
-                <div class="mb-3"><label class="form-label">Judul Laporan</label><input type="text" id="report-title" class="form-input" placeholder="Contoh: Progress pondasi"></div>
-                <div class="mb-3"><label class="form-label">Isi Laporan</label><textarea id="report-content" class="form-input" rows="4" placeholder="Deskripsikan pekerjaan..."></textarea></div>
-                <div class="mb-3"><label class="form-label">Tanggal</label><input type="date" id="report-date" class="form-input"></div>
-                <div class="mb-4">
+                <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="report-project" class="form-input"></select></div>
+                <div class="mb-4"><label class="form-label">Judul Laporan</label><input type="text" id="report-title" class="form-input" placeholder="Contoh: Progress pondasi"></div>
+                <div class="mb-4"><label class="form-label">Isi Laporan</label><textarea id="report-content" class="form-input" rows="4" placeholder="Deskripsikan pekerjaan..."></textarea></div>
+                <div class="mb-4"><label class="form-label">Tanggal</label><input type="date" id="report-date" class="form-input"></div>
+                <div class="mb-5">
                     <label class="form-label">Upload Foto</label>
                     <div id="upload-area" class="upload-area" onclick="document.getElementById('report-image').click()">
-                        <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
-                        <p class="text-xs font-semibold text-gray-500">Tap untuk ambil foto / pilih galeri</p>
+                        <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-sm font-semibold text-gray-500">Tap untuk ambil foto / pilih galeri</p>
                     </div>
                     <input type="file" id="report-image" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this)">
                 </div>
@@ -334,18 +391,18 @@
         </div>
 
         <!-- MODAL: IMAGE VIEWER -->
-        <div id="modal-image" class="modal-overlay" onclick="closeModal('modal-image')" style="align-items:center;background:rgba(0,0,0,.9);">
-            <img id="image-viewer-img" src="" style="max-width:95%;max-height:85dvh;border-radius:12px;object-fit:contain;">
-            <button onclick="closeModal('modal-image')" class="absolute top-4 right-4 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white"><i class="fas fa-times"></i></button>
+        <div id="modal-image" class="modal-overlay" onclick="closeModal('modal-image')" style="align-items:center;background:rgba(0,0,0,.92);">
+            <img id="image-viewer-img" src="" style="max-width:96%;max-height:88dvh;border-radius:14px;object-fit:contain;">
+            <button onclick="closeModal('modal-image')" class="absolute top-5 right-5 w-11 h-11 bg-white/20 rounded-full flex items-center justify-center text-white text-lg"><i class="fas fa-times"></i></button>
         </div>
 
         <!-- MODAL: KONFIRMASI -->
         <div id="modal-confirm" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-confirm')" style="align-items:center;">
-            <div class="modal-sheet" style="border-radius:20px;max-width:340px;margin:20px;">
-                <div class="text-center mb-4">
-                    <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3"><i class="fas fa-trash text-red-500 text-xl"></i></div>
-                    <h3 class="text-base font-black mb-1">Hapus Data?</h3>
-                    <p class="text-xs text-gray-500" id="confirm-msg">Data yang dihapus tidak dapat dikembalikan.</p>
+            <div class="modal-sheet" style="border-radius:22px;max-width:360px;margin:20px;">
+                <div class="text-center mb-5">
+                    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4"><i class="fas fa-trash text-red-500 text-2xl"></i></div>
+                    <h3 class="text-lg font-black mb-1">Hapus Data?</h3>
+                    <p class="text-sm text-gray-500" id="confirm-msg">Data yang dihapus tidak dapat dikembalikan.</p>
                 </div>
                 <div class="flex gap-3">
                     <button onclick="closeModal('modal-confirm')" class="btn-outline flex-1 py-3">Batal</button>
@@ -356,37 +413,18 @@
     </div>
 
 <script>
-// ==================== PWA MANIFEST ====================
-(function(){
-    function makeIcon(size){
-        const c=document.createElement('canvas');c.width=size;c.height=size;
-        const ctx=c.getContext('2d');
-        const g=ctx.createLinearGradient(0,0,size,size);
-        g.addColorStop(0,'#14532D');g.addColorStop(1,'#166534');
-        ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(0,0,size,size,size*.2);ctx.fill();
-        ctx.fillStyle='#F59E0B';ctx.font='bold '+size*.35+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('OP',size/2,size*.5);
-        return c.toDataURL('image/png');
-    }
-    const i192=makeIcon(192),i512=makeIcon(512);
-    const m={name:'OmnarPRO - Keuangan & Laporan',short_name:'OmnarPRO',description:'Keuangan Proyek & Laporan Harian',start_url:'./index.html',scope:'./',display:'standalone',orientation:'portrait',background_color:'#14532D',theme_color:'#14532D',icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
-    const b=new Blob([JSON.stringify(m)],{type:'application/json'});
-    const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);document.head.appendChild(l);
-    const a=document.createElement('link');a.rel='apple-touch-icon';a.href=i192;document.head.appendChild(a);
-    const f=document.createElement('link');f.rel='icon';f.type='image/png';f.href=i192;document.head.appendChild(f);
-})();
-
+// ==================== PWA ====================
+(function(){function makeIcon(s){const c=document.createElement('canvas');c.width=s;c.height=s;const ctx=c.getContext('2d');const g=ctx.createLinearGradient(0,0,s,s);g.addColorStop(0,'#14532D');g.addColorStop(1,'#166534');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(0,0,s,s,s*.2);ctx.fill();ctx.fillStyle='#F59E0B';ctx.font='bold '+s*.35+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('OP',s/2,s*.5);return c.toDataURL('image/png');}const i192=makeIcon(192),i512=makeIcon(512);const m={name:'OmnarPRO',short_name:'OmnarPRO',description:'Keuangan Proyek & Laporan',start_url:'./index.html',scope:'./',display:'standalone',orientation:'portrait',background_color:'#14532D',theme_color:'#14532D',icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};const b=new Blob([JSON.stringify(m)],{type:'application/json'});const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);document.head.appendChild(l);document.head.appendChild(Object.assign(document.createElement('link'),{rel:'apple-touch-icon',href:i192}));document.head.appendChild(Object.assign(document.createElement('link'),{rel:'icon',type:'image/png',href:i192}));})();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
-
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.remove('hide');const h=document.getElementById('install-btn-header');h.classList.remove('hidden');h.style.display='flex';});
 window.addEventListener('appinstalled',()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');showToast('OmnarPRO berhasil di-install!','success');});
-function promptInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');});}else{showToast('Buka Chrome → menu → "Install App"','info');}}
+function promptInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');});}else{showToast('Buka Chrome → menu → "Install App"','info');}}
 function dismissInstallBanner(){document.getElementById('install-banner').classList.add('hide');}
 
 // ==================== DATABASE ====================
-const DB={get(k){try{return JSON.parse(localStorage.getItem('pk_'+k)||'[]');}catch{return[];}},set(k,d){try{localStorage.setItem('pk_'+k,JSON.stringify(d));}catch{showToast('Penyimpanan penuh!','error');}},id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}};
-
-let currentTab='dashboard',currentProjectId=null,uploadedImage=null;
+const DB={get(k){try{return JSON.parse(localStorage.getItem('op_'+k)||'[]');}catch{return[];}},set(k,d){try{localStorage.setItem('op_'+k,JSON.stringify(d));}catch{showToast('Penyimpanan penuh!','error');}},id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}};
+let currentTab='dashboard',currentProjectId=null,uploadedImage=null,orderItemCount=1;
 
 // ==================== UTILS ====================
 function formatRp(n){return'Rp '+(Number(n)||0).toLocaleString('id-ID');}
@@ -399,41 +437,50 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 function confirmDelete(msg,cb){document.getElementById('confirm-msg').textContent=msg;const btn=document.getElementById('confirm-btn');const nb=btn.cloneNode(true);btn.parentNode.replaceChild(nb,btn);nb.textContent='Hapus';nb.style.background='var(--danger)';nb.addEventListener('click',()=>{cb();closeModal('modal-confirm');});openModal('modal-confirm');}
 
 // ==================== NAVIGASI ====================
-function switchTab(tab){currentTab=tab;document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+tab).classList.add('active');document.querySelectorAll('.nav-item').forEach((n,i)=>{const tabs=['dashboard','projects','reports','export'];n.classList.toggle('active',tabs[i]===tab);});const st={dashboard:'Keuangan & Laporan Proyek',projects:'Kelola Proyek Anda',reports:'Catatan Aktivitas Harian',export:'Export & Kirim PDF'};document.getElementById('header-subtitle').textContent=st[tab];renderCurrentView();}
-function renderCurrentView(){switch(currentTab){case'dashboard':renderDashboard();break;case'projects':renderProjectList();break;case'reports':renderReportList();break;case'export':populateExportSelect();renderInstallGuide();break;}}
+function switchTab(tab){currentTab=tab;document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+tab).classList.add('active');const tabs=['dashboard','projects','orders','reports','export'];document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',tabs[i]===tab));const st={dashboard:'Keuangan & Laporan Proyek',projects:'Kelola Proyek Anda',orders:'Nota Pesanan Barang',reports:'Catatan Aktivitas Harian',export:'Export & Kirim PDF'};document.getElementById('header-subtitle').textContent=st[tab];renderCurrentView();}
+function renderCurrentView(){switch(currentTab){case'dashboard':renderDashboard();break;case'projects':renderProjectList();break;case'orders':renderOrderList();break;case'reports':renderReportList();break;case'export':populateExportSelect();renderInstallGuide();break;}}
 function showExportView(){switchTab('export');}
 
 // ==================== DASHBOARD ====================
 function renderDashboard(){
-    const projects=DB.get('projects'),txs=DB.get('transactions'),reports=DB.get('reports');
-    let tBudget=0,tInc=0,tExp=0;
-    projects.forEach(p=>{tBudget+=Number(p.budget)||0;const pt=txs.filter(t=>t.projectId===p.id);pt.forEach(t=>{if(t.type==='income')tInc+=Number(t.amount)||0;else tExp+=Number(t.amount)||0;});});
-    const bal=tInc-tExp;const recentTx=[...txs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+    const projects=DB.get('projects'),txs=DB.get('transactions'),reports=DB.get('reports'),orders=DB.get('orders');
+    let tB=0,tI=0,tE=0;
+    projects.forEach(p=>{tB+=Number(p.budget)||0;txs.filter(t=>t.projectId===p.id).forEach(t=>{if(t.type==='income')tI+=Number(t.amount)||0;else tE+=Number(t.amount)||0;});});
+    const bal=tI-tE;
     let h=`<div class="grid grid-cols-2 gap-3 mb-5">
-        <div class="card stat-card teal p-4"><p class="text-xs font-bold text-gray-400 uppercase">Total Budget</p><p class="text-lg font-black mt-1" style="color:var(--primary)">${formatRp(tBudget)}</p></div>
-        <div class="card stat-card green p-4"><p class="text-xs font-bold text-gray-400 uppercase">Pemasukan</p><p class="text-lg font-black mt-1 text-green-600">${formatRp(tInc)}</p></div>
-        <div class="card stat-card red p-4"><p class="text-xs font-bold text-gray-400 uppercase">Pengeluaran</p><p class="text-lg font-black mt-1 text-red-600">${formatRp(tExp)}</p></div>
-        <div class="card stat-card amber p-4"><p class="text-xs font-bold text-gray-400 uppercase">Saldo</p><p class="text-lg font-black mt-1" style="color:${bal>=0?'var(--success)':'var(--danger)'}">${formatRp(bal)}</p></div></div>`;
-    if(projects.length>0){h+=`<h3 class="text-sm font-black mb-3 text-gray-500 uppercase tracking-wider">Progress Proyek</h3>`;projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let sp=0;pt.forEach(t=>{if(t.type==='expense')sp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(sp/p.budget)*100):0;const bc=pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500';h+=`<div class="card p-4 mb-3 cursor-pointer" onclick="switchTab('projects');setTimeout(()=>openProjectDetail('${p.id}'),200)"><div class="flex justify-between items-start mb-2"><div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-gray-400">${formatRp(sp)} / ${formatRp(p.budget)}</p></div><span class="text-xs font-black ${pc>90?'text-red-500':pc>70?'text-amber-500':'text-green-500'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${bc}" style="width:${pc}%"></div></div></div>`;});}
-    if(recentTx.length>0){h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>`;recentTx.forEach(tx=>{const pj=projects.find(p=>p.id===tx.projectId);const mIcon=(tx.method==='transfer')?'<i class="fas fa-building-columns text-blue-500 ml-1" style="font-size:9px;"></i>':'<i class="fas fa-money-bill-wave text-emerald-500 ml-1" style="font-size:9px;"></i>';h+=`<div class="card card-accent p-3 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${tx.description||'-'}</p><p class="text-xs text-gray-400">${pj?pj.name:'-'} · ${formatDate(tx.date)} ${mIcon}</p></div><span class="tag ${tx.type==='income'?'tag-income':'tag-expense'} ml-2 whitespace-nowrap">${tx.type==='income'?'+':'-'} ${formatRp(tx.amount)}</span></div>`;});}
-    const rr=[...reports].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
-    if(rr.length>0){h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Laporan Terbaru</h3>`;rr.forEach(r=>{const pj=projects.find(p=>p.id===r.projectId);h+=`<div class="card p-3 mb-2 flex items-center gap-3">${r.image?`<img src="${r.image}" class="img-thumb" onclick="viewImageBySrc(this.src)">`:'<div class="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-gray-300"></i></div>'}<div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${r.title}</p><p class="text-xs text-gray-400">${pj?pj.name:'-'} · ${formatDate(r.date)}</p></div></div>`;});}
-    if(projects.length===0){h+=`<div class="empty-state mt-8"><i class="fas fa-folder-open"></i><h3>Belum Ada Proyek</h3><p>Mulai dengan menambahkan proyek pertama</p><button onclick="switchTab('projects');setTimeout(openProjectModal,300)" class="btn-accent mt-4 text-sm px-6 py-3"><i class="fas fa-plus mr-2"></i>Buat Proyek</button></div>`;}
+        <div class="card stat-card teal p-5"><p class="text-xs font-bold text-gray-400 uppercase">Total Budget</p><p class="text-xl font-black mt-1" style="color:var(--primary)">${formatRp(tB)}</p></div>
+        <div class="card stat-card green p-5"><p class="text-xs font-bold text-gray-400 uppercase">Pemasukan</p><p class="text-xl font-black mt-1 text-green-600">${formatRp(tI)}</p></div>
+        <div class="card stat-card red p-5"><p class="text-xs font-bold text-gray-400 uppercase">Pengeluaran</p><p class="text-xl font-black mt-1 text-red-600">${formatRp(tE)}</p></div>
+        <div class="card stat-card amber p-5"><p class="text-xs font-bold text-gray-400 uppercase">Saldo</p><p class="text-xl font-black mt-1" style="color:${bal>=0?'var(--success)':'var(--danger)'}">${formatRp(bal)}</p></div></div>`;
+
+    if(projects.length>0){
+        h+=`<h3 class="text-sm font-black mb-3 text-gray-500 uppercase tracking-wider">Progress Proyek</h3>`;
+        projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let sp=0;pt.forEach(t=>{if(t.type==='expense')sp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(sp/p.budget)*100):0;const bc=pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500';h+=`<div class="card p-5 mb-3 cursor-pointer" onclick="switchTab('projects');setTimeout(()=>openProjectDetail('${p.id}'),200)"><div class="flex justify-between items-start mb-2"><div><p class="font-bold text-base">${p.name}</p><p class="text-sm text-gray-400">${formatRp(sp)} / ${formatRp(p.budget)}</p></div><span class="text-sm font-black ${pc>90?'text-red-500':pc>70?'text-amber-500':'text-green-500'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${bc}" style="width:${pc}%"></div></div></div>`;});
+    }
+
+    // Pesanan terbaru
+    const recentOrders=[...orders].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+    if(recentOrders.length>0){
+        h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Pesanan Terbaru</h3>`;
+        recentOrders.forEach(o=>{const pj=projects.find(p=>p.id===o.projectId);const itemCount=o.items?o.items.length:0;h+=`<div class="card p-4 mb-2 cursor-pointer" onclick="switchTab('orders');setTimeout(()=>viewNota('${o.id}'),300)"><div class="flex items-center justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-base">${o.tahap}</p><p class="text-sm text-gray-400">${pj?pj.name:'-'} · ${itemCount} barang · ${formatDate(o.date)}</p></div><span class="tag" style="background:#f3e8ff;color:#6b21a8;"><i class="fas fa-boxes-stacked mr-1"></i>${o.pemesan}</span></div></div>`;});
+    }
+
+    const recentTx=[...txs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
+    if(recentTx.length>0){
+        h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>`;
+        recentTx.forEach(tx=>{const pj=projects.find(p=>p.id===tx.projectId);const mIcon=tx.method==='transfer'?'<i class="fas fa-building-columns text-blue-500 ml-1"></i>':'<i class="fas fa-money-bill-wave text-emerald-500 ml-1"></i>';h+=`<div class="card card-accent p-4 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-base">${tx.description||'-'}</p><p class="text-sm text-gray-400">${pj?pj.name:'-'} · ${formatDate(tx.date)} ${mIcon}</p></div><span class="tag ${tx.type==='income'?'tag-income':'tag-expense'} ml-2 whitespace-nowrap">${tx.type==='income'?'+':'-'} ${formatRp(tx.amount)}</span></div>`;});
+    }
+
+    if(!projects.length){h+=`<div class="empty-state mt-8"><i class="fas fa-folder-open"></i><h3>Belum Ada Proyek</h3><p>Mulai dengan menambahkan proyek pertama</p><button onclick="switchTab('projects');setTimeout(openProjectModal,300)" class="btn-accent mt-5 text-sm px-8 py-4"><i class="fas fa-plus mr-2"></i>Buat Proyek</button></div>`;}
     document.getElementById('dashboard-content').innerHTML=h;
 }
 
 // ==================== PROYEK ====================
-function renderProjectList(){
-    const projects=DB.get('projects'),txs=DB.get('transactions'),list=document.getElementById('project-list');
-    if(!projects.length){list.innerHTML='<div class="empty-state"><i class="fas fa-building"></i><h3>Belum Ada Proyek</h3><p>Tambahkan proyek untuk mulai mencatat</p></div>';return;}
-    let h='';projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let inc=0,exp=0;pt.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else exp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
-    h+=`<div class="card p-4 mb-3 cursor-pointer" onclick="openProjectDetail('${p.id}')"><div class="flex justify-between items-start mb-1"><div class="flex-1 min-w-0"><p class="font-bold text-base">${p.name}</p><p class="text-xs text-gray-400 mt-0.5">${p.description||'Tanpa deskripsi'}</p></div><button onclick="event.stopPropagation();editProject('${p.id}')" class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-pen text-xs"></i></button></div><div class="grid grid-cols-3 gap-2 mt-3 text-center"><div class="bg-green-50 rounded-lg p-2"><p class="text-xs text-green-600 font-bold">Masuk</p><p class="text-xs font-black text-green-700">${formatRp(inc)}</p></div><div class="bg-red-50 rounded-lg p-2"><p class="text-xs text-red-600 font-bold">Keluar</p><p class="text-xs font-black text-red-700">${formatRp(exp)}</p></div><div class="bg-amber-50 rounded-lg p-2"><p class="text-xs text-amber-600 font-bold">Sisa</p><p class="text-xs font-black text-amber-700">${formatRp(p.budget-exp)}</p></div></div><div class="progress-bar mt-3"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div><p class="text-xs text-gray-400 mt-1 text-right">${Math.round(pc)}% terpakai</p></div>`;});
-    list.innerHTML=h;
-}
+function renderProjectList(){const projects=DB.get('projects'),txs=DB.get('transactions'),list=document.getElementById('project-list');if(!projects.length){list.innerHTML='<div class="empty-state"><i class="fas fa-building"></i><h3>Belum Ada Proyek</h3><p>Tambahkan proyek untuk mulai mencatat</p></div>';return;}let h='';projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let inc=0,exp=0;pt.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else exp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;h+=`<div class="card p-5 mb-3 cursor-pointer" onclick="openProjectDetail('${p.id}')"><div class="flex justify-between items-start mb-2"><div class="flex-1 min-w-0"><p class="font-bold text-lg">${p.name}</p><p class="text-sm text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div><button onclick="event.stopPropagation();editProject('${p.id}')" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-pen text-sm"></i></button></div><div class="grid grid-cols-3 gap-2 mt-4 text-center"><div class="bg-green-50 rounded-xl p-3"><p class="text-xs text-green-600 font-bold">Masuk</p><p class="text-sm font-black text-green-700">${formatRp(inc)}</p></div><div class="bg-red-50 rounded-xl p-3"><p class="text-xs text-red-600 font-bold">Keluar</p><p class="text-sm font-black text-red-700">${formatRp(exp)}</p></div><div class="bg-amber-50 rounded-xl p-3"><p class="text-xs text-amber-600 font-bold">Sisa</p><p class="text-sm font-black text-amber-700">${formatRp(p.budget-exp)}</p></div></div><div class="progress-bar mt-4"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div><p class="text-sm text-gray-400 mt-2 text-right font-bold">${Math.round(pc)}% terpakai</p></div>`;});list.innerHTML=h;}
 function openProjectModal(editId){document.getElementById('project-edit-id').value='';document.getElementById('project-name').value='';document.getElementById('project-desc').value='';document.getElementById('project-budget').value='';document.getElementById('modal-project-title').textContent='Tambah Proyek Baru';if(editId){const p=DB.get('projects').find(x=>x.id===editId);if(p){document.getElementById('project-edit-id').value=p.id;document.getElementById('project-name').value=p.name;document.getElementById('project-desc').value=p.description||'';document.getElementById('project-budget').value=p.budget||'';document.getElementById('modal-project-title').textContent='Edit Proyek';}}openModal('modal-project');}
 function editProject(id){openProjectModal(id);}
 function saveProject(){const nm=document.getElementById('project-name').value.trim(),ds=document.getElementById('project-desc').value.trim(),bg=Number(document.getElementById('project-budget').value)||0,ei=document.getElementById('project-edit-id').value;if(!nm){showToast('Nama proyek wajib diisi','error');return;}let ps=DB.get('projects');if(ei){const idx=ps.findIndex(p=>p.id===ei);if(idx>=0){ps[idx].name=nm;ps[idx].description=ds;ps[idx].budget=bg;}}else{ps.push({id:DB.id(),name:nm,description:ds,budget:bg,createdAt:todayStr()});}DB.set('projects',ps);closeModal('modal-project');showToast(ei?'Proyek diperbarui':'Proyek ditambahkan','success');renderCurrentView();}
-function deleteProject(id){confirmDelete('Proyek dan semua data terkait akan dihapus.',()=>{DB.set('projects',DB.get('projects').filter(p=>p.id!==id));DB.set('transactions',DB.get('transactions').filter(t=>t.projectId!==id));DB.set('reports',DB.get('reports').filter(r=>r.projectId!==id));showToast('Proyek dihapus','success');closeProjectDetail();renderCurrentView();});}
+function deleteProject(id){confirmDelete('Proyek dan semua data terkait akan dihapus.',()=>{DB.set('projects',DB.get('projects').filter(p=>p.id!==id));DB.set('transactions',DB.get('transactions').filter(t=>t.projectId!==id));DB.set('reports',DB.get('reports').filter(r=>r.projectId!==id));DB.set('orders',DB.get('orders').filter(o=>o.projectId!==id));showToast('Proyek dihapus','success');closeProjectDetail();renderCurrentView();});}
 
 // ==================== DETAIL PROYEK ====================
 function openProjectDetail(id){currentProjectId=id;document.getElementById('project-list-view').style.display='none';document.getElementById('project-detail-view').classList.add('active');renderProjectDetail();}
@@ -444,108 +491,211 @@ function renderProjectDetail(){
     if(!p)return;
     const txs=DB.get('transactions').filter(t=>t.projectId===p.id).sort((a,b)=>a.date.localeCompare(b.date));
     let inc=0,exp=0,cIn=0,cOut=0,tIn=0,tOut=0;
-    txs.forEach(t=>{
-        const amt=Number(t.amount)||0;
-        if(t.type==='income'){inc+=amt;if(t.method==='transfer')tIn+=amt;else cIn+=amt;}
-        else{exp+=amt;if(t.method==='transfer')tOut+=amt;else cOut+=amt;}
-    });
+    txs.forEach(t=>{const a=Number(t.amount)||0;if(t.type==='income'){inc+=a;if(t.method==='transfer')tIn+=a;else cIn+=a;}else{exp+=a;if(t.method==='transfer')tOut+=a;else cOut+=a;}});
     const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
 
-    let h=`<div class="card p-4 mb-4" style="border-left:4px solid var(--primary-ll);">
-        <div class="flex justify-between items-start">
-            <div><h3 class="font-black text-lg">${p.name}</h3><p class="text-xs text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div>
-            <button onclick="deleteProject('${p.id}')" class="btn-danger text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button>
-        </div>
-    </div>
+    let h=`<div class="card p-5 mb-4" style="border-left:5px solid var(--primary-ll);"><div class="flex justify-between items-start"><div><h3 class="font-black text-xl">${p.name}</h3><p class="text-sm text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div><button onclick="deleteProject('${p.id}')" class="btn-danger text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button></div></div>
+    <div class="grid grid-cols-2 gap-3 mb-4"><div class="card p-4 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Total Pemasukan</p><p class="text-lg font-black text-green-700">${formatRp(inc)}</p></div><div class="card p-4 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Total Pengeluaran</p><p class="text-lg font-black text-red-700">${formatRp(exp)}</p></div></div>
+    <div class="card p-4 mb-4"><p class="text-xs font-black text-gray-500 uppercase mb-2">Metode Pembayaran</p><div class="grid grid-cols-2 gap-2"><div class="bg-emerald-50 rounded-xl p-3"><p class="text-sm font-bold text-emerald-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Masuk</p><p class="text-sm font-black text-emerald-800">${formatRp(cIn)}</p></div><div class="bg-blue-50 rounded-xl p-3"><p class="text-sm font-bold text-blue-700"><i class="fas fa-building-columns mr-1"></i>Transfer Masuk</p><p class="text-sm font-black text-blue-800">${formatRp(tIn)}</p></div><div class="bg-red-50 rounded-xl p-3"><p class="text-sm font-bold text-red-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Keluar</p><p class="text-sm font-black text-red-800">${formatRp(cOut)}</p></div><div class="bg-orange-50 rounded-xl p-3"><p class="text-sm font-bold text-orange-700"><i class="fas fa-building-columns mr-1"></i>Transfer Keluar</p><p class="text-sm font-black text-orange-800">${formatRp(tOut)}</p></div></div></div>
+    <div class="card p-4 mb-4"><div class="flex justify-between text-sm mb-1"><span class="font-bold text-gray-500">Budget: ${formatRp(p.budget)}</span><span class="font-black ${pc>90?'text-red-500':'text-green-600'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div><p class="text-sm text-gray-400 mt-2">Sisa: ${formatRp(p.budget-exp)}</p></div>
+    <div class="flex items-center justify-between mb-3"><h4 class="text-sm font-black text-gray-500 uppercase">Laporan Keuangan</h4><button onclick="openTransactionModal('${p.id}')" class="btn-accent text-xs"><i class="fas fa-plus mr-1"></i>Tambah</button></div>`;
 
-    <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="card p-3 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Total Pemasukan</p><p class="text-sm font-black text-green-700">${formatRp(inc)}</p></div>
-        <div class="card p-3 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Total Pengeluaran</p><p class="text-sm font-black text-red-700">${formatRp(exp)}</p></div>
-    </div>
-
-    <div class="card p-3 mb-4">
-        <p class="text-xs font-black text-gray-500 uppercase mb-2">Rincian Metode Pembayaran</p>
-        <div class="grid grid-cols-2 gap-2">
-            <div class="bg-emerald-50 rounded-lg p-2"><p class="text-xs font-bold text-emerald-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Masuk</p><p class="text-xs font-black text-emerald-800">${formatRp(cIn)}</p></div>
-            <div class="bg-blue-50 rounded-lg p-2"><p class="text-xs font-bold text-blue-700"><i class="fas fa-building-columns mr-1"></i>Transfer Masuk</p><p class="text-xs font-black text-blue-800">${formatRp(tIn)}</p></div>
-            <div class="bg-red-50 rounded-lg p-2"><p class="text-xs font-bold text-red-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Keluar</p><p class="text-xs font-black text-red-800">${formatRp(cOut)}</p></div>
-            <div class="bg-orange-50 rounded-lg p-2"><p class="text-xs font-bold text-orange-700"><i class="fas fa-building-columns mr-1"></i>Transfer Keluar</p><p class="text-xs font-black text-orange-800">${formatRp(tOut)}</p></div>
-        </div>
-    </div>
-
-    <div class="card p-3 mb-4">
-        <div class="flex justify-between text-xs mb-1"><span class="font-bold text-gray-500">Budget: ${formatRp(p.budget)}</span><span class="font-black ${pc>90?'text-red-500':'text-green-600'}">${Math.round(pc)}%</span></div>
-        <div class="progress-bar"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div>
-        <p class="text-xs text-gray-400 mt-1">Sisa: ${formatRp(p.budget-exp)}</p>
-    </div>
-
-    <div class="flex items-center justify-between mb-3">
-        <h4 class="text-sm font-black text-gray-500 uppercase">Laporan Keuangan</h4>
-        <button onclick="openTransactionModal('${p.id}')" class="text-xs font-bold px-3 py-1.5 rounded-lg" style="background:var(--accent);color:white;"><i class="fas fa-plus mr-1"></i>Tambah</button>
-    </div>`;
-
-    if(!txs.length){
-        h+='<div class="empty-state py-8"><i class="fas fa-receipt" style="font-size:32px;"></i><h3 style="font-size:14px;">Belum ada transaksi</h3></div>';
-    }else{
-        // TABEL KEUANGAN: Pemasukan & Pengeluaran dipisah
-        h+=`<div class="fin-table-wrap mb-3">
-            <table class="fin-table">
-                <thead>
-                    <tr>
-                        <th style="text-align:left;border-radius:10px 0 0 0;">Tanggal</th>
-                        <th style="text-align:left;">Keterangan</th>
-                        <th style="text-align:center;">Metode</th>
-                        <th style="text-align:right;">Pemasukan</th>
-                        <th style="text-align:right;border-radius:0 10px 0 0;">Pengeluaran</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-
+    if(!txs.length){h+='<div class="empty-state py-8"><i class="fas fa-receipt" style="font-size:36px;"></i><h3 style="font-size:16px;">Belum ada transaksi</h3></div>';}
+    else{
+        h+=`<div class="fin-table-wrap mb-3"><table class="fin-table"><thead><tr><th style="text-align:left;border-radius:12px 0 0 0;">Tanggal</th><th style="text-align:left;">Keterangan</th><th style="text-align:center;">Metode</th><th style="text-align:right;">Pemasukan</th><th style="text-align:right;border-radius:0 12px 0 0;">Pengeluaran</th></tr></thead><tbody>`;
         txs.forEach(tx=>{
-            const mBadge=tx.method==='transfer'?'<span style="background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;">TF</span>':'<span style="background:#dcfce7;color:#166534;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;">CS</span>';
-            const incomeCell=tx.type==='income'?formatRp(tx.amount):'<span class="col-empty">-</span>';
-            const expenseCell=tx.type==='expense'?formatRp(tx.amount):'<span class="col-empty">-</span>';
-            const incCls=tx.type==='income'?'col-income':'col-empty';
-            const expCls=tx.type==='expense'?'col-expense':'col-empty';
-
-            h+=`<tr>
-                <td style="white-space:nowrap;font-size:10px;color:#64748b;">${formatDate(tx.date)}</td>
-                <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${tx.description||'-'}</td>
-                <td style="text-align:center;">${mBadge}</td>
-                <td class="${incCls}">${incomeCell}</td>
-                <td class="${expCls}">${expenseCell}</td>
-            </tr>`;
+            const mB=tx.method==='transfer'?'<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:800;">TF</span>':'<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:800;">CS</span>';
+            h+=`<tr><td style="white-space:nowrap;font-size:12px;color:#64748b;">${formatDate(tx.date)}</td><td style="font-weight:700;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${tx.description||'-'}</td><td style="text-align:center;">${mB}</td><td class="${tx.type==='income'?'col-income':'col-empty'}">${tx.type==='income'?formatRp(tx.amount):'-'}</td><td class="${tx.type==='expense'?'col-expense':'col-empty'}">${tx.type==='expense'?formatRp(tx.amount):'-'}</td></tr>`;
         });
-
-        // BARIS TOTAL
-        h+=`<tr class="row-total">
-                <td colspan="3" style="text-align:right;font-weight:900;color:var(--primary);">TOTAL</td>
-                <td class="col-income" style="font-size:13px;">${formatRp(inc)}</td>
-                <td class="col-expense" style="font-size:13px;">${formatRp(exp)}</td>
-            </tr>`;
-
-        // SALDO
         const saldo=inc-exp;
-        h+=`<tr class="row-total" style="background:#fffbeb!important;">
-                <td colspan="3" style="text-align:right;font-weight:900;color:var(--accent);">SALDO</td>
-                <td colspan="2" style="text-align:right;font-weight:900;font-size:13px;color:${saldo>=0?'#16A34A':'#DC2626'};">${formatRp(saldo)}</td>
-            </tr>`;
-
+        h+=`<tr class="row-total"><td colspan="3" style="text-align:right;font-weight:900;color:var(--primary);">TOTAL</td><td class="col-income" style="font-size:15px;">${formatRp(inc)}</td><td class="col-expense" style="font-size:15px;">${formatRp(exp)}</td></tr>`;
+        h+=`<tr class="row-total" style="background:#fffbeb!important;"><td colspan="3" style="text-align:right;font-weight:900;color:var(--accent);">SALDO</td><td colspan="2" style="text-align:right;font-weight:900;font-size:15px;color:${saldo>=0?'#16A34A':'#DC2626'};">${formatRp(saldo)}</td></tr>`;
         h+=`</tbody></table></div>`;
     }
-
     document.getElementById('project-detail-content').innerHTML=h;
 }
 
 // ==================== TRANSAKSI ====================
 function openTransactionModal(pid){document.getElementById('tx-project-id').value=pid;document.getElementById('tx-amount').value='';document.getElementById('tx-desc').value='';document.getElementById('tx-date').value=todayStr();document.querySelectorAll('input[name="tx-type"]')[1].checked=true;document.querySelectorAll('input[name="tx-method"]')[0].checked=true;openModal('modal-transaction');}
-function saveTransaction(){const pid=document.getElementById('tx-project-id').value;const tp=document.querySelector('input[name="tx-type"]:checked').value;const mt=document.querySelector('input[name="tx-method"]:checked').value;const am=Number(document.getElementById('tx-amount').value)||0;const ds=document.getElementById('tx-desc').value.trim();const dt=document.getElementById('tx-date').value;if(!am){showToast('Jumlah wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let txs=DB.get('transactions');txs.push({id:DB.id(),projectId:pid,type:tp,method:mt,amount:am,description:ds,date:dt});DB.set('transactions',txs);closeModal('modal-transaction');showToast('Transaksi ditambahkan','success');renderProjectDetail();}
+function saveTransaction(){const pid=document.getElementById('tx-project-id').value,tp=document.querySelector('input[name="tx-type"]:checked').value,mt=document.querySelector('input[name="tx-method"]:checked').value,am=Number(document.getElementById('tx-amount').value)||0,ds=document.getElementById('tx-desc').value.trim(),dt=document.getElementById('tx-date').value;if(!am){showToast('Jumlah wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let txs=DB.get('transactions');txs.push({id:DB.id(),projectId:pid,type:tp,method:mt,amount:am,description:ds,date:dt});DB.set('transactions',txs);closeModal('modal-transaction');showToast('Transaksi ditambahkan','success');renderProjectDetail();}
 function deleteTransaction(id){confirmDelete('Hapus transaksi ini?',()=>{DB.set('transactions',DB.get('transactions').filter(t=>t.id!==id));showToast('Transaksi dihapus','success');renderProjectDetail();});}
 
+// ==================== PESAN BARANG ====================
+function renderOrderList(){
+    const orders=DB.get('orders').sort((a,b)=>b.date.localeCompare(a.date));
+    const projects=DB.get('projects');
+    const list=document.getElementById('order-list');
+
+    if(!orders.length){list.innerHTML='<div class="empty-state"><i class="fas fa-boxes-stacked"></i><h3>Belum Ada Pesanan</h3><p>Buat nota pesanan barang untuk proyek</p></div>';return;}
+
+    let h='';
+    orders.forEach(o=>{
+        const pj=projects.find(p=>p.id===o.projectId);
+        const itemCount=o.items?o.items.length:0;
+        h+=`<div class="card p-5 mb-3 cursor-pointer" onclick="viewNota('${o.id}')">
+            <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-lg">${o.tahap}</p>
+                    <p class="text-sm text-gray-400 mt-1">${pj?pj.name:'-'}</p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <span class="text-sm font-bold text-amber-600"><i class="fas fa-user mr-1"></i>${o.pemesan}</span>
+                        <span class="text-sm text-gray-400"><i class="fas fa-calendar mr-1"></i>${formatDate(o.date)}</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="tag" style="background:#f3e8ff;color:#6b21a8;font-size:13px;padding:5px 14px;"><i class="fas fa-box mr-1"></i>${itemCount} barang</span>
+                </div>
+            </div>
+        </div>`;
+    });
+    list.innerHTML=h;
+}
+
+function openOrderModal(){
+    const ps=DB.get('projects');
+    if(!ps.length){showToast('Buat proyek terlebih dahulu','error');return;}
+    document.getElementById('order-tahap').value='';
+    document.getElementById('order-pemesan').value='';
+    document.getElementById('order-date').value=todayStr();
+    document.getElementById('order-project').innerHTML=ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+
+    // Reset items
+    orderItemCount=1;
+    document.getElementById('order-items-container').innerHTML='';
+    addOrderItem();
+
+    openModal('modal-order');
+}
+
+function addOrderItem(){
+    const container=document.getElementById('order-items-container');
+    const row=document.createElement('div');
+    row.className='item-row';
+    row.id='item-row-'+orderItemCount;
+    const num=orderItemCount;
+    row.innerHTML=`
+        <span class="text-sm font-black text-gray-300 w-6 text-center flex-shrink-0">${num}</span>
+        <input type="text" class="form-input" style="flex:2;padding:10px 12px;font-size:14px;" placeholder="Nama barang" id="item-name-${num}">
+        <input type="number" class="form-input" style="flex:0.6;padding:10px 12px;font-size:14px;text-align:center;" placeholder="Qty" min="1" id="item-qty-${num}">
+        <input type="text" class="form-input" style="flex:0.8;padding:10px 12px;font-size:14px;text-align:center;" placeholder="Satuan" id="item-sat-${num}">
+        <button onclick="removeOrderItem(${num})" class="w-9 h-9 rounded-lg bg-red-50 text-red-400 flex items-center justify-center flex-shrink-0"><i class="fas fa-times text-xs"></i></button>
+    `;
+    container.appendChild(row);
+    orderItemCount++;
+}
+
+function removeOrderItem(num){
+    const row=document.getElementById('item-row-'+num);
+    if(row)row.remove();
+    // Renomor ulang
+    const rows=document.querySelectorAll('#order-items-container .item-row');
+    rows.forEach((r,i)=>{r.querySelector('span').textContent=i+1;});
+}
+
+function saveOrder(){
+    const pid=document.getElementById('order-project').value;
+    const tahap=document.getElementById('order-tahap').value.trim();
+    const pemesan=document.getElementById('order-pemesan').value.trim();
+    const dt=document.getElementById('order-date').value;
+
+    if(!tahap){showToast('Tahap pekerjaan wajib diisi','error');return;}
+    if(!pemesan){showToast('Nama pemesan wajib diisi','error');return;}
+    if(!dt){showToast('Tanggal wajib diisi','error');return;}
+
+    // Kumpulkan items
+    const items=[];
+    const rows=document.querySelectorAll('#order-items-container .item-row');
+    rows.forEach(r=>{
+        const inputs=r.querySelectorAll('input');
+        const nama=inputs[0].value.trim();
+        const qty=Number(inputs[1].value)||0;
+        const satuan=inputs[2].value.trim()||'pcs';
+        if(nama&&qty>0){items.push({nama,qty,satuan});}
+    });
+
+    if(!items.length){showToast('Tambahkan minimal 1 barang','error');return;}
+
+    let orders=DB.get('orders');
+    orders.push({id:DB.id(),projectId:pid,tahap,pemesan,items,date:dt,createdAt:todayStr()});
+    DB.set('orders',orders);
+    closeModal('modal-order');
+    showToast('Nota pesanan disimpan','success');
+    renderOrderList();
+}
+
+function viewNota(id){
+    const orders=DB.get('orders');
+    const o=orders.find(x=>x.id===id);
+    if(!o)return;
+    const projects=DB.get('projects');
+    const pj=projects.find(p=>p.id===o.projectId);
+
+    let itemsHtml='';
+    if(o.items&&o.items.length){
+        o.items.forEach((item,i)=>{
+            itemsHtml+=`<tr><td class="col-no">${i+1}</td><td style="font-weight:700;">${item.nama}</td><td class="col-qty">${item.qty}</td><td class="col-sat">${item.satuan}</td></tr>`;
+        });
+    }
+
+    const html=`
+    <div class="nota" id="nota-print">
+        <div class="nota-title">NOTA PESANAN BARANG</div>
+        <div class="nota-subtitle">OMNARPRO — PROJECT MANAGEMENT</div>
+
+        <div class="nota-row"><span class="nota-label">Proyek</span><span class="nota-value">: ${pj?pj.name:'-'}</span></div>
+        <div class="nota-row"><span class="nota-label">Tahap</span><span class="nota-value">: ${o.tahap}</span></div>
+        <div class="nota-row"><span class="nota-label">Pemesan</span><span class="nota-value">: ${o.pemesan}</span></div>
+        <div class="nota-row"><span class="nota-label">Tanggal</span><span class="nota-value">: ${formatDateFull(o.date)}</span></div>
+
+        <hr class="nota-separator">
+
+        <table class="nota-table">
+            <thead><tr><th class="col-no">No</th><th>Nama Barang</th><th class="col-qty">Qty</th><th class="col-sat">Satuan</th></tr></thead>
+            <tbody>${itemsHtml}</tbody>
+        </table>
+
+        <hr class="nota-separator">
+
+        <div class="nota-sign">
+            <div class="nota-sign-box">
+                <p style="font-size:13px;font-weight:700;">Pemesan,</p>
+                <div class="nota-sign-line"></div>
+                <p class="nota-sign-name">${o.pemesan}</p>
+            </div>
+            <div class="nota-sign-box">
+                <p style="font-size:13px;font-weight:700;">Mengetahui,</p>
+                <div class="nota-sign-line"></div>
+                <p class="nota-sign-name">____________</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-2 mt-4">
+        <button onclick="printNota()" class="btn-primary flex-1 flex items-center justify-center gap-2"><i class="fas fa-print"></i> Cetak Nota</button>
+        <button onclick="deleteOrder('${o.id}')" class="btn-danger flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fas fa-trash"></i> Hapus</button>
+    </div>`;
+
+    document.getElementById('nota-content').innerHTML=html;
+    openModal('modal-nota');
+}
+
+function printNota(){
+    const nota=document.getElementById('nota-print');
+    if(!nota)return;
+    const w=window.open('','','width=400,height=700');
+    w.document.write('<html><head><title>Nota Pesanan</title><style>body{font-family:sans-serif;padding:10px;} .nota{border:2px solid #000;padding:16px;max-width:350px;margin:0 auto;} .nota-title{text-align:center;font-size:16px;font-weight:900;letter-spacing:2px;margin-bottom:2px;} .nota-subtitle{text-align:center;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:12px;} .nota-row{display:flex;padding:2px 0;font-size:12px;} .nota-label{width:80px;font-weight:700;color:#666;} .nota-value{font-weight:700;} .nota-separator{border:none;border-top:1px dashed #999;margin:8px 0;} table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0;} th{background:#f0f0f0;padding:6px;text-align:left;font-size:10px;border-bottom:2px solid #000;} td{padding:5px;border-bottom:1px solid #ddd;} .col-no{width:30px;text-align:center;} .col-qty{width:50px;text-align:center;font-weight:700;} .col-sat{width:60px;text-align:center;color:#666;} .nota-sign{display:flex;justify-content:space-between;margin-top:30px;padding:0 10px;} .nota-sign-box{text-align:center;min-width:100px;} .nota-sign-line{border-bottom:1px solid #000;margin-bottom:2px;height:40px;} .nota-sign-name{font-size:11px;font-weight:700;}</style></head><body>');
+    w.document.write(nota.outerHTML);
+    w.document.write('</body></html>');
+    w.document.close();
+    setTimeout(()=>{w.print();w.close();},300);
+}
+
+function deleteOrder(id){confirmDelete('Hapus nota pesanan ini?',()=>{DB.set('orders',DB.get('orders').filter(o=>o.id!==id));showToast('Nota dihapus','success');closeModal('modal-nota');renderOrderList();});}
+
 // ==================== LAPORAN ====================
-function renderReportList(){const reports=DB.get('reports').sort((a,b)=>b.date.localeCompare(a.date)),projects=DB.get('projects'),list=document.getElementById('report-list');if(!reports.length){list.innerHTML='<div class="empty-state"><i class="fas fa-clipboard-list"></i><h3>Belum Ada Laporan</h3><p>Catat aktivitas harian proyek Anda</p></div>';return;}const g={};reports.forEach(r=>{if(!g[r.date])g[r.date]=[];g[r.date].push(r);});let h='';Object.keys(g).sort((a,b)=>b.localeCompare(a)).forEach(d=>{h+=`<p class="text-xs font-black text-gray-400 uppercase mb-2 mt-4 first:mt-0">${formatDateFull(d)}</p>`;g[d].forEach(r=>{const pj=projects.find(p=>p.id===r.projectId);h+=`<div class="card p-4 mb-3"><div class="flex items-start gap-3">${r.image?`<img src="${r.image}" class="img-thumb flex-shrink-0" onclick="viewImageBySrc(this.src)">`:'<div class="w-14 h-14 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-green-300 text-lg"></i></div>'}<div class="flex-1 min-w-0"><div class="flex justify-between items-start"><p class="font-bold text-sm">${r.title}</p><button onclick="deleteReport('${r.id}')" class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-trash text-xs"></i></button></div><p class="text-xs text-amber-600 font-bold mt-0.5">${pj?pj.name:'-'}</p><p class="text-xs text-gray-500 mt-1 leading-relaxed">${r.content}</p></div></div></div>`;});});list.innerHTML=h;}
-function openReportModal(){const ps=DB.get('projects');if(!ps.length){showToast('Buat proyek terlebih dahulu','error');return;}document.getElementById('report-edit-id').value='';document.getElementById('report-title').value='';document.getElementById('report-content').value='';document.getElementById('report-date').value=todayStr();uploadedImage=null;document.getElementById('report-project').innerHTML=ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');const a=document.getElementById('upload-area');a.classList.remove('has-image');a.innerHTML='<i class="fas fa-camera text-2xl text-gray-400 mb-2"></i><p class="text-xs font-semibold text-gray-500">Tap untuk ambil foto / pilih galeri</p>';document.getElementById('report-image').value='';openModal('modal-report');}
-function handleImageUpload(input){if(!input.files||!input.files[0])return;const file=input.files[0];if(!file.type.startsWith('image/')){showToast('File harus gambar','error');return;}const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;const mx=800;if(w>mx){h=(h*mx)/w;w=mx;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);uploadedImage=c.toDataURL('image/jpeg',0.7);const a=document.getElementById('upload-area');a.classList.add('has-image');a.innerHTML=`<img src="${uploadedImage}" style="width:100%;border-radius:8px;max-height:200px;object-fit:cover;"><p class="text-xs font-semibold text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>Foto dipilih — tap untuk ganti</p>`;};img.src=e.target.result;};reader.readAsDataURL(file);}
+function renderReportList(){const reports=DB.get('reports').sort((a,b)=>b.date.localeCompare(a.date)),projects=DB.get('projects'),list=document.getElementById('report-list');if(!reports.length){list.innerHTML='<div class="empty-state"><i class="fas fa-clipboard-list"></i><h3>Belum Ada Laporan</h3><p>Catat aktivitas harian proyek</p></div>';return;}const g={};reports.forEach(r=>{if(!g[r.date])g[r.date]=[];g[r.date].push(r);});let h='';Object.keys(g).sort((a,b)=>b.localeCompare(a)).forEach(d=>{h+=`<p class="text-sm font-black text-gray-400 uppercase mb-2 mt-4 first:mt-0">${formatDateFull(d)}</p>`;g[d].forEach(r=>{const pj=projects.find(p=>p.id===r.projectId);h+=`<div class="card p-5 mb-3"><div class="flex items-start gap-3">${r.image?`<img src="${r.image}" class="img-thumb flex-shrink-0" onclick="viewImageBySrc(this.src)">`:'<div class="w-16 h-16 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-green-300 text-xl"></i></div>'}<div class="flex-1 min-w-0"><div class="flex justify-between items-start"><p class="font-bold text-base">${r.title}</p><button onclick="deleteReport('${r.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-trash text-sm"></i></button></div><p class="text-sm text-amber-600 font-bold mt-1">${pj?pj.name:'-'}</p><p class="text-sm text-gray-500 mt-1 leading-relaxed">${r.content}</p></div></div></div>`;});});list.innerHTML=h;}
+function openReportModal(){const ps=DB.get('projects');if(!ps.length){showToast('Buat proyek terlebih dahulu','error');return;}document.getElementById('report-edit-id').value='';document.getElementById('report-title').value='';document.getElementById('report-content').value='';document.getElementById('report-date').value=todayStr();uploadedImage=null;document.getElementById('report-project').innerHTML=ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');const a=document.getElementById('upload-area');a.classList.remove('has-image');a.innerHTML='<i class="fas fa-camera text-3xl text-gray-400 mb-2"></i><p class="text-sm font-semibold text-gray-500">Tap untuk ambil foto / pilih galeri</p>';document.getElementById('report-image').value='';openModal('modal-report');}
+function handleImageUpload(input){if(!input.files||!input.files[0])return;const file=input.files[0];if(!file.type.startsWith('image/')){showToast('File harus gambar','error');return;}const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;const mx=800;if(w>mx){h=(h*mx)/w;w=mx;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);uploadedImage=c.toDataURL('image/jpeg',0.7);const a=document.getElementById('upload-area');a.classList.add('has-image');a.innerHTML=`<img src="${uploadedImage}" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover;"><p class="text-sm font-semibold text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>Foto dipilih — tap untuk ganti</p>`;};img.src=e.target.result;};reader.readAsDataURL(file);}
 function saveReport(){const pid=document.getElementById('report-project').value,tl=document.getElementById('report-title').value.trim(),ct=document.getElementById('report-content').value.trim(),dt=document.getElementById('report-date').value;if(!tl){showToast('Judul wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let rs=DB.get('reports');rs.push({id:DB.id(),projectId:pid,title:tl,content:ct,image:uploadedImage,date:dt,createdAt:todayStr()});DB.set('reports',rs);closeModal('modal-report');uploadedImage=null;showToast('Laporan disimpan','success');renderReportList();}
 function deleteReport(id){confirmDelete('Hapus laporan ini?',()=>{DB.set('reports',DB.get('reports').filter(r=>r.id!==id));showToast('Laporan dihapus','success');renderReportList();});}
 function viewImageBySrc(src){document.getElementById('image-viewer-img').src=src;openModal('modal-image');}
@@ -553,301 +703,88 @@ function viewImageBySrc(src){document.getElementById('image-viewer-img').src=src
 // ==================== EXPORT PDF ====================
 function populateExportSelect(){const ps=DB.get('projects');document.getElementById('export-project').innerHTML='<option value="">-- Semua Proyek --</option>'+ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');document.getElementById('export-from').value='';document.getElementById('export-to').value='';}
 
-function showPDFLoading(){let ov=document.getElementById('pdf-loading-overlay');if(!ov){ov=document.createElement('div');ov.id='pdf-loading-overlay';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML=`<div style="background:white;border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;"><div style="width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:pdfspin .8s linear infinite;margin:0 auto 14px;"></div><p style="font-weight:800;font-size:15px;color:#1E293B;margin:0 0 4px;">Membuat PDF...</p><p style="font-size:12px;color:#94A3B8;margin:0;" id="pdf-loading-status">Memulai</p></div><style>@keyframes pdfspin{to{transform:rotate(360deg)}}</style>`;document.body.appendChild(ov);}else{ov.style.display='flex';}}
+function showPDFLoading(){let ov=document.getElementById('pdf-loading-overlay');if(!ov){ov=document.createElement('div');ov.id='pdf-loading-overlay';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML=`<div style="background:white;border-radius:22px;padding:30px 26px;text-align:center;max-width:320px;width:90%;"><div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:pdfspin .8s linear infinite;margin:0 auto 16px;"></div><p style="font-weight:800;font-size:16px;color:#1E293B;margin:0 0 6px;">Membuat PDF...</p><p style="font-size:13px;color:#94A3B8;margin:0;" id="pdf-loading-status">Memulai</p></div><style>@keyframes pdfspin{to{transform:rotate(360deg)}}</style>`;document.body.appendChild(ov);}else{ov.style.display='flex';}}
 function updatePDFStatus(msg){const el=document.getElementById('pdf-loading-status');if(el)el.textContent=msg;}
 function hidePDFLoading(){const ov=document.getElementById('pdf-loading-overlay');if(ov)ov.style.display='none';}
 
 async function ensureJSPDF(){if(window.jspdf&&window.jspdf.jsPDF)return true;updatePDFStatus('Memuat library PDF...');try{await loadScript('js/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true;}catch(e){}try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true;}catch(e){}return false;}
 async function ensureAutoTable(){if(window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API&&window.jspdf.jsPDF.API.autoTable)return true;try{await loadScript('js/jspdf-autotable.min.js');return true;}catch(e){try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');return true;}catch(e2){return false;}}}
 function loadScript(src){return new Promise((resolve,reject)=>{const existing=document.querySelector('script[src="'+src+'"]');if(existing){resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
-
 function resizeImgForPDF(base64){return new Promise((resolve)=>{if(!base64||base64.length<100){resolve(null);return;}try{const img=new Image();img.onload=()=>{const maxD=350;let w=img.width,h=img.height;if(w>maxD||h>maxD){if(w>h){h=Math.round(h*maxD/w);w=maxD;}else{w=Math.round(w*maxD/h);h=maxD;}}const c=document.createElement('canvas');c.width=Math.max(1,w);c.height=Math.max(1,h);c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.5));};img.onerror=()=>resolve(null);img.src=base64;}catch(e){resolve(null);}});}
-
-function triggerDownload(blob,filename,mimeType){return new Promise((resolve,reject)=>{try{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.cssText='position:fixed;left:-9999px;top:-9999px;';document.body.appendChild(a);setTimeout(()=>{a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();resolve(true);},3000);},100);}catch(e){try{const reader=new FileReader();reader.onload=()=>{const a2=document.createElement('a');a2.href=reader.result;a2.download=filename;document.body.appendChild(a2);a2.click();setTimeout(()=>a2.remove(),3000);resolve(true);};reader.readAsDataURL(blob);}catch(e2){reject(e2);}}});}
-
-async function sharePDFBlob(blob,filename){try{const file=new File([blob],filename,{type:'application/pdf'});if(navigator.share){const canShare=navigator.canShare?navigator.canShare({files:[file]}):true;if(canShare){await navigator.share({title:'Laporan OmnarPRO',text:'Laporan keuangan dan harian proyek',files:[file]});return{ok:true,method:'share'};}}}catch(e){if(e.name==='AbortError')return{ok:true,method:'cancelled'};}await triggerDownload(blob,filename,'application/pdf');return{ok:true,method:'download'};}
+function triggerDownload(blob,filename){return new Promise((resolve,reject)=>{try{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.cssText='position:fixed;left:-9999px;';document.body.appendChild(a);setTimeout(()=>{a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();resolve(true);},3000);},100);}catch(e){reject(e);}});}
+async function sharePDFBlob(blob,filename){try{const file=new File([blob],filename,{type:'application/pdf'});if(navigator.share){const cs=navigator.canShare?navigator.canShare({files:[file]}):true;if(cs){await navigator.share({title:'Laporan OmnarPRO',text:'Laporan keuangan dan harian proyek',files:[file]});return{ok:true,method:'share'};}}}catch(e){if(e.name==='AbortError')return{ok:true,method:'cancelled'};}await triggerDownload(blob,filename,'application/pdf');return{ok:true,method:'download'};}
 
 async function generatePDF(share){
     const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;
-    const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports');
-    let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId===pid);
-    if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);}
-    if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);}
-    if(!fps.length){showToast('Tidak ada data untuk di-export','error');return;}
-
-    showPDFLoading();updatePDFStatus('Memeriksa library...');
-    await new Promise(r=>setTimeout(r,300));
-
-    const hasJSPDF=await ensureJSPDF();
-    if(!hasJSPDF){hidePDFLoading();showToast('Library PDF gagal dimuat. Export teks.','error');setTimeout(()=>exportAsText(),500);return;}
+    const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports'),ors=DB.get('orders');
+    let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId!==pid),fors=ors.filter(o=>!pid||o.projectId===pid);
+    if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);fors=fors.filter(o=>o.date>=fd);}
+    if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);fors=fors.filter(o=>o.date<=fd);}
+    if(!fps.length){showToast('Tidak ada data','error');return;}
+    showPDFLoading();updatePDFStatus('Memeriksa library...');await new Promise(r=>setTimeout(r,300));
+    const hasJSPDF=await ensureJSPDF();if(!hasJSPDF){hidePDFLoading();showToast('Library PDF gagal. Export teks.','error');setTimeout(()=>exportAsText(),500);return;}
     const hasAT=await ensureAutoTable();
-
-    updatePDFStatus('Menyiapkan dokumen...');
-    await new Promise(r=>setTimeout(r,200));
+    updatePDFStatus('Menyiapkan dokumen...');await new Promise(r=>setTimeout(r,200));
 
     try{
-        const{jsPDF}=window.jspdf;
-        const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});
-        const pw=doc.internal.pageSize.getWidth();
-        const mg=14;let y=12;
-
-        function addHeader(title){
-            doc.setFillColor(20,83,45);doc.rect(0,0,pw,28,'F');
-            doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');
-            doc.text('OmnarPRO',mg,11);
-            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(title,mg,18);
-            doc.setFontSize(7);doc.text(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}),mg,24);
-            doc.setTextColor(0,0,0);y=34;
-        }
+        const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});const pw=doc.internal.pageSize.getWidth();const mg=14;let y=12;
+        function hdr(t){doc.setFillColor(20,83,45);doc.rect(0,0,pw,28,'F');doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('OmnarPRO',mg,11);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(t,mg,18);doc.setFontSize(7);doc.text(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),mg,24);doc.setTextColor(0,0,0);y=34;}
         function ckp(n){if(y+n>278){doc.addPage();y=12;}}
         function sep(){doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(mg,y,pw-mg,y);y+=3;}
 
-        // ===== KEUANGAN =====
-        if(tp==='finance'||tp==='full'){
-            updatePDFStatus('Membuat laporan keuangan...');await new Promise(r=>setTimeout(r,150));
-            addHeader('Laporan Keuangan Proyek');
+        // KEUANGAN
+        if(tp==='finance'||tp==='full'){updatePDFStatus('Membuat laporan keuangan...');await new Promise(r=>setTimeout(r,150));hdr('Laporan Keuangan Proyek');
+            for(let i=0;i<fps.length;i++){const p=fps[i];ckp(55);doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);doc.text(p.name,mg,y);y+=4;if(p.description){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(120,120,120);doc.text(p.description.substring(0,80),mg,y);y+=4;}
+            const pt=ftx.filter(t=>t.projectId===p.id);let inc=0,exp=0;pt.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else exp+=Number(t.amount)||0;});const sisa=p.budget-exp;const pct=p.budget>0?Math.round((exp/p.budget)*100):0;
+            ckp(24);doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,18,2,2,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(22,101,52);doc.text('Budget: '+formatRp(p.budget),mg+3,y+5);doc.setTextColor(22,163,74);doc.text('Pemasukan: '+formatRp(inc),mg+3,y+10);doc.setTextColor(185,28,28);doc.text('Pengeluaran: '+formatRp(exp),mg+3,y+15);doc.setTextColor(180,83,9);doc.text('Sisa: '+formatRp(sisa),mg+75,y+5);doc.setTextColor(30,41,59);doc.text('Terpakai: '+pct+'%',mg+75,y+10);y+=21;
+            if(pt.length>0){const sorted=pt.sort((a,b)=>a.date.localeCompare(b.date));const tdata=sorted.map(t=>[formatDate(t.date),(t.description||'-').substring(0,28),t.method==='transfer'?'TF':'CS',t.type==='income'?formatRp(t.amount):'',t.type==='expense'?formatRp(t.amount):'']);tdata.push(['','TOTAL','',formatRp(inc),formatRp(exp)]);
+            if(hasAT&&doc.autoTable){doc.autoTable({startY:y,head:[['Tanggal','Keterangan','Metode','Pemasukan','Pengeluaran']],body:tdata,margin:{left:mg,right:mg},styles:{fontSize:7,cellPadding:1.5},headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7},columnStyles:{0:{cellWidth:20},1:{cellWidth:42},2:{cellWidth:12,halign:'center'},3:{halign:'right',cellWidth:28},4:{halign:'right',cellWidth:28}},didParseCell:function(d){if(d.row.index===tdata.length-1){d.cell.styles.fontStyle='bold';d.cell.styles.fillColor=[240,248,240];}}});y=doc.lastAutoTable.finalY+3;const saldo=inc-exp;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setFillColor(255,251,235);doc.roundedRect(mg+60,y,pw-2*mg-60,6,1,1,1,1,'F');doc.setTextColor(180,83,9);doc.text('SALDO',mg+62,y+4);doc.setTextColor(saldo>=0?22:185,saldo>=0?163:28,saldo>=0?74:28);doc.text(formatRp(saldo),mg+90,y+4);y+=10;}else y+=8;}else{doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Belum ada transaksi.',mg,y+3);y+=8;}sep();y+=2;}}
 
-            for(let i=0;i<fps.length;i++){
-                const p=fps[i];ckp(55);
+        // PESANAN
+        if(tp==='orders'||tp==='full'){if(tp==='full'){doc.addPage();y=12;}updatePDFStatus('Membuat nota pesanan...');await new Promise(r=>setTimeout(r,150));hdr('Nota Pesanan Barang');
+            for(let i=0;i<fors.length;i++){const o=fors[i];ckp(50);const pj=ps.find(p=>p.id===o.projectId);
+            doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);doc.text(o.tahap,mg,y);y+=5;
+            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=4;doc.text('Pemesan: '+o.pemesan,mg,y);y+=4;doc.text('Tanggal: '+formatDateFull(o.date),mg,y);y+=6;
+            if(o.items&&o.items.length){const idata=o.items.map((it,idx)=>[String(idx+1),it.nama,String(it.qty),it.satuan]);
+            if(hasAT&&doc.autoTable){doc.autoTable({startY:y,head:[['No','Nama Barang','Qty','Satuan']],body:idata,margin:{left:mg,right:mg},styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:12,halign:'center'},2:{cellWidth:18,halign:'center'},3:{cellWidth:25,halign:'center'}}});y=doc.lastAutoTable.finalY+8;}else y+=6+idata.length*5;}
+            // Tanda tangan
+            ckp(30);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.text('Pemesan,',mg+10,y);doc.text('Mengetahui,',pw-mg-50,y);y+=25;doc.line(mg+5,y,mg+45,y);doc.line(pw-mg-55,y,pw-mg-15,y);y+=3;doc.setFont('helvetica','bold');doc.text(o.pemesan,mg+10,y);doc.text('____________',pw-mg-55,y);y+=12;sep();y+=4;}}
 
-                doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
-                doc.text(p.name,mg,y);y+=4;
-
-                if(p.description){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(120,120,120);const dl=doc.splitTextToSize(p.description,pw-2*mg);doc.text(dl.slice(0,2),mg,y);y+=dl.slice(0,2).length*3+2;}
-
-                const pt=ftx.filter(t=>t.projectId===p.id);
-                let inc=0,exp=0,cIn=0,cOut=0,tIn=0,tOut=0;
-                pt.forEach(t=>{const a=Number(t.amount)||0;if(t.type==='income'){inc+=a;if(t.method==='transfer')tIn+=a;else cIn+=a;}else{exp+=a;if(t.method==='transfer')tOut+=a;else cOut+=a;}});
-                const sisa=p.budget-exp;const pct=p.budget>0?Math.round((exp/p.budget)*100):0;
-
-                // Ringkasan utama
-                ckp(24);doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,20,2,2,'F');
-                doc.setFontSize(8);doc.setFont('helvetica','bold');
-                doc.setTextColor(22,101,52);doc.text('Budget: '+formatRp(p.budget),mg+3,y+5);
-                doc.setTextColor(22,163,74);doc.text('Pemasukan: '+formatRp(inc),mg+3,y+10);
-                doc.setTextColor(185,28,28);doc.text('Pengeluaran: '+formatRp(exp),mg+3,y+15);
-                doc.setTextColor(180,83,9);doc.text('Sisa: '+formatRp(sisa),mg+75,y+5);
-                doc.setTextColor(30,41,59);doc.text('Terpakai: '+pct+'%',mg+75,y+10);
-                const st=pct>90?'MELEBIHI BATAS':pct>70?'HATI-HATI':'AMAN';
-                doc.setTextColor(pct>90?185:22,pct>90?28:163,pct>90?28:74);doc.text(st,mg+75,y+15);
-                y+=23;
-
-                // Rincian Cash/Transfer
-                ckp(18);doc.setFillColor(245,248,252);doc.roundedRect(mg,y,pw-2*mg,14,2,2,'F');
-                doc.setFontSize(7);doc.setFont('helvetica','bold');
-                doc.setTextColor(5,150,105);doc.text('Cash Masuk: '+formatRp(cIn),mg+3,y+4.5);
-                doc.setTextColor(37,99,235);doc.text('Transfer Masuk: '+formatRp(tIn),mg+55,y+4.5);
-                doc.setTextColor(185,28,28);doc.text('Cash Keluar: '+formatRp(cOut),mg+3,y+9.5);
-                doc.setTextColor(194,65,12);doc.text('Transfer Keluar: '+formatRp(tOut),mg+55,y+9.5);
-                y+=18;
-
-                // TABEL: Pemasukan & Pengeluaran dipisah
-                if(pt.length>0){
-                    const sorted=pt.sort((a,b)=>a.date.localeCompare(b.date));
-                    const tdata=sorted.map(t=>[
-                        formatDate(t.date),
-                        (t.description||'-').substring(0,28),
-                        t.method==='transfer'?'TF':'CS',
-                        t.type==='income'?formatRp(t.amount):'',
-                        t.type==='expense'?formatRp(t.amount):''
-                    ]);
-
-                    // Baris total
-                    tdata.push([
-                        '','TOTAL','',formatRp(inc),formatRp(exp)
-                    ]);
-
-                    if(hasAT&&doc.autoTable){
-                        doc.autoTable({
-                            startY:y,
-                            head:[['Tanggal','Keterangan','Metode','Pemasukan','Pengeluaran']],
-                            body:tdata,
-                            margin:{left:mg,right:mg},
-                            styles:{fontSize:7,cellPadding:1.5,overflow:'ellipsize'},
-                            headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7},
-                            alternateRowStyles:{fillColor:[248,250,246]},
-                            columnStyles:{
-                                0:{cellWidth:20},
-                                1:{cellWidth:42},
-                                2:{cellWidth:12,halign:'center'},
-                                3:{halign:'right',cellWidth:28},
-                                4:{halign:'right',cellWidth:28}
-                            },
-                            // Style baris terakhir (TOTAL)
-                            didParseCell:function(data){
-                                if(data.row.index===tdata.length-1){
-                                    data.cell.styles.fontStyle='bold';
-                                    data.cell.styles.fillColor=[240,248,240];
-                                    data.cell.styles.fontSize=7.5;
-                                }
-                            }
-                        });
-                        y=doc.lastAutoTable.finalY+4;
-
-                        // Baris SALDO
-                        doc.setFontSize(8);doc.setFont('helvetica','bold');
-                        doc.setFillColor(255,251,235);doc.roundedRect(mg+60,y,pw-2*mg-60,6,1,1,1,1,'F');
-                        doc.setTextColor(180,83,9);doc.text('SALDO',mg+62,y+4);
-                        const saldo=inc-exp;
-                        doc.setTextColor(saldo>=0?22:185,saldo>=0?163:28,saldo>=0?74:28);
-                        doc.text(formatRp(saldo),mg+90,y+4);
-                        y+=10;
-                    }else{
-                        // Tabel manual
-                        doc.setFontSize(7);doc.setFont('helvetica','bold');
-                        doc.setFillColor(20,83,45);doc.rect(mg,y,pw-2*mg,5,'F');
-                        doc.setTextColor(255,255,255);
-                        doc.text('Tanggal',mg+1,y+3.5);doc.text('Keterangan',mg+22,y+3.5);doc.text('Met',mg+66,y+3.5);doc.text('Pemasukan',mg+78,y+3.5);doc.text('Pengeluaran',mg+100,y+3.5);
-                        y+=5;doc.setFont('helvetica','normal');doc.setTextColor(30,41,59);
-                        tdata.forEach((row,idx)=>{
-                            ckp(5);
-                            if(idx===tdata.length-1){doc.setFillColor(240,248,240);doc.rect(mg,y,pw-2*mg,4.5,'F');doc.setFont('helvetica','bold');}
-                            else if(idx%2===0){doc.setFillColor(248,250,246);doc.rect(mg,y,pw-2*mg,4.5,'F');}
-                            doc.text(row[0],mg+1,y+3);doc.text(row[1],mg+22,y+3);doc.text(row[2],mg+66,y+3);doc.text(row[3],mg+78,y+3);doc.text(row[4],mg+100,y+3);
-                            doc.setFont('helvetica','normal');
-                            y+=4.5;
-                        });
-                        y+=4;
-                    }
-                }else{
-                    doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Belum ada transaksi.',mg,y+3);y+=8;
-                }
-                sep();y+=2;
-            }
-        }
-
-        // ===== HARIAN =====
-        if(tp==='daily'||tp==='full'){
-            if(tp==='full'){doc.addPage();y=12;}
-            updatePDFStatus('Membuat laporan harian...');await new Promise(r=>setTimeout(r,150));
-            addHeader('Laporan Harian Proyek');
-            if(!frp.length){doc.setFontSize(9);doc.setTextColor(160,160,160);doc.text('Tidak ada laporan dalam periode ini.',mg,y+5);}
+        // HARIAN
+        if(tp==='daily'||tp==='full'){if(tp==='full'){doc.addPage();y=12;}updatePDFStatus('Membuat laporan harian...');await new Promise(r=>setTimeout(r,150));hdr('Laporan Harian Proyek');
+            if(!frp.length){doc.setFontSize(9);doc.setTextColor(160,160,160);doc.text('Tidak ada laporan.',mg,y+5);}
             const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});
-            const sd=Object.keys(gp).sort((a,b)=>b.localeCompare(a));
-            for(let di=0;di<sd.length;di++){
-                const dk=sd[di],dr=gp[dk];ckp(20);
-                doc.setFillColor(217,119,6);doc.roundedRect(mg,y,pw-2*mg,6,1.5,1.5,'F');
-                doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-                doc.text(formatDateFull(dk),mg+2,y+4);doc.setTextColor(0,0,0);y+=9;
-                for(let ri=0;ri<dr.length;ri++){
-                    const r=dr[ri];ckp(25);const pj=ps.find(p=>p.id===r.projectId);
-                    doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);doc.text(r.title,mg,y);y+=3.5;
-                    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(217,119,6);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=3.5;
-                    if(r.content){doc.setTextColor(60,60,60);const ln=doc.splitTextToSize(r.content.substring(0,400),pw-2*mg);doc.text(ln.slice(0,10),mg,y);y+=ln.slice(0,10).length*3+2;}
-                    if(r.image){updatePDFStatus('Memproses gambar...');await new Promise(r=>setTimeout(r,50));try{const sm=await resizeImgForPDF(r.image);if(sm){ckp(40);doc.addImage(sm,'JPEG',mg,y,45,34);y+=38;}}catch(e){doc.setFontSize(7);doc.setTextColor(180,180,180);doc.text('[Gambar tidak ditampilkan]',mg,y+3);y+=6;}}
-                    sep();
-                }y+=3;
-            }
-        }
+            Object.keys(gp).sort((a,b)=>b.localeCompare(a)).forEach(dk=>{const dr=gp[dk];ckp(20);doc.setFillColor(217,119,6);doc.roundedRect(mg,y,pw-2*mg,6,1.5,1.5,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text(formatDateFull(dk),mg+2,y+4);doc.setTextColor(0,0,0);y+=9;
+            for(let ri=0;ri<dr.length;ri++){const r=dr[ri];ckp(25);const pj=ps.find(p=>p.id===r.projectId);doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);doc.text(r.title,mg,y);y+=3.5;doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(217,119,6);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=3.5;if(r.content){doc.setTextColor(60,60,60);const ln=doc.splitTextToSize(r.content.substring(0,400),pw-2*mg);doc.text(ln.slice(0,10),mg,y);y+=ln.slice(0,10).length*3+2;}if(r.image){try{const sm=await resizeImgForPDF(r.image);if(sm){ckp(40);doc.addImage(sm,'JPEG',mg,y,45,34);y+=38;}}catch(e){}}sep();}y+=3;});}
 
         updatePDFStatus('Menyelesaikan...');await new Promise(r=>setTimeout(r,100));
-        const totalP=doc.internal.getNumberOfPages();
-        for(let i=1;i<=totalP;i++){doc.setPage(i);doc.setFontSize(6.5);doc.setTextColor(180,180,180);doc.text('OmnarPRO - Laporan otomatis | Halaman '+i+'/'+totalP,mg,291);}
-
+        const totalP=doc.internal.getNumberOfPages();for(let i=1;i<=totalP;i++){doc.setPage(i);doc.setFontSize(6.5);doc.setTextColor(180,180,180);doc.text('OmnarPRO - Laporan otomatis | Hal. '+i+'/'+totalP,mg,291);}
         updatePDFStatus(share?'Membuka menu kirim...':'Mengunduh...');await new Promise(r=>setTimeout(r,400));hidePDFLoading();
-
-        const fn='Laporan-OmnarPRO-'+todayStr()+'.pdf';
-        let pdfBlob;
-        try{pdfBlob=doc.output('blob');}catch(e1){try{const ab=doc.output('arraybuffer');pdfBlob=new Blob([ab],{type:'application/pdf'});}catch(e2){try{const b64=doc.output('datauristring');const bs=atob(b64.split(',')[1]);const ab2=new ArrayBuffer(bs.length);const ia=new Uint8Array(ab2);for(let j=0;j<bs.length;j++)ia[j]=bs.charCodeAt(j);pdfBlob=new Blob([ab2],{type:'application/pdf'});}catch(e3){hidePDFLoading();showToast('Gagal membuat PDF','error');setTimeout(()=>exportAsText(),500);return;}}}
-        if(!pdfBlob||pdfBlob.size<100){hidePDFLoading();showToast('File PDF tidak valid','error');setTimeout(()=>exportAsText(),500);return;}
-
-        if(share){const result=await sharePDFBlob(pdfBlob,fn);showToast(result.method==='share'?'PDF berhasil dikirim!':'PDF diunduh',result.method==='share'?'success':'info');}
-        else{try{await triggerDownload(pdfBlob,fn,'application/pdf');showToast('PDF berhasil diunduh! ('+Math.round(pdfBlob.size/1024)+' KB)','success');}catch(e){showToast('Gagal mengunduh PDF','error');setTimeout(()=>exportAsText(),500);}}
-    }catch(e){console.error('PDF Error:',e);hidePDFLoading();showToast('Gagal membuat PDF: '+(e.message||'Error').substring(0,50),'error');setTimeout(()=>exportAsText(),600);}
+        const fn='Laporan-OmnarPRO-'+todayStr()+'.pdf';let pdfBlob;try{pdfBlob=doc.output('blob');}catch(e1){try{const ab=doc.output('arraybuffer');pdfBlob=new Blob([ab],{type:'application/pdf'});}catch(e2){hidePDFLoading();showToast('Gagal membuat PDF','error');return;}}
+        if(!pdfBlob||pdfBlob.size<100){hidePDFLoading();showToast('File PDF tidak valid','error');return;}
+        if(share){const result=await sharePDFBlob(pdfBlob,fn);showToast(result.method==='share'?'PDF berhasil dikirim!':'PDF diunduh','success');}else{try{await triggerDownload(pdfBlob,fn,'application/pdf');showToast('PDF berhasil diunduh! ('+Math.round(pdfBlob.size/1024)+' KB)','success');}catch(e){showToast('Gagal mengunduh PDF','error');}}
+    }catch(e){console.error('PDF Error:',e);hidePDFLoading();showToast('Gagal membuat PDF: '+(e.message||'Error').substring(0,50),'error');}
 }
 
-// ==================== EXPORT TEKS ====================
-function exportAsText(){
-    const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;
-    const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports');
-    let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId===pid);
-    if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);}
-    if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);}
-
-    let t='=== OMNARPRO - LAPORAN ===\n';
-    t+='Dicetak: '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+'\n\n';
-
-    if(tp==='finance'||tp==='full'){
-        t+='--- LAPORAN KEUANGAN ---\n\n';
-        fps.forEach(p=>{
-            const pt=ftx.filter(tx=>tx.projectId===p.id);
-            let ic=0,ex=0;
-            pt.forEach(tx=>{if(tx.type==='income')ic+=Number(tx.amount)||0;else ex+=Number(tx.amount)||0;});
-            t+='>> '+p.name.toUpperCase()+'\n';
-            t+='   '+(p.description||'-')+'\n';
-            t+='   Budget     : '+formatRp(p.budget)+'\n';
-            t+='   Pemasukan  : '+formatRp(ic)+'\n';
-            t+='   Pengeluaran: '+formatRp(ex)+'\n';
-            t+='   Sisa       : '+formatRp(p.budget-ex)+'\n';
-            if(pt.length>0){
-                t+='\n   Tanggal       Keterangan           Metode   Pemasukan         Pengeluaran\n';
-                t+='   ----------    ----------------    ------   ----------        ------------\n';
-                pt.sort((a,b)=>a.date.localeCompare(b.date)).forEach(tx=>{
-                    const d=formatDate(tx.date).padEnd(14);
-                    const desc=(tx.description||'-').substring(0,18).padEnd(20);
-                    const m=(tx.method==='transfer'?'TF':'CS').padEnd(8);
-                    const inc=tx.type==='income'?formatRp(tx.amount).padEnd(18):'-'.padEnd(18);
-                    const exp=tx.type==='expense'?formatRp(tx.amount):'-';
-                    t+='   '+d+desc+m+inc+exp+'\n';
-                });
-                t+='   '+''.padEnd(44)+'TOTAL   '+formatRp(ic).padEnd(18)+formatRp(ex)+'\n';
-                const saldo=ic-ex;
-                t+='   '+''.padEnd(44)+'SALDO   '+(saldo>=0?'+':'')+formatRp(saldo)+'\n';
-            }
-            t+='\n';
-        });
-    }
-
-    if(tp==='daily'||tp==='full'){
-        t+='--- LAPORAN HARIAN ---\n\n';
-        const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});
-        Object.keys(gp).sort((a,b)=>b.localeCompare(a)).forEach(d=>{
-            t+='>> '+formatDateFull(d)+'\n';
-            gp[d].forEach(r=>{const pj=ps.find(p=>p.id===r.projectId);t+='   - '+r.title+' ['+(pj?pj.name:'-')+']\n';t+='     '+(r.content||'-').replace(/\n/g,'\n     ')+'\n';if(r.image)t+='     [Terlampir foto]\n';});
-            t+='\n';
-        });
-    }
-
-    t+='\n=== Dicetak oleh OmnarPRO ===\n';
-
-    try{const blob=new Blob([t],{type:'text/plain;charset=utf-8'});triggerDownload(blob,'Laporan-OmnarPRO-'+todayStr()+'.txt','text/plain');showToast('Laporan teks berhasil diunduh!','success');}catch(e){showToast('Gagal export','error');}
-}
+function exportAsText(){const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports'),ors=DB.get('orders');let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId===pid),fors=ors.filter(o=>!pid||o.projectId===pid);if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);fors=fors.filter(o=>o.date>=fd);}if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);fors=fors.filter(o=>o.date<=td);}
+let t='=== OMNARPRO - LAPORAN ===\nDicetak: '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+'\n\n';
+if(tp==='finance'||tp==='full'){t+='--- KEUANGAN ---\n\n';fps.forEach(p=>{const pt=ftx.filter(tx=>tx.projectId===p.id);let ic=0,ex=0;pt.forEach(tx=>{if(tx.type==='income')ic+=Number(tx.amount)||0;else ex+=Number(tx.amount)||0;});t+='>> '+p.name.toUpperCase()+'\n  Budget: '+formatRp(p.budget)+' | Masuk: '+formatRp(ic)+' | Keluar: '+formatRp(ex)+' | Sisa: '+formatRp(p.budget-ex)+'\n';if(pt.length){t+='  Tanggal       Keterangan       Met  Pemasukan        Pengeluaran\n';pt.sort((a,b)=>a.date.localeCompare(b.date)).forEach(tx=>{const d=formatDate(tx.date).padEnd(14);const desc=(tx.description||'-').substring(0,16).padEnd(18);const m=(tx.method==='transfer'?'TF':'CS').padEnd(4);const inc=tx.type==='income'?formatRp(tx.amount).padEnd(17):'-'.padEnd(17);const exp=tx.type==='expense'?formatRp(tx.amount):'-';t+='  '+d+desc+m+inc+exp+'\n';});t+='  '+''.padEnd(36)+'TOTAL  '+formatRp(ic).padEnd(17)+formatRp(ex)+'\n\n';}});}
+if(tp==='orders'||tp==='full'){t+='--- PESANAN BARANG ---\n\n';fors.forEach(o=>{const pj=ps.find(p=>p.id===o.projectId);t+='>> '+o.tahap+' | Proyek: '+(pj?pj.name:'-')+' | Pemesan: '+o.pemesan+' | '+formatDate(o.date)+'\n';if(o.items&&o.items.length){t+='  No  Nama Barang          Qty  Satuan\n';o.items.forEach((it,i)=>{t+='  '+String(i+1).padEnd(4)+(it.nama).substring(0,20).padEnd(21)+String(it.qty).padEnd(5)+it.satuan+'\n';});}t+='\n';});}
+if(tp==='daily'||tp==='full'){t+='--- LAPORAN HARIAN ---\n\n';const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});Object.keys(gp).sort((a,b)=>b.localeCompare(a)).forEach(d=>{t+='>> '+formatDateFull(d)+'\n';gp[d].forEach(r=>{const pj=ps.find(p=>p.id===r.projectId);t+='  - '+r.title+' ['+(pj?pj.name:'-')+']\n    '+(r.content||'-').replace(/\n/g,'\n    ')+'\n';});t+='\n';});}
+t+='\n=== Dicetak oleh OmnarPRO ===\n';
+try{const blob=new Blob([t],{type:'text/plain;charset=utf-8'});triggerDownload(blob,'Laporan-OmnarPRO-'+todayStr()+'.txt','text/plain');showToast('Laporan teks berhasil diunduh!','success');}catch(e){showToast('Gagal export','error');}}
 
 // ==================== PANDUAN INSTALL ====================
-function renderInstallGuide(){
-    const isSA=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
-    const g=document.getElementById('install-guide');
-    if(isSA){g.innerHTML='<div class="bg-green-50 rounded-xl p-4 text-center"><i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i><p class="font-bold text-sm text-green-800">OmnarPRO Sudah Terinstall</p></div>';return;}
-    g.innerHTML=`<div class="space-y-4 mt-2">
-    <div class="flex gap-3 items-start"><div class="step-num">1</div><div><p class="font-bold text-sm">Host di Web Server HTTPS</p><p class="text-xs text-gray-500">Upload ke GitHub Pages, Netlify, atau Vercel</p></div></div>
-    <div class="flex gap-3 items-start"><div class="step-num">2</div><div><p class="font-bold text-sm">Buka di Chrome Android</p><p class="text-xs text-gray-500">Tap menu → "Install app"</p></div></div>
-    <div class="flex gap-3 items-start"><div class="step-num">3</div><div><p class="font-bold text-sm">Siap! Akses dari Home Screen</p><p class="text-xs text-gray-500">Berjalan fullscreen & offline</p></div></div>
-    <div class="bg-amber-50 rounded-xl p-3" style="border:1px solid #fde68a;"><p class="text-xs font-bold text-amber-800 mb-1"><i class="fas fa-tools mr-1"></i> GitHub Pages</p><ol class="text-xs text-amber-700 space-y-1 pl-4 list-decimal"><li>Buat repo baru di GitHub</li><li>Upload semua file</li><li>Settings → Pages → Source: main</li><li>Buka URL di Chrome Android</li><li>Tap menu → "Install app"</li></ol></div></div>`;
-}
+function renderInstallGuide(){const isSA=window.matchMedia('(display-mode:standalone)').matches;const g=document.getElementById('install-guide');if(isSA){g.innerHTML='<div class="bg-green-50 rounded-xl p-5 text-center"><i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i><p class="font-bold text-green-800">OmnarPRO Sudah Terinstall</p></div>';return;}g.innerHTML=`<div class="space-y-4 mt-2"><div class="flex gap-3 items-start"><div class="step-num">1</div><div><p class="font-bold">Host di Web Server HTTPS</p><p class="text-sm text-gray-500">Upload ke GitHub Pages, Netlify, atau Vercel</p></div></div><div class="flex gap-3 items-start"><div class="step-num">2</div><div><p class="font-bold">Buka di Chrome Android</p><p class="text-sm text-gray-500">Tap menu → "Install app"</p></div></div><div class="flex gap-3 items-start"><div class="step-num">3</div><div><p class="font-bold">Siap! Akses dari Home Screen</p><p class="text-sm text-gray-500">Berjalan fullscreen & offline</p></div></div></div>`;}
+
+// ==================== OFFLINE DETECTION ====================
+function updateOnlineStatus(){const bar=document.getElementById('offline-bar');if(!navigator.onLine)bar.classList.add('show');else bar.classList.remove('show');}
+window.addEventListener('online',()=>{updateOnlineStatus();showToast('Kembali online!','success');});
+window.addEventListener('offline',()=>{updateOnlineStatus();showToast('Mode offline — data tersimpan lokal','info');});
+if(!navigator.onLine)setTimeout(()=>updateOnlineStatus(),1500);
 
 // ==================== INIT ====================
-window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash').classList.add('fade-out');document.getElementById('app').style.opacity='1';setTimeout(()=>{document.getElementById('splash').style.display='none';},500);},1200);renderDashboard();if(localStorage.getItem('pk_install_dismissed')==='1')document.getElementById('install-banner').classList.add('hide');});
-// ==================== OFFLINE DETECTION ====================
-function updateOnlineStatus(){
-    const bar=document.getElementById('offline-bar');
-    if(!navigator.onLine){
-        bar.classList.add('show');
-    }else{
-        bar.classList.remove('show');
-    }
-}
-window.addEventListener('online',()=>{
-    updateOnlineStatus();
-    showToast('Kembali online!','success');
-});
-window.addEventListener('offline',()=>{
-    updateOnlineStatus();
-    showToast('Mode offline — data tetap tersimpan','info');
-});
-// Cek status awal
-if(!navigator.onLine){
-    setTimeout(()=>updateOnlineStatus(),1500);
-}
+window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash').classList.add('fade-out');document.getElementById('app').style.opacity='1';setTimeout(()=>{document.getElementById('splash').style.display='none';},500);},1200);renderDashboard();if(localStorage.getItem('op_install_dismissed')==='1')document.getElementById('install-banner').classList.add('hide');});
 </script>
 </body>
 </html>
