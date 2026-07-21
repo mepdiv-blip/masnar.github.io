@@ -359,14 +359,508 @@ function openRepModal(){var ps=myDB.get('projects');if(!ps.length){myToast('Buat
 function handleImg(inp){if(!inp.files||!inp.files[0])return;var f=inp.files[0];if(!f.type.startsWith('image/'))return;var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=img.width,h=img.height;var mx=800;if(w>mx){h=(h*mx)/w;w=mx}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);uploadImg=c.toDataURL('image/jpeg',0.7);var a=document.getElementById('uplArea');a.classList.add('has');a.innerHTML='<img src="'+uploadImg+'" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover"><p class="text-sm font-semibold text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>Foto dipilih</p>'};img.src=e.target.result};rd.readAsDataURL(f)}
 function saveReport(){var pid=document.getElementById('mrPid').value,tl=document.getElementById('mrTitle').value.trim(),ct=document.getElementById('mrContent').value.trim(),dt=document.getElementById('mrDate').value;if(!tl){myToast('Judul wajib','e');return}if(!dt){myToast('Tanggal wajib','e');return}var rs=myDB.get('reports');rs.push({id:myDB.uid(),projectId:pid,title:tl,content:ct,image:uploadImg,date:dt});myDB.put('reports',rs);closeM('mRep');uploadImg=null;myToast('Laporan disimpan','s');renderRepList()}
 function delReport(id){myConfirm('Hapus laporan?',function(){myDB.put('reports',myDB.get('reports').filter(function(r){return r.id!==id}));myToast('Dihapus','s');renderRepList()})}
-
 // ========== EXPORT PDF ==========
 function popExSel(){var ps=myDB.get('projects');var h='<option value="">-- Semua Proyek --</option>';for(var i=0;i<ps.length;i++){h+='<option value="'+ps[i].id+'">'+ps[i].name+'</option>'}document.getElementById('exProj').innerHTML=h;document.getElementById('exFrom').value='';document.getElementById('exTo').value=''}
-function showPDFLoad(msg){var o=document.getElementById('pfOv');if(!o){o=document.createElement('div');o.id='pfOv';o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center';o.innerHTML='<div style="background:#fff;border-radius:22px;padding:30px 26px;text-align:center;max-width:320px;width:90%"><div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div><p style="font-weight:800;font-size:16px;margin:0 0 6px">Membuat PDF...</p><p style="font-size:13px;color:#94A3B8;margin:0" id="pfMsg">'+(msg||'Memulai')+'</p></div>';document.body.appendChild(o)}else{o.style.display='flex'}}
+
+function showPDFLoad(msg){var o=document.getElementById('pfOv');if(!o){o=document.createElement('div');o.id='pfOv';o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center';o.innerHTML='<div style="background:#fff;border-radius:22px;padding:30px 26px;text-align:center;max-width:320px;width:90%"><div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div><p style="font-weight:800;font-size:16px;margin:0 0 6px">Membuat PDF...</p><p style="font-size:13px;color:#94A3B8;margin:0" id="pfMsg">'+(msg||'Memulai')+'</p></div>';document.body.appendChild(o)}else{o.style.display='flex';document.getElementById('pfMsg').textContent=msg||'Memulai'}}
 function hidePDFLoad(){var o=document.getElementById('pfOv');if(o)o.style.display='none'}
+
 function dlBlob(blob,fn){return new Promise(function(res){try{var u=URL.createObjectURL(blob);var a=document.createElement('a');a.href=u;a.download=fn;a.style.cssText='position:fixed;left:-9999px';document.body.appendChild(a);setTimeout(function(){a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove();res(true)},3000)},100)}catch(e){res(false)}})}
 
+// Resize gambar supaya muat di PDF Android
+function resizeForPdf(base64data){
+    return new Promise(function(resolve){
+        if(!base64data||base64data.length<100){resolve(null);return}
+        try{
+            var img=new Image();
+            img.onload=function(){
+                var maxD=350;
+                var w=img.width,h=img.height;
+                if(w>maxD||h>maxD){
+                    if(w>h){h=Math.round(h*maxD/w);w=maxD}
+                    else{w=Math.round(w*maxD/h);h=maxD}
+                }
+                var c=document.createElement('canvas');
+                c.width=Math.max(1,w);c.height=Math.max(1,h);
+                c.getContext('2d').drawImage(img,0,0,w,h);
+                resolve(c.toDataURL('image/jpeg',0.5));
+            };
+            img.onerror=function(){resolve(null)};
+            img.src=base64data;
+        }catch(e){resolve(null)}
+    });
+}
+
+// ===== NOTA PDF =====
+async function genNotaPDF(share){
+    if(!viewOrderId)return;
+    var ords=myDB.get('orders');
+    var o=null;for(var i=0;i<ords.length;i++){if(ords[i].id===viewOrderId){o=ords[i];break}}
+    if(!o)return;
+    var projs=myDB.get('projects');
+    var pj=null;for(var j=0;j<projs.length;j++){if(projs[j].id===o.projectId){pj=projs[j];break}}
+
+    showPDFLoad('Membuat Nota PDF...');
+    await new Promise(function(r){setTimeout(r,400)});
+
+    if(!window.jspdf||!window.jspdf.jsPDF){
+        hidePDFLoad();myToast('Library PDF gagal dimuat','e');return;
+    }
+
+    try{
+        var doc=new window.jspdf.jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});
+        var pw=doc.internal.pageSize.getWidth();
+        var mg=20;var y=20;
+
+        // Border
+        doc.setDrawColor(30,41,59);doc.setLineWidth(0.8);doc.rect(10,10,pw-20,277);
+
+        // Judul
+        doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
+        doc.text('NOTA PESANAN BARANG',pw/2,y,{align:'center'});y+=7;
+        doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
+        doc.text('OMNARPRO - PROJECT MANAGEMENT',pw/2,y,{align:'center'});y+=12;
+
+        // Garis
+        doc.setDrawColor(200,200,200);doc.setLineWidth(0.5);
+        doc.line(mg,y,pw-mg,y);y+=10;
+
+        // Info
+        doc.setFontSize(11);doc.setTextColor(30,41,59);
+        var infoRows=[
+            ['Proyek',pj?pj.name:'-'],
+            ['Tahap',o.tahap],
+            ['Pemesan',o.pemesan],
+            ['Tanggal',fDtF(o.date)]
+        ];
+        for(var i=0;i<infoRows.length;i++){
+            doc.setFont('helvetica','bold');doc.text(infoRows[i][0]+':',mg,y);
+            doc.setFont('helvetica','normal');doc.text(infoRows[i][1],mg+35,y);
+            y+=7;
+        }
+        y+=4;
+
+        // Garis
+        doc.setDrawColor(200,200,200);doc.line(mg,y,pw-mg,y);y+=8;
+
+        // Tabel barang
+        if(o.items&&o.items.length>0){
+            var tData=[];
+            for(var k=0;k<o.items.length;k++){
+                tData.push([String(k+1),o.items[k].nama,String(o.items[k].qty),o.items[k].satuan]);
+            }
+
+            if(doc.autoTable){
+                doc.autoTable({
+                    startY:y,
+                    head:[['No','Nama Barang','Qty','Satuan']],
+                    body:tData,
+                    margin:{left:mg,right:mg},
+                    styles:{fontSize:11,cellPadding:4,lineColor:[200,200,200],lineWidth:0.2},
+                    headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:10},
+                    alternateRowStyles:{fillColor:[248,250,246]},
+                    columnStyles:{
+                        0:{cellWidth:15,halign:'center'},
+                        1:{cellWidth:65},
+                        2:{cellWidth:25,halign:'center',fontStyle:'bold'},
+                        3:{cellWidth:30,halign:'center'}
+                    }
+                });
+                y=doc.lastAutoTable.finalY+6;
+            }else{
+                // Tabel manual tanpa autoTable
+                doc.setFillColor(20,83,45);doc.rect(mg,y,pw-2*mg,8,'F');
+                doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','bold');
+                doc.text('No',mg+3,y+5.5);doc.text('Nama Barang',mg+20,y+5.5);
+                doc.text('Qty',mg+100,y+5.5);doc.text('Satuan',mg+120,y+5.5);
+                y+=8;doc.setTextColor(30,41,59);doc.setFont('helvetica','normal');doc.setFontSize(10);
+                for(var k=0;k<tData.length;k++){
+                    if(k%2===0){doc.setFillColor(248,250,246);doc.rect(mg,y,pw-2*mg,7,'F')}
+                    doc.text(tData[k][0],mg+5,y+5);doc.text(tData[k][1],mg+20,y+5);
+                    doc.text(tData[k][2],mg+102,y+5);doc.text(tData[k][3],mg+120,y+5);
+                    y+=7;
+                }
+                y+=4;
+            }
+        }
+
+        // Total barang
+        doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
+        doc.text('Total: '+(o.items?o.items.length:0)+' jenis barang',mg,y);y+=16;
+
+        // Tanda tangan
+        doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(30,41,59);
+        doc.text('Pemesan,',mg+15,y);doc.text('Mengetahui,',pw-mg-55,y);y+=35;
+        doc.setDrawColor(30,41,59);doc.setLineWidth(0.3);
+        doc.line(mg+10,y,mg+60,y);
+        doc.line(pw-mg-65,y,pw-mg-15,y);y+=5;
+        doc.setFont('helvetica','bold');
+        doc.text(o.pemesan,mg+15,y);
+        doc.text('____________',pw-mg-65,y);
+
+        hidePDFLoad();
+
+        var fn='Nota-'+o.tahap.replace(/[^a-zA-Z0-9]/g,'-')+'.pdf';
+        var bl;try{bl=doc.output('blob')}catch(e1){try{var ab=doc.output('arraybuffer');bl=new Blob([ab],{type:'application/pdf'})}catch(e2){hidePDFLoad();myToast('Gagal buat PDF','e');return}}
+
+        if(!bl||bl.size<100){myToast('PDF tidak valid','e');return}
+
+        if(share){
+            try{
+                var f=new File([bl],fn,{type:'application/pdf'});
+                if(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){
+                    await navigator.share({title:'Nota '+o.tahap,files:[f]});
+                    myToast('Nota dikirim!','s');return;
+                }
+            }catch(e){if(e.name==='AbortError')return}
+            await dlBlob(bl,fn);myToast('Diunduh (share tidak tersedia)','i');
+        }else{
+            await dlBlob(bl,fn);myToast('Nota PDF diunduh! ('+Math.round(bl.size/1024)+' KB)','s');
+        }
+    }catch(e){
+        hidePDFLoad();console.error('Nota PDF error:',e);myToast('Gagal: '+(e.message||'').substring(0,60),'e');
+    }
+}
+
+// ===== LAPORAN UTAMA PDF =====
 async function genMainPDF(share){
+    var pid=document.getElementById('exProj').value;
+    var fd=document.getElementById('exFrom').value;
+    var td=document.getElementById('exTo').value;
+    var tp=document.querySelector('input[name="exType"]:checked').value;
+
+    var ps=myDB.get('projects'),txs=myDB.get('transactions'),rps=myDB.get('reports'),ords=myDB.get('orders');
+    var fps=pid?ps.filter(function(p){return p.id===pid}):ps;
+    var ftx=txs.filter(function(t){return!pid||t.projectId===pid});
+    var frp=rps.filter(function(r){return!pid||r.projectId===pid});
+    var fors=ords.filter(function(o){return!pid||o.projectId===pid});
+    if(fd){ftx=ftx.filter(function(t){return t.date>=fd});frp=frp.filter(function(r){return r.date>=fd});fors=fors.filter(function(o){return o.date>=fd})}
+    if(td){ftx=ftx.filter(function(t){return t.date<=td});frp=frp.filter(function(r){return r.date<=td});fors=fors.filter(function(o){return o.date<=td})}
+    if(!fps.length){myToast('Tidak ada data','e');return}
+
+    showPDFLoad('Mempersiapkan...');await new Promise(function(r){setTimeout(r,400)});
+    if(!window.jspdf||!window.jspdf.jsPDF){hidePDFLoad();myToast('Library PDF gagal','e');return}
+
+    try{
+        var doc=new window.jspdf.jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});
+        var pw=doc.internal.pageSize.getWidth();var mg=14;var y=12;
+
+        function addHdr(title){
+            doc.setFillColor(20,83,45);doc.rect(0,0,pw,28,'F');
+            doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');
+            doc.text('OmnarPRO',mg,11);
+            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(title,mg,18);
+            doc.setFontSize(7);doc.text('Dicetak: '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}),mg,24);
+            doc.setTextColor(0,0,0);y=34;
+        }
+        function needSpace(n){if(y+n>275){doc.addPage();y=12}}
+        function addLine(){doc.setDrawColor(200,200,200);doc.setLineWidth(0.2);doc.line(mg,y,pw-mg,y);y+=4}
+
+        // ==========================================
+        // BAGIAN 1: KEUANGAN
+        // ==========================================
+        if(tp==='finance'||tp==='full'){
+            addHdr('Laporan Keuangan Proyek');
+
+            for(var i=0;i<fps.length;i++){
+                var p=fps[i];needSpace(50);
+                doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
+                doc.text(p.name,mg,y);y+=5;
+                if(p.description){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(120,120,120);doc.text(p.description.substring(0,80),mg,y);y+=4}
+
+                var pt=ftx.filter(function(t){return t.projectId===p.id});
+                var totInc=0,totExp=0;
+                for(var j=0;j<pt.length;j++){
+                    if(pt[j].type==='income')totInc+=Number(pt[j].amount)||0;
+                    else totExp+=Number(pt[j].amount)||0;
+                }
+                var sisa=p.budget-totExp;
+                var pct=p.budget>0?Math.round(totExp/p.budget*100):0;
+
+                // Ringkasan
+                needSpace(22);
+                doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,20,2,2,'F');
+                doc.setFontSize(8);doc.setFont('helvetica','bold');
+                doc.setTextColor(22,101,52);doc.text('Budget: '+fRp(p.budget),mg+3,y+5);
+                doc.setTextColor(22,163,74);doc.text('Pemasukan: '+fRp(totInc),mg+3,y+10);
+                doc.setTextColor(185,28,28);doc.text('Pengeluaran: '+fRp(totExp),mg+3,y+15);
+                doc.setTextColor(180,83,9);doc.text('Sisa: '+fRp(sisa),mg+75,y+5);
+                doc.setTextColor(30,41,59);doc.text('Terpakai: '+pct+'%',mg+75,y+10);
+                var statusTxt=pct>90?'MELEBIHI BATAS':pct>70?'HATI-HATI':'AMAN';
+                doc.setTextColor(pct>90?185:22,pct>90?28:163,pct>90?28:74);
+                doc.text(statusTxt,mg+75,y+15);
+                y+=24;
+
+                // Tabel transaksi
+                if(pt.length>0){
+                    var sorted=pt.sort(function(a,b){return a.date.localeCompare(b.date)});
+                    var tRows=[];
+                    for(var k=0;k<sorted.length;k++){
+                        var t=sorted[k];
+                        tRows.push([
+                            fDt(t.date),
+                            (t.description||'-').substring(0,28),
+                            t.method==='transfer'?'TF':'CS',
+                            t.type==='income'?fRp(t.amount):'',
+                            t.type==='expense'?fRp(t.amount):''
+                        ]);
+                    }
+                    // Baris total
+                    tRows.push(['','TOTAL','',fRp(totInc),fRp(totExp)]);
+
+                    if(doc.autoTable){
+                        doc.autoTable({
+                            startY:y,
+                            head:[['Tanggal','Keterangan','Met','Pemasukan','Pengeluaran']],
+                            body:tRows,
+                            margin:{left:mg,right:mg},
+                            styles:{fontSize:7,cellPadding:1.5},
+                            headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7},
+                            alternateRowStyles:{fillColor:[248,250,246]},
+                            columnStyles:{0:{cellWidth:20},1:{cellWidth:42},2:{cellWidth:10,halign:'center'},3:{halign:'right',cellWidth:28},4:{halign:'right',cellWidth:28}},
+                            didParseCell:function(data){
+                                if(data.row.index===tRows.length-1){
+                                    data.cell.styles.fontStyle='bold';
+                                    data.cell.styles.fillColor=[240,248,240];
+                                }
+                            }
+                        });
+                        y=doc.lastAutoTable.finalY+4;
+
+                        // Baris saldo
+                        var saldo=totInc-totExp;
+                        doc.setFontSize(8);doc.setFont('helvetica','bold');
+                        doc.setFillColor(255,251,235);doc.roundedRect(mg+55,y,pw-2*mg-55,7,1,1,1,1,'F');
+                        doc.setTextColor(180,83,9);doc.text('SALDO',mg+57,y+5);
+                        doc.setTextColor(saldo>=0?22:185,saldo>=0?163:28,saldo>=0?74:28);
+                        doc.text(fRp(saldo),mg+80,y+5);
+                        y+=12;
+                    }
+                }else{
+                    doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Belum ada transaksi.',mg,y+3);y+=8;
+                }
+                addLine();y+=3;
+            }
+        }
+
+        // ==========================================
+        // BAGIAN 2: PESANAN BARANG / NOTA
+        // ==========================================
+        if(tp==='orders'||tp==='full'){
+            if(tp==='full'){doc.addPage();y=12}
+            addHdr('Nota Pesanan Barang');
+
+            for(var i=0;i<fors.length;i++){
+                var o=fors[i];needSpace(50);
+                var opj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===o.projectId){opj=ps[j];break}}
+
+                // Judul nota
+                doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
+                doc.text(o.tahap,mg,y);y+=6;
+
+                // Info
+                doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
+                doc.text('Proyek: '+(opj?opj.name:'-'),mg,y);y+=4;
+                doc.text('Pemesan: '+o.pemesan,mg,y);y+=4;
+                doc.text('Tanggal: '+fDtF(o.date),mg,y);y+=8;
+
+                // Tabel barang
+                if(o.items&&o.items.length>0){
+                    var oRows=[];
+                    for(var k=0;k<o.items.length;k++){
+                        oRows.push([String(k+1),o.items[k].nama,String(o.items[k].qty),o.items[k].satuan]);
+                    }
+
+                    if(doc.autoTable){
+                        doc.autoTable({
+                            startY:y,
+                            head:[['No','Nama Barang','Qty','Satuan']],
+                            body:oRows,
+                            margin:{left:mg,right:mg},
+                            styles:{fontSize:9,cellPadding:3},
+                            headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:8},
+                            alternateRowStyles:{fillColor:[248,250,246]},
+                            columnStyles:{0:{cellWidth:12,halign:'center'},2:{cellWidth:20,halign:'center',fontStyle:'bold'},3:{cellWidth:28,halign:'center'}}
+                        });
+                        y=doc.lastAutoTable.finalY+6;
+                    }else{
+                        // Manual table
+                        doc.setFillColor(20,83,45);doc.rect(mg,y,pw-2*mg,6,'F');
+                        doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont('helvetica','bold');
+                        doc.text('No',mg+3,y+4);doc.text('Nama Barang',mg+18,y+4);
+                        doc.text('Qty',mg+100,y+4);doc.text('Satuan',mg+115,y+4);
+                        y+=6;doc.setTextColor(30,41,59);doc.setFont('helvetica','normal');doc.setFontSize(9);
+                        for(var k=0;k<oRows.length;k++){
+                            doc.text(oRows[k][0],mg+4,y+4);doc.text(oRows[k][1],mg+18,y+4);
+                            doc.text(oRows[k][2],mg+102,y+4);doc.text(oRows[k][3],mg+115,y+4);
+                            y+=5;
+                        }
+                        y+=4;
+                    }
+                }
+
+                // Total item
+                doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);
+                doc.text('Total: '+(o.items?o.items.length:0)+' jenis barang',mg,y);y+=10;
+
+                // Tanda tangan
+                needSpace(40);
+                doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
+                doc.text('Pemesan,',mg+10,y);doc.text('Mengetahui,',pw-mg-50,y);y+=28;
+                doc.setDrawColor(50,50,50);doc.setLineWidth(0.3);
+                doc.line(mg+5,y,mg+45,y);doc.line(pw-mg-55,y,pw-mg-15,y);y+=4;
+                doc.setFont('helvetica','bold');
+                doc.text(o.pemesan,mg+10,y);doc.text('____________',pw-mg-55,y);y+=10;
+                addLine();y+=4;
+            }
+        }
+
+        // ==========================================
+        // BAGIAN 3: LAPORAN HARIAN + FOTO
+        // ==========================================
+        if(tp==='daily'||tp==='full'){
+            if(tp==='full'){doc.addPage();y=12}
+            addHdr('Laporan Harian Proyek');
+
+            if(!frp.length){
+                doc.setFontSize(9);doc.setTextColor(160,160,160);
+                doc.text('Tidak ada laporan dalam periode ini.',mg,y+3);
+            }
+
+            var grp={};
+            for(var i=0;i<frp.length;i++){
+                if(!grp[frp[i].date])grp[frp[i].date]=[];
+                grp[frp[i].date].push(frp[i]);
+            }
+            var dateKeys=Object.keys(grp).sort(function(a,b){return b.localeCompare(a)});
+
+            for(var d=0;d<dateKeys.length;d++){
+                var dayReps=grp[dateKeys[d]];
+                needSpace(18);
+
+                // Header tanggal
+                doc.setFillColor(217,119,6);doc.roundedRect(mg,y,pw-2*mg,7,1.5,1.5,'F');
+                doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+                doc.text(fDtF(dateKeys[d]),mg+2,y+5);
+                doc.setTextColor(0,0,0);y+=10;
+
+                for(var ri=0;ri<dayReps.length;ri++){
+                    var rep=dayReps[ri];
+                    needSpace(20);
+                    var rpj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===rep.projectId){rpj=ps[j];break}}
+
+                    // Judul
+                    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);
+                    doc.text(rep.title,mg,y);y+=4;
+
+                    // Proyek
+                    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(217,119,6);
+                    doc.text('Proyek: '+(rpj?rpj.name:'-'),mg,y);y+=4;
+
+                    // Isi teks
+                    if(rep.content){
+                        doc.setTextColor(60,60,60);
+                        var lines=doc.splitTextToSize(rep.content.substring(0,500),pw-2*mg);
+                        doc.text(lines.slice(0,12),mg,y);
+                        y+=lines.slice(0,12).length*3+2;
+                    }
+
+                    // ===== FOTO =====
+                    if(rep.image){
+                        showPDFLoad('Memproses gambar...');
+                        await new Promise(function(r){setTimeout(r,50)});
+                        try{
+                            var smallImg=await resizeForPdf(rep.image);
+                            if(smallImg){
+                                needSpace(48);
+                                doc.addImage(smallImg,'JPEG',mg,y,48,36);
+                                y+=40;
+                            }
+                        }catch(imgErr){
+                            console.warn('Gagal render gambar:',imgErr);
+                            doc.setFontSize(7);doc.setTextColor(180,180,180);
+                            doc.text('[Gambar tidak dapat ditampilkan]',mg,y+3);y+=6;
+                        }
+                    }
+
+                    addLine();
+                }
+                y+=3;
+            }
+        }
+
+        // ==========================================
+        // BAGIAN 4: RINGKASAN / KESIMPULAN
+        // ==========================================
+        if(fps.length>0){
+            needSpace(60);
+            doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,6,2,2,'F');
+            doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
+            doc.text('RINGKASAN LAPORAN',mg+2,y+4.5);y+=10;
+
+            doc.setFontSize(9);doc.setTextColor(30,41,59);
+
+            // Hitung total keseluruhan
+            var gInc=0,gExp=0,gOrd=0,gRep=0;
+            for(var i=0;i<ftx.length;i++){if(ftx[i].type==='income')gInc+=Number(ftx[i].amount)||0;else gExp+=Number(ftx[i].amount)||0}
+            gOrd=fors.length;gRep=frp.length;
+            var gBal=gInc-gExp;
+
+            doc.setFont('helvetica','bold');doc.text('Total Pemasukan:',mg,y);doc.setFont('helvetica','normal');doc.text(fRp(gInc),mg+55,y);y+=5;
+            doc.setFont('helvetica','bold');doc.text('Total Pengeluaran:',mg,y);doc.setFont('helvetica','normal');doc.text(fRp(gExp),mg+55,y);y+=5;
+            doc.setFont('helvetica','bold');doc.text('Saldo Bersih:',mg,y);
+            doc.setFont('helvetica','bold');
+            doc.setTextColor(gBal>=0?22:185,gBal>=0?163:28,gBal>=0?74:28);
+            doc.text(fRp(gBal),mg+55,y);y+=5;
+            doc.setTextColor(30,41,59);
+            doc.setFont('helvetica','bold');doc.text('Jumlah Nota Pesanan:',mg,y);doc.setFont('helvetica','normal');doc.text(String(gOrd)+' nota',mg+55,y);y+=5;
+            doc.setFont('helvetica','bold');doc.text('Jumlah Laporan Harian:',mg,y);doc.setFont('helvetica','normal');doc.text(String(gRep)+' laporan',mg+55,y);y+=5;
+            doc.setFont('helvetica','bold');doc.text('Jumlah Proyek:',mg,y);doc.setFont('helvetica','normal');doc.text(String(fps.length)+' proyek',mg+55,y);y+=5;
+
+            // Detail per proyek
+            y+=4;
+            doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,100,100);
+            doc.text('Rincian Per Proyek:',mg,y);y+=5;
+
+            for(var i=0;i<fps.length;i++){
+                var p=fps[i];
+                var ptx=ftx.filter(function(t){return t.projectId===p.id});
+                var pi=0,pe=0;
+                for(var j=0;j<ptx.length;j++){if(ptx[j].type==='income')pi+=Number(ptx[j].amount)||0;else pe+=Number(ptx[j].amount)||0}
+                needSpace(10);
+                doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);
+                doc.text(p.name,mg+2,y);
+                doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+                doc.text('Masuk: '+fRp(pi)+' | Keluar: '+fRp(pe)+' | Sisa: '+fRp(p.budget-pe),mg+40,y);
+                y+=5;
+            }
+        }
+
+        // Footer halaman
+        var totalP=doc.internal.getNumberOfPages();
+        for(var pg=1;pg<=totalP;pg++){
+            doc.setPage(pg);
+            doc.setFontSize(6.5);doc.setTextColor(180,180,180);
+            doc.text('OmnarPRO - Laporan otomatis | Hal. '+pg+'/'+totalP,mg,291);
+        }
+
+        hidePDFLoad();
+        var fn='Laporan-OmnarPRO-'+tS()+'.pdf';
+        var bl;try{bl=doc.output('blob')}catch(e1){try{var ab=doc.output('arraybuffer');bl=new Blob([ab],{type:'application/pdf'})}catch(e2){hidePDFLoad();myToast('Gagal buat PDF','e');return}}
+
+        if(!bl||bl.size<100){myToast('PDF tidak valid','e');return}
+
+        if(share){
+            try{var f=new File([bl],fn,{type:'application/pdf'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({title:'Laporan OmnarPRO',files:[f]});myToast('Dikirim!','s');return}}catch(e){if(e.name==='AbortError')return}
+            await dlBlob(bl,fn);myToast('Diunduh (share tidak tersedia)','i');
+        }else{
+            await dlBlob(bl,fn);myToast('PDF diunduh! ('+Math.round(bl.size/1024)+' KB)','s');
+        }
+    }catch(e){
+        hidePDFLoad();console.error('PDF Error:',e);myToast('Gagal: '+(e.message||'').substring(0,60),'e');
+    }
+}
+
     var pid=document.getElementById('exProj').value,fd=document.getElementById('exFrom').value,td=document.getElementById('exTo').value,tp=document.querySelector('input[name="exType"]:checked').value;
     var ps=myDB.get('projects'),txs=myDB.get('transactions'),rps=myDB.get('reports'),ords=myDB.get('orders');
     var fps=pid?ps.filter(function(p){return p.id===pid}):ps;
