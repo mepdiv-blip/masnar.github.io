@@ -861,7 +861,7 @@ async function genMainPDF(share){
     }
 }
 
-    pid=document.getElementById('exProj').value,fd=document.getElementById('exFrom').value,td=document.getElementById('exTo').value,tp=document.querySelector('input[name="exType"]:checked').value;
+    Var pid=document.getElementById('exProj').value,fd=document.getElementById('exFrom').value,td=document.getElementById('exTo').value,tp=document.querySelector('input[name="exType"]:checked').value;
     var ps=myDB.get('projects'),txs=myDB.get('transactions'),rps=myDB.get('reports'),ords=myDB.get('orders');
     var fps=pid?ps.filter(function(p){return p.id===pid}):ps;
     var ftx=txs.filter(function(t){return!pid||t.projectId===pid});
