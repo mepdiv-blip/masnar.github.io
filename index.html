@@ -3,33 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OmnarPro - Keuangan & Laporan</title>
-    <!-- PWA Meta Tags -->
+    <title>OmnarPRO - Keuangan & Laporan</title>
     <meta name="theme-color" content="#14532D">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="OmnarPro">
-    <meta name="application-name" content="OmnarPro">
+    <meta name="apple-mobile-web-app-title" content="OmnarPRO">
+    <meta name="application-name" content="OmnarPRO">
     <meta name="description" content="Aplikasi Keuangan Proyek & Laporan Harian">
 
-    <!-- PWA Manifest — FILE FISIK (bukan Blob URL) -->
-    <link rel="manifest" href="manifest.json">
-
-    <!-- Ikon PWA -->
-    <link rel="icon" type="image/png" sizes="72x72" href="icons/icon-72.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-    <link rel="apple-touch-icon" href="icons/icon-152.png">
-   ent="yes">
-   
-    <!-- ===== LOCAL FILES (OFFLINE) ===== -->
     <link rel="stylesheet" href="css/fontawesome.min.css">
     <link rel="stylesheet" href="css/plus-jakarta.css">
     <script src="js/tailwind.min.js"></script>
     <script src="js/jspdf.umd.min.js"></script>
     <script src="js/jspdf-autotable.min.js"></script>
-    <!-- ===== END LOCAL FILES ===== -->
 
     <script>
     tailwind.config = {
@@ -140,10 +127,44 @@
 
         .step-num { width:32px; height:32px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0; }
 
+        /* Tabel keuangan */
+        .fin-table { width:100%; border-collapse:collapse; font-size:11px; }
+        .fin-table th { background:var(--primary); color:white; padding:8px 6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; }
+        .fin-table td { padding:7px 6px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+        .fin-table tr:nth-child(even) td { background:#f8fafc; }
+        .fin-table .col-income { color:#16A34A; font-weight:700; text-align:right; }
+        .fin-table .col-expense { color:#DC2626; font-weight:700; text-align:right; }
+        .fin-table .col-empty { color:#cbd5e1; text-align:right; }
+        .fin-table .row-total td { background:#f0fdf4!important; font-weight:800; border-top:2px solid var(--primary-ll); font-size:12px; }
+        .fin-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px; border:1px solid #e2e8f0; }
+
         @media(min-width:500px) {
             .modal-sheet { border-radius:20px; margin:20px; max-height:85dvh; }
             .modal-overlay { align-items:center; }
         }
+/* Offline indicator */
+.offline-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #DC2626;
+    color: white;
+    text-align: center;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 10000;
+    transform: translateY(-100%);
+    transition: transform .3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.offline-bar.show {
+    transform: translateY(0);
+}
     </style>
 </head>
 <body>
@@ -151,9 +172,9 @@
     <div id="splash" class="splash">
         <div style="animation:bounceIn .6s ease">
             <div class="w-20 h-20 bg-white/15 rounded-2xl flex items-center justify-center mb-4 mx-auto" style="border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);">
-                <i class="fas fa-hard-hat text-4xl text-amber-400"></i>
+                <i class="fas fa-chart-line text-4xl text-amber-400"></i>
             </div>
-            <h1 class="text-2xl font-black text-white text-center tracking-tight">OmnarPro</h1>
+            <h1 class="text-2xl font-black text-white text-center tracking-tight">OmnarPRO</h1>
             <p class="text-xs text-green-200 text-center mt-1 font-medium">Keuangan & Laporan Proyek</p>
         </div>
         <div class="mt-8">
@@ -167,27 +188,20 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-lg font-black tracking-tight flex items-center gap-2">
-                        <i class="fas fa-hard-hat text-amber-400 text-sm"></i> OmnarPro
+                        <i class="fas fa-chart-line text-amber-400 text-sm"></i> OmnarPRO
                     </h1>
                     <p class="text-xs opacity-70 font-medium" id="header-subtitle">Keuangan & Laporan Proyek</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="install-btn-header" onclick="promptInstall()" class="hidden w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Install">
-                        <i class="fas fa-download text-sm"></i>
-                    </button>
-                    <button onclick="showExportView()" class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Export PDF">
-                        <i class="fas fa-file-pdf text-sm"></i>
-                    </button>
+                    <button id="install-btn-header" onclick="promptInstall()" class="hidden w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Install"><i class="fas fa-download text-sm"></i></button>
+                    <button onclick="showExportView()" class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center" title="Export PDF"><i class="fas fa-file-pdf text-sm"></i></button>
                 </div>
             </div>
         </header>
 
         <main style="flex:1;overflow:hidden;position:relative;">
-
-            <!-- DASHBOARD -->
             <div id="view-dashboard" class="view active"><div id="dashboard-content"></div></div>
 
-            <!-- PROYEK -->
             <div id="view-projects" class="view">
                 <div id="project-list-view">
                     <div class="flex items-center justify-between mb-4">
@@ -202,7 +216,6 @@
                 </div>
             </div>
 
-            <!-- LAPORAN -->
             <div id="view-reports" class="view">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-black">Laporan Harian</h2>
@@ -211,14 +224,10 @@
                 <div id="report-list"></div>
             </div>
 
-            <!-- EXPORT -->
             <div id="view-export" class="view">
                 <h2 class="text-lg font-black mb-4">Export & Kirim PDF</h2>
                 <div class="card p-5 mb-4">
-                    <div class="mb-4">
-                        <label class="form-label">Pilih Proyek</label>
-                        <select id="export-project" class="form-input"></select>
-                    </div>
+                    <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="export-project" class="form-input"></select></div>
                     <div class="grid grid-cols-2 gap-3 mb-4">
                         <div><label class="form-label">Dari Tanggal</label><input type="date" id="export-from" class="form-input"></div>
                         <div><label class="form-label">Sampai Tanggal</label><input type="date" id="export-to" class="form-input"></div>
@@ -226,15 +235,9 @@
                     <div class="mb-5">
                         <label class="form-label">Jenis Laporan</label>
                         <div class="flex gap-2 mt-1 flex-wrap">
-                            <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition">
-                                <input type="radio" name="export-type" value="finance" checked class="accent-green-600"> <span class="text-xs font-bold">Keuangan</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition">
-                                <input type="radio" name="export-type" value="daily" class="accent-amber-600"> <span class="text-xs font-bold">Harian</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition">
-                                <input type="radio" name="export-type" value="full" class="accent-blue-600"> <span class="text-xs font-bold">Lengkap</span>
-                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition"><input type="radio" name="export-type" value="finance" checked class="accent-green-600"><span class="text-xs font-bold">Keuangan</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition"><input type="radio" name="export-type" value="daily" class="accent-amber-600"><span class="text-xs font-bold">Harian</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition"><input type="radio" name="export-type" value="full" class="accent-blue-600"><span class="text-xs font-bold">Lengkap</span></label>
                         </div>
                     </div>
                     <div class="flex gap-3">
@@ -249,7 +252,6 @@
             </div>
         </main>
 
-        <!-- Bottom Nav -->
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-home"></i><span>Beranda</span></div>
             <div class="nav-item" onclick="switchTab('projects')"><i class="fas fa-building"></i><span>Proyek</span></div>
@@ -257,11 +259,10 @@
             <div class="nav-item" onclick="switchTab('export')"><i class="fas fa-file-pdf"></i><span>Export</span></div>
         </nav>
 
-        <!-- Install Banner -->
         <div id="install-banner" class="install-banner hide">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-hard-hat text-amber-400 text-lg"></i></div>
-                <div class="flex-1 min-w-0"><p class="font-bold text-sm">Install OmnarPro</p><p class="text-xs opacity-80">Akses cepat dari home screen</p></div>
+                <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-chart-line text-amber-400 text-lg"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-bold text-sm">Install OmnarPRO</p><p class="text-xs opacity-80">Akses cepat dari home screen</p></div>
                 <button onclick="dismissInstallBanner()" class="text-white/60 text-lg px-2"><i class="fas fa-times"></i></button>
             </div>
             <div class="flex gap-2 mt-3">
@@ -309,7 +310,6 @@
                 <button onclick="saveTransaction()" class="btn-primary">Simpan Transaksi</button>
             </div>
         </div>
-     
 
         <!-- MODAL: LAPORAN -->
         <div id="modal-report" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-report')">
@@ -356,82 +356,48 @@
     </div>
 
 <script>
-
-// ==================== PWA: REGISTER SW ====================
-if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg=>{
-                console.log('[PWA] SW terdaftar:',reg.scope);
-                reg.addEventListener('updatefound',()=>{
-                    const nw=reg.installing;
-                    nw.addEventListener('statechange',()=>{
-                        if(nw.state==='activated'){
-                            showToast('Versi baru tersedia! Refresh halaman.','info');
-                        }
-                    });
-                });
-                // Cek update setiap 30 menit
-                setInterval(()=>{reg.update();},1800000);
-            })
-            .catch(e=>console.warn('[PWA] SW gagal:',e.message));
-    });
-}
-
-   
-    const m={name:'OmnarPro - Keuangan & Laporan',short_name:'OmnarPro',description:'Keuangan Proyek & Laporan Harian',start_url:'./index.html',scope:'./',display:'standalone',orientation:'portrait',background_color:'#14532D',theme_color:'#14532D',categories:['business','productivity'],icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}],prefer_related_applications:false};
+// ==================== PWA MANIFEST ====================
+(function(){
+    function makeIcon(size){
+        const c=document.createElement('canvas');c.width=size;c.height=size;
+        const ctx=c.getContext('2d');
+        const g=ctx.createLinearGradient(0,0,size,size);
+        g.addColorStop(0,'#14532D');g.addColorStop(1,'#166534');
+        ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(0,0,size,size,size*.2);ctx.fill();
+        ctx.fillStyle='#F59E0B';ctx.font='bold '+size*.35+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('OP',size/2,size*.5);
+        return c.toDataURL('image/png');
+    }
+    const i192=makeIcon(192),i512=makeIcon(512);
+    const m={name:'OmnarPRO - Keuangan & Laporan',short_name:'OmnarPRO',description:'Keuangan Proyek & Laporan Harian',start_url:'./index.html',scope:'./',display:'standalone',orientation:'portrait',background_color:'#14532D',theme_color:'#14532D',icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
     const b=new Blob([JSON.stringify(m)],{type:'application/json'});
-    const u=URL.createObjectURL(b);
-    const l=document.createElement('link');l.rel='manifest';l.href=u;document.head.appendChild(l);
+    const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);document.head.appendChild(l);
     const a=document.createElement('link');a.rel='apple-touch-icon';a.href=i192;document.head.appendChild(a);
     const f=document.createElement('link');f.rel='icon';f.type='image/png';f.href=i192;document.head.appendChild(f);
 })();
 
-// ==================== SERVICE WORKER ====================
-if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{
-        navigator.serviceWorker.register('./sw.js').then(r=>{
-            console.log('[PWA] SW terdaftar:',r.scope);
-            r.addEventListener('updatefound',()=>{
-                const nw=r.installing;
-                nw.addEventListener('statechange',()=>{if(nw.state==='activated')showToast('App diperbarui! Refresh untuk update.','info');});
-            });
-        }).catch(e=>console.log('[PWA] SW gagal:',e.message));
-    });
-}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
 
-// ==================== INSTALL PROMPT ====================
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.remove('hide');const h=document.getElementById('install-btn-header');h.classList.remove('hidden');h.style.display='flex';});
-window.addEventListener('appinstalled',()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');document.getElementById('install-btn-header').classList.add('hidden');showToast('OmnarPro berhasil di-install!','success');});
-function promptInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')showToast('Menginstall...','success');deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');});}else{showToast('Buka Chrome → menu → "Install App"','info');}}
-function dismissInstallBanner(){document.getElementById('install-banner').classList.add('hide');localStorage.setItem('pk_install_dismissed','1');}
+window.addEventListener('appinstalled',()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');showToast('OmnarPRO berhasil di-install!','success');});
+function promptInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');});}else{showToast('Buka Chrome → menu → "Install App"','info');}}
+function dismissInstallBanner(){document.getElementById('install-banner').classList.add('hide');}
 
 // ==================== DATABASE ====================
 const DB={get(k){try{return JSON.parse(localStorage.getItem('pk_'+k)||'[]');}catch{return[];}},set(k,d){try{localStorage.setItem('pk_'+k,JSON.stringify(d));}catch{showToast('Penyimpanan penuh!','error');}},id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}};
 
-// ==================== STATE ====================
 let currentTab='dashboard',currentProjectId=null,uploadedImage=null;
 
 // ==================== UTILS ====================
 function formatRp(n){return'Rp '+(Number(n)||0).toLocaleString('id-ID');}
-function formatDate(d){if(!d)return'-';const dt=new Date(d);return dt.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});}
-function formatDateFull(d){if(!d)return'-';const dt=new Date(d);return dt.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function formatDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});}
+function formatDateFull(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function showToast(msg,type='info'){const old=document.querySelector('.toast');if(old)old.remove();const ic={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};const t=document.createElement('div');t.className='toast '+type;t.innerHTML='<i class="fas '+ic[type]+'"></i> '+msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},2800);}
 function openModal(id){document.getElementById(id).classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
-function confirmDelete(msg,cb){
-    document.getElementById('confirm-msg').textContent=msg;
-    const btn=document.getElementById('confirm-btn');
-    const nb=btn.cloneNode(true);
-    btn.parentNode.replaceChild(nb,btn);
-    // Reset teks dan warna tombol
-    nb.textContent='Hapus';
-    nb.style.background='var(--danger)';
-    nb.addEventListener('click',()=>{cb();closeModal('modal-confirm');});
-    openModal('modal-confirm');
-}
+function confirmDelete(msg,cb){document.getElementById('confirm-msg').textContent=msg;const btn=document.getElementById('confirm-btn');const nb=btn.cloneNode(true);btn.parentNode.replaceChild(nb,btn);nb.textContent='Hapus';nb.style.background='var(--danger)';nb.addEventListener('click',()=>{cb();closeModal('modal-confirm');});openModal('modal-confirm');}
+
 // ==================== NAVIGASI ====================
 function switchTab(tab){currentTab=tab;document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+tab).classList.add('active');document.querySelectorAll('.nav-item').forEach((n,i)=>{const tabs=['dashboard','projects','reports','export'];n.classList.toggle('active',tabs[i]===tab);});const st={dashboard:'Keuangan & Laporan Proyek',projects:'Kelola Proyek Anda',reports:'Catatan Aktivitas Harian',export:'Export & Kirim PDF'};document.getElementById('header-subtitle').textContent=st[tab];renderCurrentView();}
 function renderCurrentView(){switch(currentTab){case'dashboard':renderDashboard();break;case'projects':renderProjectList();break;case'reports':renderReportList();break;case'export':populateExportSelect();renderInstallGuide();break;}}
@@ -449,7 +415,7 @@ function renderDashboard(){
         <div class="card stat-card red p-4"><p class="text-xs font-bold text-gray-400 uppercase">Pengeluaran</p><p class="text-lg font-black mt-1 text-red-600">${formatRp(tExp)}</p></div>
         <div class="card stat-card amber p-4"><p class="text-xs font-bold text-gray-400 uppercase">Saldo</p><p class="text-lg font-black mt-1" style="color:${bal>=0?'var(--success)':'var(--danger)'}">${formatRp(bal)}</p></div></div>`;
     if(projects.length>0){h+=`<h3 class="text-sm font-black mb-3 text-gray-500 uppercase tracking-wider">Progress Proyek</h3>`;projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let sp=0;pt.forEach(t=>{if(t.type==='expense')sp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(sp/p.budget)*100):0;const bc=pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500';h+=`<div class="card p-4 mb-3 cursor-pointer" onclick="switchTab('projects');setTimeout(()=>openProjectDetail('${p.id}'),200)"><div class="flex justify-between items-start mb-2"><div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-gray-400">${formatRp(sp)} / ${formatRp(p.budget)}</p></div><span class="text-xs font-black ${pc>90?'text-red-500':pc>70?'text-amber-500':'text-green-500'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${bc}" style="width:${pc}%"></div></div></div>`;});}
-    if(recentTx.length>0){h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>`;recentTx.forEach(tx=>{const pj=projects.find(p=>p.id===tx.projectId);h+=`<div class="card card-accent p-3 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${tx.description||'-'}</p><p class="text-xs text-gray-400">${pj?pj.name:'-'} · ${formatDate(tx.date)}</p></div><span class="tag ${tx.type==='income'?'tag-income':'tag-expense'} ml-2 whitespace-nowrap">${tx.type==='income'?'+':'-'} ${formatRp(tx.amount)}</span></div>`;});}
+    if(recentTx.length>0){h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>`;recentTx.forEach(tx=>{const pj=projects.find(p=>p.id===tx.projectId);const mIcon=(tx.method==='transfer')?'<i class="fas fa-building-columns text-blue-500 ml-1" style="font-size:9px;"></i>':'<i class="fas fa-money-bill-wave text-emerald-500 ml-1" style="font-size:9px;"></i>';h+=`<div class="card card-accent p-3 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${tx.description||'-'}</p><p class="text-xs text-gray-400">${pj?pj.name:'-'} · ${formatDate(tx.date)} ${mIcon}</p></div><span class="tag ${tx.type==='income'?'tag-income':'tag-expense'} ml-2 whitespace-nowrap">${tx.type==='income'?'+':'-'} ${formatRp(tx.amount)}</span></div>`;});}
     const rr=[...reports].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
     if(rr.length>0){h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Laporan Terbaru</h3>`;rr.forEach(r=>{const pj=projects.find(p=>p.id===r.projectId);h+=`<div class="card p-3 mb-2 flex items-center gap-3">${r.image?`<img src="${r.image}" class="img-thumb" onclick="viewImageBySrc(this.src)">`:'<div class="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-gray-300"></i></div>'}<div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${r.title}</p><p class="text-xs text-gray-400">${pj?pj.name:'-'} · ${formatDate(r.date)}</p></div></div>`;});}
     if(projects.length===0){h+=`<div class="empty-state mt-8"><i class="fas fa-folder-open"></i><h3>Belum Ada Proyek</h3><p>Mulai dengan menambahkan proyek pertama</p><button onclick="switchTab('projects');setTimeout(openProjectModal,300)" class="btn-accent mt-4 text-sm px-6 py-3"><i class="fas fa-plus mr-2"></i>Buat Proyek</button></div>`;}
@@ -472,14 +438,108 @@ function deleteProject(id){confirmDelete('Proyek dan semua data terkait akan dih
 // ==================== DETAIL PROYEK ====================
 function openProjectDetail(id){currentProjectId=id;document.getElementById('project-list-view').style.display='none';document.getElementById('project-detail-view').classList.add('active');renderProjectDetail();}
 function closeProjectDetail(){document.getElementById('project-list-view').style.display='block';document.getElementById('project-detail-view').classList.remove('active');currentProjectId=null;renderProjectList();}
-function renderProjectDetail(){const ps=DB.get('projects'),p=ps.find(x=>x.id===currentProjectId);if(!p)return;const txs=DB.get('transactions').filter(t=>t.projectId===p.id).sort((a,b)=>b.date.localeCompare(a.date));let inc=0,exp=0;txs.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else exp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
-let h=`<div class="card p-4 mb-4" style="border-left:4px solid var(--primary-ll);"><div class="flex justify-between items-start"><div><h3 class="font-black text-lg">${p.name}</h3><p class="text-xs text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div><button onclick="deleteProject('${p.id}')" class="btn-danger text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button></div></div><div class="grid grid-cols-2 gap-3 mb-4"><div class="card p-3 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Pemasukan</p><p class="text-sm font-black text-green-700">${formatRp(inc)}</p></div><div class="card p-3 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Pengeluaran</p><p class="text-sm font-black text-red-700">${formatRp(exp)}</p></div></div><div class="card p-3 mb-4"><div class="flex justify-between text-xs mb-1"><span class="font-bold text-gray-500">Budget: ${formatRp(p.budget)}</span><span class="font-black ${pc>90?'text-red-500':'text-green-600'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div><p class="text-xs text-gray-400 mt-1">Sisa: ${formatRp(p.budget-exp)}</p></div><div class="flex items-center justify-between mb-3"><h4 class="text-sm font-black text-gray-500 uppercase">Riwayat Transaksi</h4><button onclick="openTransactionModal('${p.id}')" class="text-xs font-bold px-3 py-1.5 rounded-lg" style="background:var(--accent);color:white;"><i class="fas fa-plus mr-1"></i>Tambah</button></div>`;
-if(!txs.length){h+='<div class="empty-state py-8"><i class="fas fa-receipt" style="font-size:32px;"></i><h3 style="font-size:14px;">Belum ada transaksi</h3></div>';}else{txs.forEach(tx=>{h+=`<div class="card card-accent p-3 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="text-sm font-bold truncate">${tx.description||'-'}</p><p class="text-xs text-gray-400">${formatDate(tx.date)}</p></div><div class="flex items-center gap-2"><span class="tag ${tx.type==='income'?'tag-income':'tag-expense'}">${tx.type==='income'?'+':'-'}${formatRp(tx.amount)}</span><button onclick="deleteTransaction('${tx.id}')" class="w-7 h-7 rounded flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-times text-xs"></i></button></div></div>`;});}
-document.getElementById('project-detail-content').innerHTML=h;}
+
+function renderProjectDetail(){
+    const ps=DB.get('projects'),p=ps.find(x=>x.id===currentProjectId);
+    if(!p)return;
+    const txs=DB.get('transactions').filter(t=>t.projectId===p.id).sort((a,b)=>a.date.localeCompare(b.date));
+    let inc=0,exp=0,cIn=0,cOut=0,tIn=0,tOut=0;
+    txs.forEach(t=>{
+        const amt=Number(t.amount)||0;
+        if(t.type==='income'){inc+=amt;if(t.method==='transfer')tIn+=amt;else cIn+=amt;}
+        else{exp+=amt;if(t.method==='transfer')tOut+=amt;else cOut+=amt;}
+    });
+    const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
+
+    let h=`<div class="card p-4 mb-4" style="border-left:4px solid var(--primary-ll);">
+        <div class="flex justify-between items-start">
+            <div><h3 class="font-black text-lg">${p.name}</h3><p class="text-xs text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div>
+            <button onclick="deleteProject('${p.id}')" class="btn-danger text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="card p-3 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Total Pemasukan</p><p class="text-sm font-black text-green-700">${formatRp(inc)}</p></div>
+        <div class="card p-3 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Total Pengeluaran</p><p class="text-sm font-black text-red-700">${formatRp(exp)}</p></div>
+    </div>
+
+    <div class="card p-3 mb-4">
+        <p class="text-xs font-black text-gray-500 uppercase mb-2">Rincian Metode Pembayaran</p>
+        <div class="grid grid-cols-2 gap-2">
+            <div class="bg-emerald-50 rounded-lg p-2"><p class="text-xs font-bold text-emerald-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Masuk</p><p class="text-xs font-black text-emerald-800">${formatRp(cIn)}</p></div>
+            <div class="bg-blue-50 rounded-lg p-2"><p class="text-xs font-bold text-blue-700"><i class="fas fa-building-columns mr-1"></i>Transfer Masuk</p><p class="text-xs font-black text-blue-800">${formatRp(tIn)}</p></div>
+            <div class="bg-red-50 rounded-lg p-2"><p class="text-xs font-bold text-red-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Keluar</p><p class="text-xs font-black text-red-800">${formatRp(cOut)}</p></div>
+            <div class="bg-orange-50 rounded-lg p-2"><p class="text-xs font-bold text-orange-700"><i class="fas fa-building-columns mr-1"></i>Transfer Keluar</p><p class="text-xs font-black text-orange-800">${formatRp(tOut)}</p></div>
+        </div>
+    </div>
+
+    <div class="card p-3 mb-4">
+        <div class="flex justify-between text-xs mb-1"><span class="font-bold text-gray-500">Budget: ${formatRp(p.budget)}</span><span class="font-black ${pc>90?'text-red-500':'text-green-600'}">${Math.round(pc)}%</span></div>
+        <div class="progress-bar"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div>
+        <p class="text-xs text-gray-400 mt-1">Sisa: ${formatRp(p.budget-exp)}</p>
+    </div>
+
+    <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-black text-gray-500 uppercase">Laporan Keuangan</h4>
+        <button onclick="openTransactionModal('${p.id}')" class="text-xs font-bold px-3 py-1.5 rounded-lg" style="background:var(--accent);color:white;"><i class="fas fa-plus mr-1"></i>Tambah</button>
+    </div>`;
+
+    if(!txs.length){
+        h+='<div class="empty-state py-8"><i class="fas fa-receipt" style="font-size:32px;"></i><h3 style="font-size:14px;">Belum ada transaksi</h3></div>';
+    }else{
+        // TABEL KEUANGAN: Pemasukan & Pengeluaran dipisah
+        h+=`<div class="fin-table-wrap mb-3">
+            <table class="fin-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;border-radius:10px 0 0 0;">Tanggal</th>
+                        <th style="text-align:left;">Keterangan</th>
+                        <th style="text-align:center;">Metode</th>
+                        <th style="text-align:right;">Pemasukan</th>
+                        <th style="text-align:right;border-radius:0 10px 0 0;">Pengeluaran</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        txs.forEach(tx=>{
+            const mBadge=tx.method==='transfer'?'<span style="background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;">TF</span>':'<span style="background:#dcfce7;color:#166534;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;">CS</span>';
+            const incomeCell=tx.type==='income'?formatRp(tx.amount):'<span class="col-empty">-</span>';
+            const expenseCell=tx.type==='expense'?formatRp(tx.amount):'<span class="col-empty">-</span>';
+            const incCls=tx.type==='income'?'col-income':'col-empty';
+            const expCls=tx.type==='expense'?'col-expense':'col-empty';
+
+            h+=`<tr>
+                <td style="white-space:nowrap;font-size:10px;color:#64748b;">${formatDate(tx.date)}</td>
+                <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${tx.description||'-'}</td>
+                <td style="text-align:center;">${mBadge}</td>
+                <td class="${incCls}">${incomeCell}</td>
+                <td class="${expCls}">${expenseCell}</td>
+            </tr>`;
+        });
+
+        // BARIS TOTAL
+        h+=`<tr class="row-total">
+                <td colspan="3" style="text-align:right;font-weight:900;color:var(--primary);">TOTAL</td>
+                <td class="col-income" style="font-size:13px;">${formatRp(inc)}</td>
+                <td class="col-expense" style="font-size:13px;">${formatRp(exp)}</td>
+            </tr>`;
+
+        // SALDO
+        const saldo=inc-exp;
+        h+=`<tr class="row-total" style="background:#fffbeb!important;">
+                <td colspan="3" style="text-align:right;font-weight:900;color:var(--accent);">SALDO</td>
+                <td colspan="2" style="text-align:right;font-weight:900;font-size:13px;color:${saldo>=0?'#16A34A':'#DC2626'};">${formatRp(saldo)}</td>
+            </tr>`;
+
+        h+=`</tbody></table></div>`;
+    }
+
+    document.getElementById('project-detail-content').innerHTML=h;
+}
 
 // ==================== TRANSAKSI ====================
-function openTransactionModal(pid){document.getElementById('tx-project-id').value=pid;document.getElementById('tx-amount').value='';document.getElementById('tx-desc').value='';document.getElementById('tx-date').value=todayStr();document.querySelectorAll('input[name="tx-type"]')[1].checked=true;openModal('modal-transaction');}
-function saveTransaction(){const pid=document.getElementById('tx-project-id').value,tp=document.querySelector('input[name="tx-type"]:checked').value,am=Number(document.getElementById('tx-amount').value)||0,ds=document.getElementById('tx-desc').value.trim(),dt=document.getElementById('tx-date').value;if(!am){showToast('Jumlah wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let txs=DB.get('transactions');txs.push({id:DB.id(),projectId:pid,type:tp,amount:am,description:ds,date:dt});DB.set('transactions',txs);closeModal('modal-transaction');showToast('Transaksi ditambahkan','success');renderProjectDetail();}
+function openTransactionModal(pid){document.getElementById('tx-project-id').value=pid;document.getElementById('tx-amount').value='';document.getElementById('tx-desc').value='';document.getElementById('tx-date').value=todayStr();document.querySelectorAll('input[name="tx-type"]')[1].checked=true;document.querySelectorAll('input[name="tx-method"]')[0].checked=true;openModal('modal-transaction');}
+function saveTransaction(){const pid=document.getElementById('tx-project-id').value;const tp=document.querySelector('input[name="tx-type"]:checked').value;const mt=document.querySelector('input[name="tx-method"]:checked').value;const am=Number(document.getElementById('tx-amount').value)||0;const ds=document.getElementById('tx-desc').value.trim();const dt=document.getElementById('tx-date').value;if(!am){showToast('Jumlah wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let txs=DB.get('transactions');txs.push({id:DB.id(),projectId:pid,type:tp,method:mt,amount:am,description:ds,date:dt});DB.set('transactions',txs);closeModal('modal-transaction');showToast('Transaksi ditambahkan','success');renderProjectDetail();}
 function deleteTransaction(id){confirmDelete('Hapus transaksi ini?',()=>{DB.set('transactions',DB.get('transactions').filter(t=>t.id!==id));showToast('Transaksi dihapus','success');renderProjectDetail();});}
 
 // ==================== LAPORAN ====================
@@ -489,226 +549,38 @@ function handleImageUpload(input){if(!input.files||!input.files[0])return;const 
 function saveReport(){const pid=document.getElementById('report-project').value,tl=document.getElementById('report-title').value.trim(),ct=document.getElementById('report-content').value.trim(),dt=document.getElementById('report-date').value;if(!tl){showToast('Judul wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let rs=DB.get('reports');rs.push({id:DB.id(),projectId:pid,title:tl,content:ct,image:uploadedImage,date:dt,createdAt:todayStr()});DB.set('reports',rs);closeModal('modal-report');uploadedImage=null;showToast('Laporan disimpan','success');renderReportList();}
 function deleteReport(id){confirmDelete('Hapus laporan ini?',()=>{DB.set('reports',DB.get('reports').filter(r=>r.id!==id));showToast('Laporan dihapus','success');renderReportList();});}
 function viewImageBySrc(src){document.getElementById('image-viewer-img').src=src;openModal('modal-image');}
-// ==================== EXPORT PDF ====================
-function populateExportSelect(){
-    const ps=DB.get('projects');
-    document.getElementById('export-project').innerHTML='<option value="">-- Semua Proyek --</option>'+ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-    document.getElementById('export-from').value='';
-    document.getElementById('export-to').value='';
-}
 
-// Loading overlay
-function showPDFLoading(){
-    let ov=document.getElementById('pdf-loading-overlay');
-    if(!ov){
-        ov=document.createElement('div');
-        ov.id='pdf-loading-overlay';
-        ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;';
-        ov.innerHTML=`
-            <div style="background:white;border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;">
-                <div style="width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:pdfspin .8s linear infinite;margin:0 auto 14px;"></div>
-                <p style="font-weight:800;font-size:15px;color:#1E293B;margin:0 0 4px;">Membuat PDF...</p>
-                <p style="font-size:12px;color:#94A3B8;margin:0;" id="pdf-loading-status">Memulai</p>
-            </div>
-            <style>@keyframes pdfspin{to{transform:rotate(360deg)}}</style>`;
-        document.body.appendChild(ov);
-    }else{ov.style.display='flex';}
-}
+// ==================== EXPORT PDF ====================
+function populateExportSelect(){const ps=DB.get('projects');document.getElementById('export-project').innerHTML='<option value="">-- Semua Proyek --</option>'+ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');document.getElementById('export-from').value='';document.getElementById('export-to').value='';}
+
+function showPDFLoading(){let ov=document.getElementById('pdf-loading-overlay');if(!ov){ov=document.createElement('div');ov.id='pdf-loading-overlay';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML=`<div style="background:white;border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;"><div style="width:44px;height:44px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:pdfspin .8s linear infinite;margin:0 auto 14px;"></div><p style="font-weight:800;font-size:15px;color:#1E293B;margin:0 0 4px;">Membuat PDF...</p><p style="font-size:12px;color:#94A3B8;margin:0;" id="pdf-loading-status">Memulai</p></div><style>@keyframes pdfspin{to{transform:rotate(360deg)}}</style>`;document.body.appendChild(ov);}else{ov.style.display='flex';}}
 function updatePDFStatus(msg){const el=document.getElementById('pdf-loading-status');if(el)el.textContent=msg;}
 function hidePDFLoading(){const ov=document.getElementById('pdf-loading-overlay');if(ov)ov.style.display='none';}
 
-// Cek & load jsPDF dinamically
-async function ensureJSPDF(){
-    // Sudah ada?
-    if(window.jspdf && window.jspdf.jsPDF) return true;
+async function ensureJSPDF(){if(window.jspdf&&window.jspdf.jsPDF)return true;updatePDFStatus('Memuat library PDF...');try{await loadScript('js/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true;}catch(e){}try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true;}catch(e){}return false;}
+async function ensureAutoTable(){if(window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API&&window.jspdf.jsPDF.API.autoTable)return true;try{await loadScript('js/jspdf-autotable.min.js');return true;}catch(e){try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');return true;}catch(e2){return false;}}}
+function loadScript(src){return new Promise((resolve,reject)=>{const existing=document.querySelector('script[src="'+src+'"]');if(existing){resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
 
-    updatePDFStatus('Memuat library PDF...');
+function resizeImgForPDF(base64){return new Promise((resolve)=>{if(!base64||base64.length<100){resolve(null);return;}try{const img=new Image();img.onload=()=>{const maxD=350;let w=img.width,h=img.height;if(w>maxD||h>maxD){if(w>h){h=Math.round(h*maxD/w);w=maxD;}else{w=Math.round(w*maxD/h);h=maxD;}}const c=document.createElement('canvas');c.width=Math.max(1,w);c.height=Math.max(1,h);c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.5));};img.onerror=()=>resolve(null);img.src=base64;}catch(e){resolve(null);}});}
 
-    // Coba load dari lokal dulu
-    try{
-        await loadScript('js/jspdf.umd.min.js');
-        if(window.jspdf && window.jspdf.jsPDF) return true;
-    }catch(e){console.warn('jsPDF lokal gagal:',e);}
+function triggerDownload(blob,filename,mimeType){return new Promise((resolve,reject)=>{try{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.cssText='position:fixed;left:-9999px;top:-9999px;';document.body.appendChild(a);setTimeout(()=>{a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();resolve(true);},3000);},100);}catch(e){try{const reader=new FileReader();reader.onload=()=>{const a2=document.createElement('a');a2.href=reader.result;a2.download=filename;document.body.appendChild(a2);a2.click();setTimeout(()=>a2.remove(),3000);resolve(true);};reader.readAsDataURL(blob);}catch(e2){reject(e2);}}});}
 
-    // Fallback: load dari CDN
-    try{
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-        if(window.jspdf && window.jspdf.jsPDF) return true;
-    }catch(e){console.warn('jsPDF CDN gagal:',e);}
+async function sharePDFBlob(blob,filename){try{const file=new File([blob],filename,{type:'application/pdf'});if(navigator.share){const canShare=navigator.canShare?navigator.canShare({files:[file]}):true;if(canShare){await navigator.share({title:'Laporan OmnarPRO',text:'Laporan keuangan dan harian proyek',files:[file]});return{ok:true,method:'share'};}}}catch(e){if(e.name==='AbortError')return{ok:true,method:'cancelled'};}await triggerDownload(blob,filename,'application/pdf');return{ok:true,method:'download'};}
 
-    return false;
-}
-
-// Cek & load autoTable
-async function ensureAutoTable(){
-    if(typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF && window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable) return true;
-
-    try{
-        await loadScript('js/jspdf-autotable.min.js');
-        return true;
-    }catch(e){
-        try{
-            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
-            return true;
-        }catch(e2){return false;}
-    }
-}
-
-function loadScript(src){
-    return new Promise((resolve,reject)=>{
-        // Cek sudah ada
-        const existing=document.querySelector('script[src="'+src+'"]');
-        if(existing){resolve();return;}
-
-        const s=document.createElement('script');
-        s.src=src;
-        s.onload=resolve;
-        s.onerror=reject;
-        document.head.appendChild(s);
-    });
-}
-
-// Resize gambar ke ukuran kecil untuk PDF
-function resizeImgForPDF(base64){
-    return new Promise((resolve)=>{
-        if(!base64||base64.length<100){resolve(null);return;}
-        try{
-            const img=new Image();
-            img.onload=()=>{
-                const maxD=350; // Ukuran kecil untuk Android
-                let w=img.width,h=img.height;
-                if(w>maxD||h>maxD){
-                    if(w>h){h=Math.round(h*maxD/w);w=maxD;}
-                    else{w=Math.round(w*maxD/h);h=maxD;}
-                }
-                const c=document.createElement('canvas');
-                c.width=Math.max(1,w);c.height=Math.max(1,h);
-                c.getContext('2d').drawImage(img,0,0,w,h);
-                resolve(c.toDataURL('image/jpeg',0.5));
-            };
-            img.onerror=()=>resolve(null);
-            img.src=base64;
-        }catch(e){resolve(null);}
-    });
-}
-
-// Download blob yang kompatibel dengan Android
-function triggerDownload(blob, filename, mimeType){
-    return new Promise((resolve,reject)=>{
-        // Metode 1: Blob URL + anchor click
-        try{
-            const url=URL.createObjectURL(blob);
-            const a=document.createElement('a');
-            a.href=url;
-            a.download=filename;
-            a.style.cssText='position:fixed;left:-9999px;top:-9999px;';
-            document.body.appendChild(a);
-
-            // Timeout untuk Android
-            setTimeout(()=>{
-                a.click();
-                setTimeout(()=>{
-                    URL.revokeObjectURL(url);
-                    a.remove();
-                    resolve(true);
-                },3000);
-            },100);
-            return; // Jangan lanjut ke metode lain
-        }catch(e){
-            console.warn('Download metode 1 gagal:',e);
-        }
-
-        // Metode 2: navigator.msSaveBlob (lama)
-        try{
-            if(navigator.msSaveBlob){
-                navigator.msSaveBlob(blob,filename);
-                resolve(true);
-                return;
-            }
-        }catch(e){}
-
-        // Metode 3: Data URI
-        try{
-            const reader=new FileReader();
-            reader.onload=()=>{
-                const a=document.createElement('a');
-                a.href=reader.result;
-                a.download=filename;
-                a.style.cssText='position:fixed;left:-9999px;';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(()=>a.remove(),3000);
-                resolve(true);
-            };
-            reader.readAsDataURL(blob);
-        }catch(e){
-            reject(e);
-        }
-    });
-}
-
-// Share PDF
-async function sharePDFBlob(blob, filename){
-    try{
-        const file=new File([blob],filename,{type:'application/pdf'});
-
-        if(navigator.share){
-            const canShare=navigator.canShare?navigator.canShare({files:[file]}):true;
-            if(canShare){
-                await navigator.share({
-                    title:'Laporan OmnarPro',
-                    text:'Laporan keuangan dan harian proyek',
-                    files:[file]
-                });
-                return{ok:true,method:'share'};
-            }
-        }
-    }catch(e){
-        if(e.name==='AbortError') return{ok:true,method:'cancelled'};
-        console.warn('Share gagal:',e);
-    }
-
-    // Fallback: download
-    await triggerDownload(blob,filename,'application/pdf');
-    return{ok:true,method:'download'};
-}
-
-// ==================== FUNGSI UTAMA GENERATE PDF ====================
 async function generatePDF(share){
-    const pid=document.getElementById('export-project').value;
-    const fd=document.getElementById('export-from').value;
-    const td=document.getElementById('export-to').value;
-    const tp=document.querySelector('input[name="export-type"]:checked').value;
-
-    const ps=DB.get('projects');
-    const txs=DB.get('transactions');
-    const rps=DB.get('reports');
-
-    let fps=pid?ps.filter(p=>p.id===pid):ps;
-    let ftx=txs.filter(t=>!pid||t.projectId===pid);
-    let frp=rps.filter(r=>!pid||r.projectId===pid);
+    const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;
+    const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports');
+    let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId===pid);
     if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);}
     if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);}
-
     if(!fps.length){showToast('Tidak ada data untuk di-export','error');return;}
 
-    showPDFLoading();
-    updatePDFStatus('Memeriksa library...');
-
-    // Beri waktu UI render
+    showPDFLoading();updatePDFStatus('Memeriksa library...');
     await new Promise(r=>setTimeout(r,300));
 
-    // Pastikan library loaded
     const hasJSPDF=await ensureJSPDF();
-    if(!hasJSPDF){
-        hidePDFLoading();
-        showToast('Library PDF gagal dimuat. Menggunakan export teks.','error');
-        setTimeout(()=>exportAsText(),500);
-        return;
-    }
-
+    if(!hasJSPDF){hidePDFLoading();showToast('Library PDF gagal dimuat. Export teks.','error');setTimeout(()=>exportAsText(),500);return;}
     const hasAT=await ensureAutoTable();
-    // AutoTable tidak wajib, bisa tanpa tabel
 
     updatePDFStatus('Menyiapkan dokumen...');
     await new Promise(r=>setTimeout(r,200));
@@ -717,362 +589,182 @@ async function generatePDF(share){
         const{jsPDF}=window.jspdf;
         const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});
         const pw=doc.internal.pageSize.getWidth();
-        const mg=14;
-        let y=12;
+        const mg=14;let y=12;
 
-        // ---- HEADER FUNGSI ----
         function addHeader(title){
-            doc.setFillColor(20,83,45);
-            doc.rect(0,0,pw,28,'F');
-            doc.setTextColor(255,255,255);
-            doc.setFontSize(16);
-            doc.setFont('helvetica','bold');
-            doc.text('OmnarPro',mg,11);
-            doc.setFontSize(9);
-            doc.setFont('helvetica','normal');
-            doc.text(title,mg,18);
-            doc.setFontSize(7);
-            doc.text(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}),mg,24);
-            doc.setTextColor(0,0,0);
-            y=34;
+            doc.setFillColor(20,83,45);doc.rect(0,0,pw,28,'F');
+            doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');
+            doc.text('OmnarPRO',mg,11);
+            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(title,mg,18);
+            doc.setFontSize(7);doc.text(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}),mg,24);
+            doc.setTextColor(0,0,0);y=34;
         }
+        function ckp(n){if(y+n>278){doc.addPage();y=12;}}
+        function sep(){doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(mg,y,pw-mg,y);y+=3;}
 
-        function checkSpace(needed){
-            if(y+needed>278){
-                doc.addPage();
-                y=12;
-            }
-        }
-
-        function drawSeparator(){
-            doc.setDrawColor(220,220,220);
-            doc.setLineWidth(0.3);
-            doc.line(mg,y,pw-mg,y);
-            y+=3;
-        }
-
-        // ===== LAPORAN KEUANGAN =====
+        // ===== KEUANGAN =====
         if(tp==='finance'||tp==='full'){
-            updatePDFStatus('Membuat laporan keuangan...');
-            await new Promise(r=>setTimeout(r,150));
-
+            updatePDFStatus('Membuat laporan keuangan...');await new Promise(r=>setTimeout(r,150));
             addHeader('Laporan Keuangan Proyek');
 
             for(let i=0;i<fps.length;i++){
-                const p=fps[i];
-                checkSpace(55);
+                const p=fps[i];ckp(55);
 
-                // Nama proyek
-                doc.setFontSize(12);
-                doc.setFont('helvetica','bold');
-                doc.setTextColor(20,83,45);
-                doc.text(p.name,mg,y);
-                y+=4;
+                doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);
+                doc.text(p.name,mg,y);y+=4;
 
-                // Deskripsi
-                if(p.description){
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica','normal');
-                    doc.setTextColor(120,120,120);
-                    const descLines=doc.splitTextToSize(p.description,pw-2*mg);
-                    doc.text(descLines.slice(0,2),mg,y);
-                    y+=descLines.slice(0,2).length*3+2;
-                }
+                if(p.description){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(120,120,120);const dl=doc.splitTextToSize(p.description,pw-2*mg);doc.text(dl.slice(0,2),mg,y);y+=dl.slice(0,2).length*3+2;}
 
-                // Hitung keuangan
                 const pt=ftx.filter(t=>t.projectId===p.id);
-                let inc=0,exp=0;
-                pt.forEach(t=>{
-                    if(t.type==='income')inc+=Number(t.amount)||0;
-                    else exp+=Number(t.amount)||0;
-                });
-                const sisa=p.budget-exp;
-                const pct=p.budget>0?Math.round((exp/p.budget)*100):0;
+                let inc=0,exp=0,cIn=0,cOut=0,tIn=0,tOut=0;
+                pt.forEach(t=>{const a=Number(t.amount)||0;if(t.type==='income'){inc+=a;if(t.method==='transfer')tIn+=a;else cIn+=a;}else{exp+=a;if(t.method==='transfer')tOut+=a;else cOut+=a;}});
+                const sisa=p.budget-exp;const pct=p.budget>0?Math.round((exp/p.budget)*100):0;
 
-                // Kotak ringkasan
-                checkSpace(24);
-                doc.setFillColor(240,248,240);
-                doc.roundedRect(mg,y,pw-2*mg,20,2,2,'F');
+                // Ringkasan utama
+                ckp(24);doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,20,2,2,'F');
+                doc.setFontSize(8);doc.setFont('helvetica','bold');
+                doc.setTextColor(22,101,52);doc.text('Budget: '+formatRp(p.budget),mg+3,y+5);
+                doc.setTextColor(22,163,74);doc.text('Pemasukan: '+formatRp(inc),mg+3,y+10);
+                doc.setTextColor(185,28,28);doc.text('Pengeluaran: '+formatRp(exp),mg+3,y+15);
+                doc.setTextColor(180,83,9);doc.text('Sisa: '+formatRp(sisa),mg+75,y+5);
+                doc.setTextColor(30,41,59);doc.text('Terpakai: '+pct+'%',mg+75,y+10);
+                const st=pct>90?'MELEBIHI BATAS':pct>70?'HATI-HATI':'AMAN';
+                doc.setTextColor(pct>90?185:22,pct>90?28:163,pct>90?28:74);doc.text(st,mg+75,y+15);
+                y+=23;
 
-                doc.setFontSize(8);
-                doc.setFont('helvetica','bold');
+                // Rincian Cash/Transfer
+                ckp(18);doc.setFillColor(245,248,252);doc.roundedRect(mg,y,pw-2*mg,14,2,2,'F');
+                doc.setFontSize(7);doc.setFont('helvetica','bold');
+                doc.setTextColor(5,150,105);doc.text('Cash Masuk: '+formatRp(cIn),mg+3,y+4.5);
+                doc.setTextColor(37,99,235);doc.text('Transfer Masuk: '+formatRp(tIn),mg+55,y+4.5);
+                doc.setTextColor(185,28,28);doc.text('Cash Keluar: '+formatRp(cOut),mg+3,y+9.5);
+                doc.setTextColor(194,65,12);doc.text('Transfer Keluar: '+formatRp(tOut),mg+55,y+9.5);
+                y+=18;
 
-                doc.setTextColor(22,101,52);
-                doc.text('Budget: '+formatRp(p.budget),mg+3,y+5);
-
-                doc.setTextColor(22,163,74);
-                doc.text('Pemasukan: '+formatRp(inc),mg+3,y+10);
-
-                doc.setTextColor(185,28,28);
-                doc.text('Pengeluaran: '+formatRp(exp),mg+3,y+15);
-
-                doc.setTextColor(180,83,9);
-                doc.text('Sisa: '+formatRp(sisa),mg+75,y+5);
-
-                doc.setTextColor(30,41,59);
-                doc.text('Terpakai: '+pct+'%',mg+75,y+10);
-
-                const statusTxt=pct>90?'MELEBIHI BATAS':pct>70?'HATI-HATI':'AMAN';
-                doc.setTextColor(pct>90?185:22,pct>90?28:163,pct>90?28:74);
-                doc.text(statusTxt,mg+75,y+15);
-
-                y+=24;
-
-                // Tabel transaksi
+                // TABEL: Pemasukan & Pengeluaran dipisah
                 if(pt.length>0){
                     const sorted=pt.sort((a,b)=>a.date.localeCompare(b.date));
                     const tdata=sorted.map(t=>[
                         formatDate(t.date),
-                        (t.description||'-').substring(0,35),
-                        t.type==='income'?'Masuk':'Keluar',
-                        (t.type==='income'?'+':'-')+formatRp(t.amount)
+                        (t.description||'-').substring(0,28),
+                        t.method==='transfer'?'TF':'CS',
+                        t.type==='income'?formatRp(t.amount):'',
+                        t.type==='expense'?formatRp(t.amount):''
                     ]);
 
-                    if(hasAT && doc.autoTable){
+                    // Baris total
+                    tdata.push([
+                        '','TOTAL','',formatRp(inc),formatRp(exp)
+                    ]);
+
+                    if(hasAT&&doc.autoTable){
                         doc.autoTable({
                             startY:y,
-                            head:[['Tanggal','Keterangan','Jenis','Jumlah']],
+                            head:[['Tanggal','Keterangan','Metode','Pemasukan','Pengeluaran']],
                             body:tdata,
                             margin:{left:mg,right:mg},
                             styles:{fontSize:7,cellPadding:1.5,overflow:'ellipsize'},
-                            headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7.5},
+                            headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7},
                             alternateRowStyles:{fillColor:[248,250,246]},
                             columnStyles:{
-                                0:{cellWidth:22},
-                                1:{cellWidth:50},
-                                2:{cellWidth:18},
-                                3:{halign:'right',cellWidth:28}
+                                0:{cellWidth:20},
+                                1:{cellWidth:42},
+                                2:{cellWidth:12,halign:'center'},
+                                3:{halign:'right',cellWidth:28},
+                                4:{halign:'right',cellWidth:28}
+                            },
+                            // Style baris terakhir (TOTAL)
+                            didParseCell:function(data){
+                                if(data.row.index===tdata.length-1){
+                                    data.cell.styles.fontStyle='bold';
+                                    data.cell.styles.fillColor=[240,248,240];
+                                    data.cell.styles.fontSize=7.5;
+                                }
                             }
                         });
-                        y=doc.lastAutoTable.finalY+6;
-                    }else{
-                        // Tabel manual tanpa autoTable
-                        doc.setFontSize(7);
-                        doc.setFont('helvetica','bold');
-                        doc.setFillColor(20,83,45);
-                        doc.rect(mg,y,pw-2*mg,5,'F');
-                        doc.setTextColor(255,255,255);
-                        doc.text('Tanggal',mg+1,y+3.5);
-                        doc.text('Keterangan',mg+24,y+3.5);
-                        doc.text('Jenis',mg+76,y+3.5);
-                        doc.text('Jumlah',mg+96,y+3.5);
-                        y+=5;
+                        y=doc.lastAutoTable.finalY+4;
 
-                        doc.setFont('helvetica','normal');
-                        doc.setTextColor(30,41,59);
+                        // Baris SALDO
+                        doc.setFontSize(8);doc.setFont('helvetica','bold');
+                        doc.setFillColor(255,251,235);doc.roundedRect(mg+60,y,pw-2*mg-60,6,1,1,1,1,'F');
+                        doc.setTextColor(180,83,9);doc.text('SALDO',mg+62,y+4);
+                        const saldo=inc-exp;
+                        doc.setTextColor(saldo>=0?22:185,saldo>=0?163:28,saldo>=0?74:28);
+                        doc.text(formatRp(saldo),mg+90,y+4);
+                        y+=10;
+                    }else{
+                        // Tabel manual
+                        doc.setFontSize(7);doc.setFont('helvetica','bold');
+                        doc.setFillColor(20,83,45);doc.rect(mg,y,pw-2*mg,5,'F');
+                        doc.setTextColor(255,255,255);
+                        doc.text('Tanggal',mg+1,y+3.5);doc.text('Keterangan',mg+22,y+3.5);doc.text('Met',mg+66,y+3.5);doc.text('Pemasukan',mg+78,y+3.5);doc.text('Pengeluaran',mg+100,y+3.5);
+                        y+=5;doc.setFont('helvetica','normal');doc.setTextColor(30,41,59);
                         tdata.forEach((row,idx)=>{
-                            checkSpace(5);
-                            if(idx%2===0){doc.setFillColor(248,250,246);doc.rect(mg,y,pw-2*mg,4.5,'F');}
-                            doc.text(row[0],mg+1,y+3);
-                            doc.text(row[1],mg+24,y+3);
-                            doc.text(row[2],mg+76,y+3);
-                            doc.text(row[3],mg+96,y+3);
+                            ckp(5);
+                            if(idx===tdata.length-1){doc.setFillColor(240,248,240);doc.rect(mg,y,pw-2*mg,4.5,'F');doc.setFont('helvetica','bold');}
+                            else if(idx%2===0){doc.setFillColor(248,250,246);doc.rect(mg,y,pw-2*mg,4.5,'F');}
+                            doc.text(row[0],mg+1,y+3);doc.text(row[1],mg+22,y+3);doc.text(row[2],mg+66,y+3);doc.text(row[3],mg+78,y+3);doc.text(row[4],mg+100,y+3);
+                            doc.setFont('helvetica','normal');
                             y+=4.5;
                         });
                         y+=4;
                     }
                 }else{
-                    doc.setFontSize(8);
-                    doc.setTextColor(160,160,160);
-                    doc.text('Belum ada transaksi untuk proyek ini.',mg,y+3);
-                    y+=8;
+                    doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Belum ada transaksi.',mg,y+3);y+=8;
                 }
-
-                drawSeparator();
-                y+=2;
+                sep();y+=2;
             }
         }
 
-        // ===== LAPORAN HARIAN =====
+        // ===== HARIAN =====
         if(tp==='daily'||tp==='full'){
             if(tp==='full'){doc.addPage();y=12;}
-
-            updatePDFStatus('Membuat laporan harian...');
-            await new Promise(r=>setTimeout(r,150));
-
+            updatePDFStatus('Membuat laporan harian...');await new Promise(r=>setTimeout(r,150));
             addHeader('Laporan Harian Proyek');
-
-            if(!frp.length){
-                doc.setFontSize(9);
-                doc.setTextColor(160,160,160);
-                doc.text('Tidak ada laporan dalam periode ini.',mg,y+5);
-            }
-
-            // Kelompokkan per tanggal
-            const grouped={};
-            frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
-                if(!grouped[r.date])grouped[r.date]=[];
-                grouped[r.date].push(r);
-            });
-
-            const sortedDates=Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
-
-            for(let di=0;di<sortedDates.length;di++){
-                const dateKey=sortedDates[di];
-                const dateReports=grouped[dateKey];
-
-                checkSpace(20);
-
-                // Header tanggal
-                doc.setFillColor(217,119,6);
-                doc.roundedRect(mg,y,pw-2*mg,6,1.5,1.5,'F');
-                doc.setFontSize(8);
-                doc.setFont('helvetica','bold');
-                doc.setTextColor(255,255,255);
-                doc.text(formatDateFull(dateKey),mg+2,y+4);
-                doc.setTextColor(0,0,0);
-                y+=9;
-
-                for(let ri=0;ri<dateReports.length;ri++){
-                    const r=dateReports[ri];
-                    checkSpace(25);
-
-                    const pj=ps.find(p=>p.id===r.projectId);
-
-                    // Judul laporan
-                    doc.setFontSize(9.5);
-                    doc.setFont('helvetica','bold');
-                    doc.setTextColor(30,41,59);
-                    doc.text(r.title,mg,y);
-                    y+=3.5;
-
-                    // Proyek
-                    doc.setFontSize(7.5);
-                    doc.setFont('helvetica','normal');
-                    doc.setTextColor(217,119,6);
-                    doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);
-                    y+=3.5;
-
-                    // Isi
-                    if(r.content){
-                        doc.setTextColor(60,60,60);
-                        const lines=doc.splitTextToSize(r.content.substring(0,400),pw-2*mg);
-                        doc.text(lines.slice(0,10),mg,y);
-                        y+=lines.slice(0,10).length*3+2;
-                    }
-
-                    // Gambar
-                    if(r.image){
-                        updatePDFStatus('Memproses gambar '+(ri+1)+'/'+dateReports.length+'...');
-                        await new Promise(r=>setTimeout(r,50));
-
-                        try{
-                            const small=await resizeImgForPDF(r.image);
-                            if(small){
-                                checkSpace(40);
-                                doc.addImage(small,'JPEG',mg,y,45,34);
-                                y+=38;
-                            }
-                        }catch(imgErr){
-                            console.warn('Gambah gagal:',imgErr);
-                            doc.setFontSize(7);
-                            doc.setTextColor(180,180,180);
-                            doc.text('[Gambar tidak dapat ditampilkan]',mg,y+3);
-                            y+=6;
-                        }
-                    }
-
-                    drawSeparator();
-                }
-                y+=3;
+            if(!frp.length){doc.setFontSize(9);doc.setTextColor(160,160,160);doc.text('Tidak ada laporan dalam periode ini.',mg,y+5);}
+            const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});
+            const sd=Object.keys(gp).sort((a,b)=>b.localeCompare(a));
+            for(let di=0;di<sd.length;di++){
+                const dk=sd[di],dr=gp[dk];ckp(20);
+                doc.setFillColor(217,119,6);doc.roundedRect(mg,y,pw-2*mg,6,1.5,1.5,'F');
+                doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+                doc.text(formatDateFull(dk),mg+2,y+4);doc.setTextColor(0,0,0);y+=9;
+                for(let ri=0;ri<dr.length;ri++){
+                    const r=dr[ri];ckp(25);const pj=ps.find(p=>p.id===r.projectId);
+                    doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);doc.text(r.title,mg,y);y+=3.5;
+                    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(217,119,6);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=3.5;
+                    if(r.content){doc.setTextColor(60,60,60);const ln=doc.splitTextToSize(r.content.substring(0,400),pw-2*mg);doc.text(ln.slice(0,10),mg,y);y+=ln.slice(0,10).length*3+2;}
+                    if(r.image){updatePDFStatus('Memproses gambar...');await new Promise(r=>setTimeout(r,50));try{const sm=await resizeImgForPDF(r.image);if(sm){ckp(40);doc.addImage(sm,'JPEG',mg,y,45,34);y+=38;}}catch(e){doc.setFontSize(7);doc.setTextColor(180,180,180);doc.text('[Gambar tidak ditampilkan]',mg,y+3);y+=6;}}
+                    sep();
+                }y+=3;
             }
         }
 
-        // ===== FOOTER SETIAP HALAMAN =====
-        updatePDFStatus('Menyelesaikan...');
-        await new Promise(r=>setTimeout(r,100));
-
+        updatePDFStatus('Menyelesaikan...');await new Promise(r=>setTimeout(r,100));
         const totalP=doc.internal.getNumberOfPages();
-        for(let i=1;i<=totalP;i++){
-            doc.setPage(i);
-            doc.setFontSize(6.5);
-            doc.setTextColor(180,180,180);
-            doc.text('OmnarPro - Laporan otomatis | Halaman '+i+'/'+totalP,mg,291);
-        }
+        for(let i=1;i<=totalP;i++){doc.setPage(i);doc.setFontSize(6.5);doc.setTextColor(180,180,180);doc.text('OmnarPRO - Laporan otomatis | Halaman '+i+'/'+totalP,mg,291);}
 
-        // ===== OUTPUT =====
-        updatePDFStatus(share?'Membuka menu kirim...':'Mengunduh...');
-        await new Promise(r=>setTimeout(r,400));
+        updatePDFStatus(share?'Membuka menu kirim...':'Mengunduh...');await new Promise(r=>setTimeout(r,400));hidePDFLoading();
 
-        hidePDFLoading();
-
-        const filename='Laporan-OmnarPro-'+todayStr()+'.pdf';
-
-        // Generate blob
+        const fn='Laporan-OmnarPRO-'+todayStr()+'.pdf';
         let pdfBlob;
-        try{
-            pdfBlob=doc.output('blob');
-        }catch(e1){
-            try{
-                // Fallback: output arraybuffer lalu buat blob manual
-                const ab=doc.output('arraybuffer');
-                pdfBlob=new Blob([ab],{type:'application/pdf'});
-            }catch(e2){
-                try{
-                    const base64=doc.output('datauristring');
-                    // Konversi data URI ke blob
-                    const byteString=atob(base64.split(',')[1]);
-                    const ab2=new ArrayBuffer(byteString.length);
-                    const ia=new Uint8Array(ab2);
-                    for(let j=0;j<byteString.length;j++)ia[j]=byteString.charCodeAt(j);
-                    pdfBlob=new Blob([ab2],{type:'application/pdf'});
-                }catch(e3){
-                    hidePDFLoading();
-                    showToast('Gagal membuat file PDF','error');
-                    setTimeout(()=>exportAsText(),500);
-                    return;
-                }
-            }
-        }
+        try{pdfBlob=doc.output('blob');}catch(e1){try{const ab=doc.output('arraybuffer');pdfBlob=new Blob([ab],{type:'application/pdf'});}catch(e2){try{const b64=doc.output('datauristring');const bs=atob(b64.split(',')[1]);const ab2=new ArrayBuffer(bs.length);const ia=new Uint8Array(ab2);for(let j=0;j<bs.length;j++)ia[j]=bs.charCodeAt(j);pdfBlob=new Blob([ab2],{type:'application/pdf'});}catch(e3){hidePDFLoading();showToast('Gagal membuat PDF','error');setTimeout(()=>exportAsText(),500);return;}}}
+        if(!pdfBlob||pdfBlob.size<100){hidePDFLoading();showToast('File PDF tidak valid','error');setTimeout(()=>exportAsText(),500);return;}
 
-        // Cek ukuran blob
-        if(!pdfBlob||pdfBlob.size<100){
-            hidePDFLoading();
-            showToast('File PDF terlalu kecil/tidak valid','error');
-            setTimeout(()=>exportAsText(),500);
-            return;
-        }
-
-        if(share){
-            const result=await sharePDFBlob(pdfBlob,filename);
-            if(result.method==='share'){
-                showToast('PDF berhasil dikirim!','success');
-            }else{
-                showToast('PDF diunduh (share tidak tersedia)','info');
-            }
-        }else{
-            try{
-                await triggerDownload(pdfBlob,filename,'application/pdf');
-                showToast('PDF berhasil diunduh! ('+Math.round(pdfBlob.size/1024)+' KB)','success');
-            }catch(e){
-                showToast('Gagal mengunduh PDF','error');
-                setTimeout(()=>exportAsText(),500);
-            }
-        }
-
-    }catch(e){
-        console.error('PDF Error:',e);
-        hidePDFLoading();
-        showToast('Gagal membuat PDF: '+(e.message||'Unknown error').substring(0,50),'error');
-        setTimeout(()=>exportAsText(),600);
-    }
+        if(share){const result=await sharePDFBlob(pdfBlob,fn);showToast(result.method==='share'?'PDF berhasil dikirim!':'PDF diunduh',result.method==='share'?'success':'info');}
+        else{try{await triggerDownload(pdfBlob,fn,'application/pdf');showToast('PDF berhasil diunduh! ('+Math.round(pdfBlob.size/1024)+' KB)','success');}catch(e){showToast('Gagal mengunduh PDF','error');setTimeout(()=>exportAsText(),500);}}
+    }catch(e){console.error('PDF Error:',e);hidePDFLoading();showToast('Gagal membuat PDF: '+(e.message||'Error').substring(0,50),'error');setTimeout(()=>exportAsText(),600);}
 }
 
-// ==================== EXPORT TEKS FALLBACK ====================
+// ==================== EXPORT TEKS ====================
 function exportAsText(){
-    const pid=document.getElementById('export-project').value;
-    const fd=document.getElementById('export-from').value;
-    const td=document.getElementById('export-to').value;
-    const tp=document.querySelector('input[name="export-type"]:checked').value;
-
+    const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;
     const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports');
-    let fps=pid?ps.filter(p=>p.id===pid):ps;
-    let ftx=txs.filter(t=>!pid||t.projectId===pid);
-    let frp=rps.filter(r=>!pid||r.projectId===pid);
+    let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId===pid);
     if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);}
     if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);}
 
-    let t='=== OmnarPro - LAPORAN ===\n';
+    let t='=== OMNARPRO - LAPORAN ===\n';
     t+='Dicetak: '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+'\n\n';
 
     if(tp==='finance'||tp==='full'){
@@ -1082,22 +774,25 @@ function exportAsText(){
             let ic=0,ex=0;
             pt.forEach(tx=>{if(tx.type==='income')ic+=Number(tx.amount)||0;else ex+=Number(tx.amount)||0;});
             t+='>> '+p.name.toUpperCase()+'\n';
-            t+='   '+((p.description||'-'))+'\n';
+            t+='   '+(p.description||'-')+'\n';
             t+='   Budget     : '+formatRp(p.budget)+'\n';
             t+='   Pemasukan  : '+formatRp(ic)+'\n';
             t+='   Pengeluaran: '+formatRp(ex)+'\n';
             t+='   Sisa       : '+formatRp(p.budget-ex)+'\n';
-            t+='   Terpakai   : '+(p.budget>0?Math.round((ex/p.budget)*100):0)+'%\n';
             if(pt.length>0){
-                t+='\n   Tanggal       Keterangan           Jenis      Jumlah\n';
-                t+='   ----------    ----------------    ------    ---------------\n';
+                t+='\n   Tanggal       Keterangan           Metode   Pemasukan         Pengeluaran\n';
+                t+='   ----------    ----------------    ------   ----------        ------------\n';
                 pt.sort((a,b)=>a.date.localeCompare(b.date)).forEach(tx=>{
                     const d=formatDate(tx.date).padEnd(14);
                     const desc=(tx.description||'-').substring(0,18).padEnd(20);
-                    const j=(tx.type==='income'?'Masuk':'Keluar').padEnd(9);
-                    const amt=(tx.type==='income'?'+':'-')+formatRp(tx.amount);
-                    t+='   '+d+desc+j+amt+'\n';
+                    const m=(tx.method==='transfer'?'TF':'CS').padEnd(8);
+                    const inc=tx.type==='income'?formatRp(tx.amount).padEnd(18):'-'.padEnd(18);
+                    const exp=tx.type==='expense'?formatRp(tx.amount):'-';
+                    t+='   '+d+desc+m+inc+exp+'\n';
                 });
+                t+='   '+''.padEnd(44)+'TOTAL   '+formatRp(ic).padEnd(18)+formatRp(ex)+'\n';
+                const saldo=ic-ex;
+                t+='   '+''.padEnd(44)+'SALDO   '+(saldo>=0?'+':'')+formatRp(saldo)+'\n';
             }
             t+='\n';
         });
@@ -1105,50 +800,54 @@ function exportAsText(){
 
     if(tp==='daily'||tp==='full'){
         t+='--- LAPORAN HARIAN ---\n\n';
-        const gp={};
-        frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});
+        const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});
         Object.keys(gp).sort((a,b)=>b.localeCompare(a)).forEach(d=>{
             t+='>> '+formatDateFull(d)+'\n';
-            gp[d].forEach(r=>{
-                const pj=ps.find(p=>p.id===r.projectId);
-                t+='   - '+r.title+' ['+(pj?pj.name:'-')+']\n';
-                t+='     '+(r.content||'-').replace(/\n/g,'\n     ')+'\n';
-                if(r.image) t+='     [Terlampir foto]\n';
-            });
+            gp[d].forEach(r=>{const pj=ps.find(p=>p.id===r.projectId);t+='   - '+r.title+' ['+(pj?pj.name:'-')+']\n';t+='     '+(r.content||'-').replace(/\n/g,'\n     ')+'\n';if(r.image)t+='     [Terlampir foto]\n';});
             t+='\n';
         });
     }
 
-    t+='\n=== Dicetak oleh OmnarPro ===\n';
+    t+='\n=== Dicetak oleh OmnarPRO ===\n';
 
-    try{
-        const blob=new Blob([t],{type:'text/plain;charset=utf-8'});
-        triggerDownload(blob,'Laporan-OmnarPro-'+todayStr()+'.txt','text/plain');
-        showToast('Laporan teks berhasil diunduh!','success');
-    }catch(e){
-        showToast('Gagal export','error');
-    }
+    try{const blob=new Blob([t],{type:'text/plain;charset=utf-8'});triggerDownload(blob,'Laporan-OmnarPRO-'+todayStr()+'.txt','text/plain');showToast('Laporan teks berhasil diunduh!','success');}catch(e){showToast('Gagal export','error');}
 }
-
-
-
-
 
 // ==================== PANDUAN INSTALL ====================
 function renderInstallGuide(){
     const isSA=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
     const g=document.getElementById('install-guide');
-    if(isSA){g.innerHTML='<div class="bg-green-50 rounded-xl p-4 text-center"><i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i><p class="font-bold text-sm text-green-800">OmnarPro Sudah Terinstall</p><p class="text-xs text-green-600 mt-1">Berjalan sebagai standalone app</p></div>';return;}
+    if(isSA){g.innerHTML='<div class="bg-green-50 rounded-xl p-4 text-center"><i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i><p class="font-bold text-sm text-green-800">OmnarPRO Sudah Terinstall</p></div>';return;}
     g.innerHTML=`<div class="space-y-4 mt-2">
-    <div class="flex gap-3 items-start"><div class="step-num">1</div><div><p class="font-bold text-sm">Host di Web Server HTTPS</p><p class="text-xs text-gray-500 mt-0.5">Upload semua file ke hosting (GitHub Pages, Netlify, Vercel)</p></div></div>
-    <div class="flex gap-3 items-start"><div class="step-num">2</div><div><p class="font-bold text-sm">Buka di Chrome Android</p><p class="text-xs text-gray-500 mt-0.5">Akses URL → muncul banner install, atau tap menu ⋮ → "Install app"</p></div></div>
-    <div class="flex gap-3 items-start"><div class="step-num">3</div><div><p class="font-bold text-sm">Siap! Akses dari Home Screen</p><p class="text-xs text-gray-500 mt-0.5">App berjalan fullscreen, bisa offline, seperti native app</p></div></div>
-    <div class="bg-amber-50 rounded-xl p-3 mt-3" style="border:1px solid #fde68a;"><p class="text-xs font-bold text-amber-800 mb-1"><i class="fas fa-tools mr-1"></i> Cara Cepat: GitHub Pages</p><ol class="text-xs text-amber-700 space-y-1 pl-4 list-decimal"><li>Buat repo baru di GitHub</li><li>Upload semua file proyek</li><li>Settings → Pages → Source: main</li><li>Buka <code>username.github.io/repo</code> di Chrome</li><li>Tap menu → "Install app"</li></ol></div>
-    <div class="bg-blue-50 rounded-xl p-3" style="border:1px solid #bfdbfe;"><p class="text-xs font-bold text-blue-800 mb-1"><i class="fas fa-cube mr-1"></i> Bikin APK (Opsional)</p><p class="text-xs text-blue-700">Gunakan <strong>PWABuilder.com</strong> untuk konversi ke APK. Atau gunakan <strong>Capacitor</strong> untuk wrapper native.</p></div></div>`;
+    <div class="flex gap-3 items-start"><div class="step-num">1</div><div><p class="font-bold text-sm">Host di Web Server HTTPS</p><p class="text-xs text-gray-500">Upload ke GitHub Pages, Netlify, atau Vercel</p></div></div>
+    <div class="flex gap-3 items-start"><div class="step-num">2</div><div><p class="font-bold text-sm">Buka di Chrome Android</p><p class="text-xs text-gray-500">Tap menu → "Install app"</p></div></div>
+    <div class="flex gap-3 items-start"><div class="step-num">3</div><div><p class="font-bold text-sm">Siap! Akses dari Home Screen</p><p class="text-xs text-gray-500">Berjalan fullscreen & offline</p></div></div>
+    <div class="bg-amber-50 rounded-xl p-3" style="border:1px solid #fde68a;"><p class="text-xs font-bold text-amber-800 mb-1"><i class="fas fa-tools mr-1"></i> GitHub Pages</p><ol class="text-xs text-amber-700 space-y-1 pl-4 list-decimal"><li>Buat repo baru di GitHub</li><li>Upload semua file</li><li>Settings → Pages → Source: main</li><li>Buka URL di Chrome Android</li><li>Tap menu → "Install app"</li></ol></div></div>`;
 }
 
 // ==================== INIT ====================
 window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash').classList.add('fade-out');document.getElementById('app').style.opacity='1';setTimeout(()=>{document.getElementById('splash').style.display='none';},500);},1200);renderDashboard();if(localStorage.getItem('pk_install_dismissed')==='1')document.getElementById('install-banner').classList.add('hide');});
+// ==================== OFFLINE DETECTION ====================
+function updateOnlineStatus(){
+    const bar=document.getElementById('offline-bar');
+    if(!navigator.onLine){
+        bar.classList.add('show');
+    }else{
+        bar.classList.remove('show');
+    }
+}
+window.addEventListener('online',()=>{
+    updateOnlineStatus();
+    showToast('Kembali online!','success');
+});
+window.addEventListener('offline',()=>{
+    updateOnlineStatus();
+    showToast('Mode offline — data tetap tersimpan','info');
+});
+// Cek status awal
+if(!navigator.onLine){
+    setTimeout(()=>updateOnlineStatus(),1500);
+}
 </script>
 </body>
 </html>

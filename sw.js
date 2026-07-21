@@ -1,207 +1,176 @@
-// =============================================
-// OmnarPro Service Worker v3 - PWABuilder Ready
-// =============================================
+// ============================================
+// OmnarPRO - Service Worker (Offline Support)
+// ============================================
 
-const CACHE_NAME = 'OmnarPro-v3';
-const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 hari
+const CACHE_NAME = 'omnarpro-offline-v2';
 
-// File utama yang WAJIB di-cache (app shell)
-const APP_SHELL = [
+// Semua file yang harus di-cache
+const LOCAL_ASSETS = [
     './',
     './index.html',
-    './manifest.json'
-];
-
-// File tambahan (di-cache tapi gagal 1 tidak menghentikan install)
-const ASSETS_SECONDARY = [
     './css/fontawesome.min.css',
     './css/plus-jakarta.css',
     './js/tailwind.min.js',
     './js/jspdf.umd.min.js',
     './js/jspdf-autotable.min.js',
     './webfonts/fa-solid-900.woff2',
+    './webfonts/fa-solid-900.ttf',
     './webfonts/fa-regular-400.woff2',
+    './webfonts/fa-regular-400.ttf',
     './webfonts/fa-brands-400.woff2',
+    './webfonts/fa-brands-400.ttf',
+    './fonts/PlusJakartaSans-Light.woff2',
     './fonts/PlusJakartaSans-Regular.woff2',
-    './fonts/PlusJakartaSans-Bold.woff2',
-    './fonts/PlusJakartaSans-ExtraBold.woff2',
-    './fonts/PlusJakartaSans-Black.woff2',
     './fonts/PlusJakartaSans-Medium.woff2',
     './fonts/PlusJakartaSans-SemiBold.woff2',
-    './fonts/PlusJakartaSans-Light.woff2'
+    './fonts/PlusJakartaSans-Bold.woff2',
+    './fonts/PlusJakartaSans-ExtraBold.woff2',
+    './fonts/PlusJakartaSans-Black.woff2'
 ];
 
-// Icon yang di-cache saat pertama kali diakses
-const ICON_PATHS = [
-    './icons/icon-72.png',
-    './icons/icon-96.png',
-    './icons/icon-128.png',
-    './icons/icon-144.png',
-    './icons/icon-152.png',
-    './icons/icon-192.png',
-    './icons/icon-384.png',
-    './icons/icon-512.png'
+// CDN fallback URLs — di-cache saat pertama kali diakses
+const CDN_PATTERNS = [
+    'cdn.tailwindcss.com',
+    'cdnjs.cloudflare.com',
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'cdn.jsdelivr.net'
 ];
 
-// =============================================
-// INSTALL — Cache app shell, lalu secondary secara individual
-// =============================================
+// ============================================
+// INSTALL — Cache semua aset lokal
+// ============================================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v3...');
-
+    console.log('[SW] Installing...');
     event.waitUntil(
-        // Step 1: Cache APP_SHELL (wajib berhasil)
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[SW] Caching app shell...');
-                return cache.addAll(APP_SHELL);
-            })
-            .then(() => {
-                // Step 2: Cache secondary (gagal 1 tidak masalah)
-                return caches.open(CACHE_NAME).then(cache => {
-                    return Promise.allSettled(
-                        ASSETS_SECONDARY.map(url =>
-                            cache.match(url).then(cached => {
-                                if (!cached) {
-                                    return fetch(url).then(response => {
-                                        if (response && response.status === 200) {
-                                            return cache.put(url, response);
-                                        }
-                                    }).catch(() => {
-                                        console.warn('[SW] Gagal cache:', url);
-                                    });
-                                }
-                            })
-                        )
-                    );
-                });
-            })
-            .then(() => {
-                // Step 3: Cache ikon
-                return caches.open(CACHE_NAME).then(cache => {
-                    return Promise.allSettled(
-                        ICON_PATHS.map(url =>
-                            cache.match(url).then(cached => {
-                                if (!cached) {
-                                    return fetch(url).then(response => {
-                                        if (response && response.status === 200) {
-                                            return cache.put(url, response);
-                                        }
-                                    }).catch(() => {
-                                        console.warn('[SW] Gagal cache icon:', url);
-                                    });
-                                }
-                            })
-                        )
-                    );
-                });
-            })
-            .then(() => {
-                console.log('[SW] Install selesai');
-                return self.skipWaiting();
-            })
-            .catch(err => {
-                console.error('[SW] Install error:', err);
-                // Tetap skip waiting meskipun ada error
-                self.skipWaiting();
-            })
-    );
-});
-
-// =============================================
-// ACTIVATE — Hapus cache lama
-// =============================================
-self.addEventListener('activate', event => {
-    console.log('[SW] Activating v3...');
-    event.waitUntil(
-        caches.keys()
-            .then(keys => {
-                return Promise.all(
-                    keys
-                        .filter(key => key !== CACHE_NAME)
-                        .map(key => {
-                            console.log('[SW] Menghapus cache lama:', key);
-                            return caches.delete(key);
+                console.log('[SW] Caching local assets...');
+                // Cache file lokal satu per satu agar satu gagal tidak menggagalkan semua
+                return Promise.allSettled(
+                    LOCAL_ASSETS.map(url =>
+                        cache.add(url).catch(err => {
+                            console.warn('[SW] Gagal cache:', url, err.message);
                         })
+                    )
                 );
             })
             .then(() => {
-                console.log('[SW] Aktif');
-                return self.clients.claim();
+                console.log('[SW] Install selesai, skip waiting');
+                return self.skipWaiting();
             })
     );
 });
 
-// =============================================
-// FETCH — Strategy: Cache First, Network Fallback
-// + Periodic background update
-// =============================================
+// ============================================
+// ACTIVATE — Hapus cache lama
+// ============================================
+self.addEventListener('activate', event => {
+    console.log('[SW] Activating...');
+    event.waitUntil(
+        caches.keys().then(keys => {
+            return Promise.all(
+                keys
+                    .filter(key => key !== CACHE_NAME)
+                    .map(key => {
+                        console.log('[SW] Hapus cache lama:', key);
+                        return caches.delete(key);
+                    })
+            );
+        }).then(() => {
+            console.log('[SW] Aktif, mengambil kontrol');
+            return self.clients.claim();
+        })
+    );
+});
+
+// ============================================
+// FETCH — Strategi cache
+// ============================================
 self.addEventListener('fetch', event => {
-    // Skip non-GET
+    // Hanya proses GET request
     if (event.request.method !== 'GET') return;
 
     const url = new URL(event.request.url);
 
-    // Skip chrome-extension, blob, dll
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+    // Jangan cache chrome-extension, data:, blob:, dll
+    if (!url.protocol.startsWith('http')) return;
 
-    event.respondWith(
-        caches.match(event.request)
-            .then(cached => {
-                if (cached) {
-                    // Return cache, tapi update di background (stale-while-revalidate)
+    // Cek apakah request ke CDN
+    const isCDN = CDN_PATTERNS.some(pattern => url.hostname.includes(pattern));
+
+    // Cek apakah request ke server yang sama (aset lokal)
+    const isLocal = url.origin === self.location.origin;
+
+    if (isCDN) {
+        // CDN: Stale-While-Revalidate
+        // Tampilkan dari cache dulu, update di background
+        event.respondWith(
+            caches.open(CACHE_NAME).then(cache => {
+                return cache.match(event.request).then(cached => {
                     const fetchPromise = fetch(event.request)
                         .then(response => {
                             if (response && response.status === 200) {
-                                const clone = response.clone();
-                                caches.open(CACHE_NAME).then(cache => {
-                                    cache.put(event.request, clone);
-                                });
+                                cache.put(event.request, response.clone());
                             }
                             return response;
                         })
-                        .catch(() => {
-                            // Network gagal, cache sudah di-return
-                        });
+                        .catch(() => cached);
 
-                    // Return cache dulu, fetch update di background
+                    return cached || fetchPromise;
+                });
+            })
+        );
+    } else if (isLocal) {
+        // Aset lokal: Cache-First (prioritaskan cache)
+        event.respondWith(
+            caches.match(event.request).then(cached => {
+                if (cached) {
+                    // Ada di cache, pakai cache
+                    // Update cache di background untuk versi baru
+                    fetch(event.request).then(response => {
+                        if (response && response.status === 200) {
+                            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
+                        }
+                    }).catch(() => {}); // Abaikan error background update
                     return cached;
                 }
 
-                // Tidak ada di cache — fetch dari network
+                // Tidak di cache, fetch dari network
                 return fetch(event.request)
                     .then(response => {
-                        // Cache response yang berhasil
                         if (response && response.status === 200) {
                             const clone = response.clone();
-                            caches.open(CACHE_NAME).then(cache => {
-                                cache.put(event.request, clone);
-                            });
+                            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
                         }
                         return response;
                     })
                     .catch(() => {
-                        // Network juga gagal — fallback ke index.html untuk navigasi
+                        // Network gagal & tidak di cache
+                        // Jika navigasi, tampilkan index.html dari cache
                         if (event.request.mode === 'navigate') {
                             return caches.match('./index.html');
                         }
-                        // Return offline response untuk resource lain
-                        return new Response('Offline', {
-                            status: 503,
-                            statusText: 'Service Unavailable'
+                        // Return response kosong untuk request lain
+                        return new Response('', {
+                            status: 408,
+                            statusText: 'Offline - Resource not cached'
                         });
                     });
             })
-    );
+        );
+    }
+    // Request ke domain lain yang bukan CDN: biarkan normal (tidak di-cache)
 });
 
-// =============================================
-// MESSAGE — Handle update dari app
-// =============================================
+// ============================================
+// MESSAGE — Handle pesan dari main app
+// ============================================
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
+
     if (event.data && event.data.type === 'CLEAR_CACHE') {
         caches.delete(CACHE_NAME).then(() => {
             console.log('[SW] Cache dibersihkan');
