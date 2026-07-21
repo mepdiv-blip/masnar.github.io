@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OmnarPRO - Keuangan & Laporan</title>
+    <title>OmnarPRO</title>
     <meta name="theme-color" content="#14532D">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,775 +16,521 @@
     <script src="js/tailwind.min.js"></script>
     <script src="js/jspdf.umd.min.js"></script>
     <script src="js/jspdf-autotable.min.js"></script>
-
     <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                fontFamily: { jakarta: ['Plus Jakarta Sans','sans-serif'] }
-            }
-        }
-    }
+    tailwind.config={theme:{extend:{fontFamily:{jakarta:['Plus Jakarta Sans','sans-serif']}}}}
     </script>
     <style>
-        :root {
-            --primary: #14532D;
-            --primary-l: #166534;
-            --primary-ll: #22C55E;
-            --accent: #D97706;
-            --accent-l: #F59E0B;
-            --bg: #F1F5F0;
-            --surface: #FFFFFF;
-            --text: #1E293B;
-            --muted: #64748B;
-            --danger: #DC2626;
-            --success: #16A34A;
-            --radius: 16px;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100dvh; font-size: 15px; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        :root{--pri:#14532D;--pri2:#166534;--pri3:#22C55E;--acc:#D97706;--acc2:#F59E0B;--bg:#F1F5F0;--sf:#FFF;--tx:#1E293B;--mt:#64748B;--dng:#DC2626;--suc:#16A34A;--rad:16px}
+        *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--tx);margin:0;overflow:hidden;height:100dvh;font-size:15px}
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
 
-        .view { display: none; height: calc(100dvh - 78px); overflow-y: auto; padding: 18px 16px 30px; scroll-behavior: smooth; }
-        .view.active { display: block; animation: fadeUp .3s ease; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
-        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-        @keyframes bounceIn { 0% { transform: scale(.3); opacity: 0 } 50% { transform: scale(1.05) } 70% { transform: scale(.9) } 100% { transform: scale(1); opacity: 1 } }
-        @keyframes pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.03) } }
+        .view{display:none;height:calc(100dvh - 78px);overflow-y:auto;padding:18px 16px 30px}
+        .view.active{display:block;animation:fadeUp .3s ease}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        @keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+        @keyframes spin{to{transform:rotate(360deg)}}
 
-        .card { background: var(--surface); border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
-        .card:active { transform: scale(.985); }
-        .card-accent { border-left: 5px solid var(--accent); }
+        .card{background:var(--sf);border-radius:var(--rad);box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .15s}
+        .card:active{transform:scale(.985)}
+        .card-acc{border-left:5px solid var(--acc)}
 
-        .stat-card { position: relative; overflow: hidden; }
-        .stat-card::after { content: ''; position: absolute; bottom: -10px; right: -10px; width: 60px; height: 60px; border-radius: 50%; opacity: .07; }
-        .stat-card.green::after { background: var(--success); }
-        .stat-card.amber::after { background: var(--accent); }
-        .stat-card.red::after { background: var(--danger); }
-        .stat-card.teal::after { background: var(--primary-ll); }
+        .stcard{position:relative;overflow:hidden}
+        .stcard::after{content:'';position:absolute;bottom:-10px;right:-10px;width:60px;height:60px;border-radius:50%;opacity:.07}
 
-        /* Bottom Nav - lebih besar */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid #e2e8f0; display: flex; z-index: 100; padding: 4px 0 env(safe-area-inset-bottom,6px); box-shadow: 0 -2px 12px rgba(0,0,0,.06); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0 4px; cursor: pointer; transition: all .2s; position: relative; }
-        .nav-item i { font-size: 20px; color: var(--muted); transition: all .2s; }
-        .nav-item span { font-size: 9px; font-weight: 700; color: var(--muted); margin-top: 3px; transition: all .2s; letter-spacing: .3px; }
-        .nav-item.active i { color: var(--primary-ll); transform: scale(1.1); }
-        .nav-item.active span { color: var(--primary-ll); font-weight: 800; }
-        .nav-item.active::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 30px; height: 3px; background: var(--primary-ll); border-radius: 0 0 4px 4px; }
+        .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid #e2e8f0;display:flex;z-index:100;padding:4px 0 env(safe-area-inset-bottom,6px);box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+        .bnav-i{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 4px;cursor:pointer;position:relative;transition:all .2s}
+        .bnav-i i{font-size:20px;color:var(--mt);transition:all .2s}
+        .bnav-i span{font-size:9px;font-weight:700;color:var(--mt);margin-top:3px;transition:all .2s}
+        .bnav-i.on i{color:var(--pri3);transform:scale(1.1)}
+        .bnav-i.on span{color:var(--pri3);font-weight:800}
+        .bnav-i.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:30px;height:3px;background:var(--pri3);border-radius:0 0 4px 4px}
 
-        /* Header - lebih besar */
-        .app-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-l) 100%); color: white; padding: 14px 18px 12px; position: relative; }
-        .app-header::after { content: ''; position: absolute; bottom: -14px; left: 0; right: 0; height: 14px; background: var(--bg); border-radius: 14px 14px 0 0; }
+        .hdr{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;padding:14px 18px 12px;position:relative}
+        .hdr::after{content:'';position:absolute;bottom:-14px;left:0;right:0;height:14px;background:var(--bg);border-radius:14px 14px 0 0}
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 200; display: none; align-items: flex-end; justify-content: center; animation: fadeIn .2s; }
-        .modal-overlay.show { display: flex; }
-        .modal-sheet { background: var(--surface); border-radius: 22px 22px 0 0; width: 100%; max-width: 520px; max-height: 92dvh; overflow-y: auto; padding: 22px; animation: slideUp .3s ease; }
-        .modal-handle { width: 44px; height: 5px; background: #d1d5db; border-radius: 5px; margin: 0 auto 18px; }
+        .movl{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:flex-end;justify-content:center}
+        .movl.show{display:flex;animation:fadeIn .2s}
+        .msht{background:var(--sf);border-radius:22px 22px 0 0;width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;padding:22px;animation:slideUp .3s ease}
+        .mhdl{width:44px;height:5px;background:#d1d5db;border-radius:5px;margin:0 auto 18px}
 
-        /* Form - lebih besar */
-        .form-input { width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 16px; transition: border-color .2s; background: #f8fafc; }
-        .form-input:focus { outline: none; border-color: var(--primary-ll); background: white; box-shadow: 0 0 0 4px rgba(34,197,94,.1); }
-        .form-label { font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; display: block; }
+        .finp{width:100%;padding:13px 16px;border:2px solid #e2e8f0;border-radius:12px;font-family:inherit;font-size:16px;background:#f8fafc;transition:all .2s}
+        .finp:focus{outline:none;border-color:var(--pri3);background:#fff;box-shadow:0 0 0 4px rgba(34,197,94,.1)}
+        .flbl{font-size:13px;font-weight:800;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
 
-        /* Buttons - lebih besar */
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-family: inherit; font-weight: 800; font-size: 15px; cursor: pointer; transition: all .2s; width: 100%; letter-spacing: .3px; }
-        .btn-primary:active { transform: scale(.97); background: var(--primary-l); }
-        .btn-accent { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; transition: all .2s; }
-        .btn-accent:active { transform: scale(.97); }
-        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary-ll); padding: 12px 24px; border-radius: 12px; font-family: inherit; font-weight: 800; font-size: 15px; cursor: pointer; transition: all .2s; }
-        .btn-danger { background: var(--danger); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
-        .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; transition: all .15s; }
-        .btn-sm:active { transform: scale(.95); }
+        .bp{background:var(--pri);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer;width:100%;transition:all .15s;letter-spacing:.3px}
+        .bp:active{transform:scale(.97);background:var(--pri2)}
+        .ba{background:var(--acc);color:#fff;border:none;padding:12px 20px;border-radius:12px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;transition:all .15s}
+        .ba:active{transform:scale(.97)}
+        .bo{background:transparent;color:var(--pri);border:2px solid var(--pri3);padding:12px 24px;border-radius:12px;font-family:inherit;font-weight:800;font-size:15px;cursor:pointer}
+        .bd{background:var(--dng);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+        .bs{padding:8px 14px;font-size:12px;border-radius:8px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+        .bs:active{transform:scale(.95)}
 
-        .progress-bar { height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 10px; transition: width .5s ease; }
+        .pbar{height:10px;background:#e2e8f0;border-radius:10px;overflow:hidden}
+        .pfill{height:100%;border-radius:10px;transition:width .5s ease}
 
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 14px 22px; border-radius: 12px; color: white; font-weight: 700; font-size: 14px; z-index: 999; animation: fadeUp .3s ease; box-shadow: 0 6px 16px rgba(0,0,0,.2); display: flex; align-items: center; gap: 8px; max-width: 92%; }
-        .toast.success { background: var(--success); }
-        .toast.error { background: var(--danger); }
-        .toast.info { background: var(--primary); }
+        .tst{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:14px 22px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;z-index:999;animation:fadeUp .3s;box-shadow:0 6px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;max-width:92%}
+        .tst.s{background:var(--suc)}.tst.e{background:var(--dng)}.tst.i{background:var(--pri)}
 
-        .tag { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; }
-        .tag-income { background: #dcfce7; color: #166534; }
-        .tag-expense { background: #fef2f2; color: #991b1b; }
+        .tag{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800}
+        .tag-i{background:#dcfce7;color:#166534}.tag-e{background:#fef2f2;color:#991b1b}
 
-        .img-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 2px solid #e2e8f0; cursor: pointer; }
+        .imth{width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid #e2e8f0;cursor:pointer}
 
-        .empty-state { text-align: center; padding: 50px 24px; }
-        .empty-state i { font-size: 52px; color: #cbd5e1; margin-bottom: 14px; }
-        .empty-state h3 { font-size: 18px; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
-        .empty-state p { font-size: 14px; color: #94a3b8; }
+        .empt{text-align:center;padding:50px 24px}
+        .empt i{font-size:52px;color:#cbd5e1;margin-bottom:14px}
+        .empt h3{font-size:18px;font-weight:800;color:var(--mt);margin-bottom:6px}
+        .empt p{font-size:14px;color:#94a3b8}
 
-        .sub-view { display: none; }
-        .sub-view.active { display: block; animation: fadeUp .25s ease; }
+        .subv{display:none}.subv.active{display:block;animation:fadeUp .25s ease}
 
-        .upload-area { border: 2px dashed #cbd5e1; border-radius: 14px; padding: 28px; text-align: center; cursor: pointer; transition: all .2s; background: #f8fafc; }
-        .upload-area.has-image { border-style: solid; border-color: var(--primary-ll); padding: 10px; }
+        .upl{border:2px dashed #cbd5e1;border-radius:14px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:#f8fafc}
+        .upl.has{border-style:solid;border-color:var(--pri3);padding:10px}
 
-        .install-banner { position: fixed; bottom: 78px; left: 12px; right: 12px; background: linear-gradient(135deg,#14532D,#166534); color: white; border-radius: 18px; padding: 18px; z-index: 150; box-shadow: 0 8px 30px rgba(0,0,0,.25); animation: slideUp .4s ease; }
-        .install-banner.hide { display: none; }
+        .ibar{position:fixed;top:0;left:0;right:0;background:var(--dng);color:#fff;text-align:center;padding:6px 16px;font-size:12px;font-weight:700;z-index:10000;transform:translateY(-100%);transition:transform .3s;display:flex;align-items:center;justify-content:center;gap:6px}
+        .ibar.show{transform:translateY(0)}
 
-        .splash { position: fixed; inset: 0; background: linear-gradient(135deg,#14532D,#166534); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .5s; }
-        .splash.fade-out { opacity: 0; pointer-events: none; }
-        .step-num { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
-
-        /* Offline indicator */
-        .offline-bar { position: fixed; top: 0; left: 0; right: 0; background: #DC2626; color: white; text-align: center; padding: 6px 16px; font-size: 12px; font-weight: 700; z-index: 10000; transform: translateY(-100%); transition: transform .3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .offline-bar.show { transform: translateY(0); }
+        .spl{position:fixed;inset:0;background:linear-gradient(135deg,var(--pri),var(--pri2));z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+        .spl.fo{opacity:0;pointer-events:none}
 
         /* Tabel keuangan */
-        .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .fin-table th { background: var(--primary); color: white; padding: 10px 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; white-space: nowrap; }
-        .fin-table td { padding: 9px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        .fin-table tr:nth-child(even) td { background: #f8fafc; }
-        .fin-table .col-income { color: #16A34A; font-weight: 800; text-align: right; }
-        .fin-table .col-expense { color: #DC2626; font-weight: 800; text-align: right; }
-        .fin-table .col-empty { color: #cbd5e1; text-align: right; }
-        .fin-table .row-total td { background: #f0fdf4 !important; font-weight: 900; border-top: 2px solid var(--primary-ll); font-size: 14px; }
-        .fin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .ftbl{width:100%;border-collapse:collapse;font-size:13px}
+        .ftbl th{background:var(--pri);color:#fff;padding:10px 8px;font-size:11px;font-weight:800;text-transform:uppercase;white-space:nowrap}
+        .ftbl td{padding:9px 8px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+        .ftbl tr:nth-child(even) td{background:#f8fafc}
+        .ftbl .ci{color:#16A34A;font-weight:800;text-align:right}
+        .ftbl .ce{color:#DC2626;font-weight:800;text-align:right}
+        .ftbl .cd{color:#cbd5e1;text-align:right}
+        .ftbl .rt td{background:#f0fdf4!important;font-weight:900;border-top:2px solid var(--pri3);font-size:14px}
+        .ftbl-w{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid #e2e8f0}
 
-        /* Nota pesanan */
-        .nota { background: white; border: 2px solid #1E293B; border-radius: 0; padding: 20px; position: relative; }
-        .nota::before { content: ''; position: absolute; top: -1px; left: 20px; right: 20px; height: 4px; background: var(--primary); }
-        .nota-title { text-align: center; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; color: var(--primary); }
-        .nota-subtitle { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 1px; margin-bottom: 16px; }
-        .nota-row { display: flex; padding: 4px 0; font-size: 14px; }
-        .nota-label { width: 100px; font-weight: 700; color: var(--muted); flex-shrink: 0; }
-        .nota-value { font-weight: 700; color: var(--text); }
-        .nota-separator { border: none; border-top: 2px dashed #cbd5e1; margin: 12px 0; }
-        .nota-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
-        .nota-table th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 12px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid #1E293B; }
-        .nota-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
-        .nota-table .col-no { width: 36px; text-align: center; font-weight: 700; color: var(--muted); }
-        .nota-table .col-qty { width: 60px; text-align: center; font-weight: 800; }
-        .nota-table .col-sat { width: 70px; text-align: center; font-weight: 600; color: var(--muted); }
-        .nota-sign { display: flex; justify-content: space-between; margin-top: 40px; padding: 0 20px; }
-        .nota-sign-box { text-align: center; min-width: 120px; }
-        .nota-sign-line { border-bottom: 1px solid #1E293B; margin-bottom: 4px; height: 50px; }
-        .nota-sign-name { font-size: 13px; font-weight: 700; }
+        /* Nota */
+        .nota{background:#fff;border:2px solid #1E293B;padding:20px;position:relative}
+        .nota::before{content:'';position:absolute;top:-1px;left:20px;right:20px;height:4px;background:var(--pri)}
+        .nota-t{text-align:center;font-size:20px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;color:var(--pri)}
+        .nota-st{text-align:center;font-size:12px;color:var(--mt);font-weight:600;letter-spacing:1px;margin-bottom:16px}
+        .nota-r{display:flex;padding:5px 0;font-size:15px}
+        .nota-l{width:100px;font-weight:700;color:var(--mt);flex-shrink:0}
+        .nota-v{font-weight:700;color:var(--tx)}
+        .nota-sep{border:none;border-top:2px dashed #cbd5e1;margin:14px 0}
+        .nota-tb{width:100%;border-collapse:collapse;font-size:15px;margin:8px 0}
+        .nota-tb th{background:#f1f5f9;padding:10px 12px;text-align:left;font-size:13px;font-weight:800;text-transform:uppercase;border-bottom:2px solid #1E293B}
+        .nota-tb td{padding:10px 12px;border-bottom:1px solid #e2e8f0}
+        .nota-tb .cn{width:36px;text-align:center;font-weight:700;color:var(--mt)}
+        .nota-tb .cq{width:60px;text-align:center;font-weight:800}
+        .nota-tb .cs{width:80px;text-align:center;font-weight:600;color:var(--mt)}
+        .nota-sg{display:flex;justify-content:space-between;margin-top:50px;padding:0 20px}
+        .nota-sb{text-align:center;min-width:130px}
+        .nota-sl{border-bottom:1px solid #1E293B;margin-bottom:4px;height:60px}
+        .nota-sn{font-size:14px;font-weight:700}
 
-        .item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .item-row input { font-size: 15px; }
+        .irow{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+        .irow input{font-size:15px}
 
-        @media(min-width:500px) {
-            .modal-sheet { border-radius: 22px; margin: 20px; max-height: 85dvh; }
-            .modal-overlay { align-items: center; }
-        }
+        .ibnr{position:fixed;bottom:78px;left:12px;right:12px;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;border-radius:18px;padding:18px;z-index:150;box-shadow:0 8px 30px rgba(0,0,0,.25);animation:slideUp .4s ease;display:none}
+        .ibnr.show{display:block}
+
+        @media(min-width:500px){.msht{border-radius:22px;margin:20px;max-height:85dvh}.movl{align-items:center}}
     </style>
 </head>
 <body>
-    <div id="offline-bar" class="offline-bar"><i class="fas fa-wifi-slash"></i><span>Offline Mode — Data tersimpan lokal</span></div>
 
-    <div id="splash" class="splash">
-        <div style="animation:bounceIn .6s ease">
-            <div class="w-24 h-24 bg-white/15 rounded-2xl flex items-center justify-center mb-5 mx-auto" style="border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);">
-                <i class="fas fa-chart-line text-5xl text-amber-400"></i>
-            </div>
-            <h1 class="text-3xl font-black text-white text-center tracking-tight">OmnarPRO</h1>
-            <p class="text-sm text-green-200 text-center mt-2 font-medium">Keuangan & Laporan Proyek</p>
-        </div>
-        <div class="mt-10"><div class="w-10 h-10 rounded-full animate-spin mx-auto" style="border:4px solid rgba(255,255,255,.3);border-top-color:white;"></div></div>
+<div id="ibar" class="ibar"><i class="fas fa-wifi-slash"></i><span>Offline Mode — Data tersimpan lokal</span></div>
+
+<div id="splash" class="spl">
+    <div style="animation:bounceIn .6s ease">
+        <div class="w-24 h-24 bg-white/15 rounded-2xl flex items-center justify-center mb-5 mx-auto" style="border:1px solid rgba(255,255,255,.2)"><i class="fas fa-chart-line text-5xl text-amber-400"></i></div>
+        <h1 class="text-3xl font-black text-white text-center tracking-tight">OmnarPRO</h1>
+        <p class="text-sm text-green-200 text-center mt-2 font-medium">Keuangan & Laporan Proyek</p>
     </div>
+    <div class="mt-10"><div class="w-10 h-10 rounded-full mx-auto" style="border:4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin 1s linear infinite"></div></div>
+</div>
 
-    <div id="app" class="font-jakarta" style="height:100dvh;display:flex;flex-direction:column;opacity:0;transition:opacity .3s;">
+<div id="app" class="font-jakarta" style="height:100dvh;display:flex;flex-direction:column;opacity:0;transition:opacity .3s">
 
-        <header class="app-header">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-black tracking-tight flex items-center gap-2"><i class="fas fa-chart-line text-amber-400"></i> OmnarPRO</h1>
-                    <p class="text-xs opacity-70 font-semibold" id="header-subtitle">Keuangan & Laporan Proyek</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="install-btn-header" onclick="promptInstall()" class="hidden w-10 h-10 rounded-full bg-white/15 flex items-center justify-center" title="Install"><i class="fas fa-download text-sm"></i></button>
-                    <button onclick="showExportView()" class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center" title="Export PDF"><i class="fas fa-file-pdf text-sm"></i></button>
-                </div>
+    <header class="hdr">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-black tracking-tight flex items-center gap-2"><i class="fas fa-chart-line text-amber-400"></i> OmnarPRO</h1>
+                <p class="text-xs opacity-70 font-semibold" id="hsub">Keuangan & Laporan Proyek</p>
             </div>
-        </header>
-
-        <main style="flex:1;overflow:hidden;position:relative;">
-
-            <!-- DASHBOARD -->
-            <div id="view-dashboard" class="view active"><div id="dashboard-content"></div></div>
-
-            <!-- PROYEK -->
-            <div id="view-projects" class="view">
-                <div id="project-list-view">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-black">Daftar Proyek</h2>
-                        <button onclick="openProjectModal()" class="btn-accent"><i class="fas fa-plus mr-1"></i> Tambah</button>
-                    </div>
-                    <div id="project-list"></div>
-                </div>
-                <div id="project-detail-view" class="sub-view">
-                    <button onclick="closeProjectDetail()" class="flex items-center gap-2 text-sm font-bold mb-3" style="color:var(--primary-ll)"><i class="fas fa-arrow-left"></i> Kembali</button>
-                    <div id="project-detail-content"></div>
-                </div>
+            <div class="flex items-center gap-2">
+                <button id="ibh" onclick="pi()" class="hidden w-10 h-10 rounded-full bg-white/15 items-center justify-center" title="Install"><i class="fas fa-download text-sm"></i></button>
+                <button onclick="st('export')" class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center" title="PDF"><i class="fas fa-file-pdf text-sm"></i></button>
             </div>
+        </div>
+    </header>
 
-            <!-- PESAN BARANG -->
-            <div id="view-orders" class="view">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-black">Pesan Barang</h2>
-                    <button onclick="openOrderModal()" class="btn-accent"><i class="fas fa-plus mr-1"></i> Buat Nota</button>
-                </div>
-                <div id="order-list"></div>
+    <main style="flex:1;overflow:hidden;position:relative">
+
+        <!-- DASHBOARD -->
+        <div id="v-dashboard" class="view active"><div id="c-dash"></div></div>
+
+        <!-- PROYEK -->
+        <div id="v-projects" class="view">
+            <div id="plv">
+                <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-black">Daftar Proyek</h2><button onclick="opm()" class="ba"><i class="fas fa-plus mr-1"></i> Tambah</button></div>
+                <div id="plist"></div>
             </div>
-
-            <!-- LAPORAN -->
-            <div id="view-reports" class="view">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-black">Laporan Harian</h2>
-                    <button onclick="openReportModal()" class="btn-accent"><i class="fas fa-plus mr-1"></i> Tambah</button>
-                </div>
-                <div id="report-list"></div>
-            </div>
-
-            <!-- EXPORT -->
-            <div id="view-export" class="view">
-                <h2 class="text-xl font-black mb-4">Export & Kirim PDF</h2>
-                <div class="card p-5 mb-4">
-                    <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="export-project" class="form-input"></select></div>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div><label class="form-label">Dari</label><input type="date" id="export-from" class="form-input"></div>
-                        <div><label class="form-label">Sampai</label><input type="date" id="export-to" class="form-input"></div>
-                    </div>
-                    <div class="mb-5">
-                        <label class="form-label">Jenis Laporan</label>
-                        <div class="flex gap-2 mt-1 flex-wrap">
-                            <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2.5 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition"><input type="radio" name="export-type" value="finance" checked class="accent-green-600"><span class="text-xs font-bold">Keuangan</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2.5 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition"><input type="radio" name="export-type" value="daily" class="accent-amber-600"><span class="text-xs font-bold">Harian</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-purple-50 px-3 py-2.5 rounded-lg border-2 border-purple-200 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-100 transition"><input type="radio" name="export-type" value="orders" class="accent-purple-600"><span class="text-xs font-bold">Pesanan</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2.5 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition"><input type="radio" name="export-type" value="full" class="accent-blue-600"><span class="text-xs font-bold">Lengkap</span></label>
-                        </div>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="generatePDF(true)" class="btn-primary flex-1 flex items-center justify-center gap-2"><i class="fas fa-share"></i> Kirim PDF</button>
-                        <button onclick="generatePDF(false)" class="btn-outline flex-1 flex items-center justify-center gap-2"><i class="fas fa-download"></i> Download</button>
-                    </div>
-                </div>
-                <div class="card p-5" style="border-left:4px solid var(--primary-ll);">
-                    <h3 class="font-black text-sm mb-3 flex items-center gap-2" style="color:var(--primary);"><i class="fas fa-mobile-alt"></i> Install di Android</h3>
-                    <div id="install-guide"></div>
-                </div>
-            </div>
-        </main>
-
-        <nav class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-home"></i><span>Beranda</span></div>
-            <div class="nav-item" onclick="switchTab('projects')"><i class="fas fa-building"></i><span>Proyek</span></div>
-            <div class="nav-item" onclick="switchTab('orders')"><i class="fas fa-boxes-stacked"></i><span>Pesan</span></div>
-            <div class="nav-item" onclick="switchTab('reports')"><i class="fas fa-clipboard-list"></i><span>Laporan</span></div>
-            <div class="nav-item" onclick="switchTab('export')"><i class="fas fa-file-pdf"></i><span>Export</span></div>
-        </nav>
-
-        <div id="install-banner" class="install-banner hide">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-chart-line text-amber-400 text-lg"></i></div>
-                <div class="flex-1 min-w-0"><p class="font-bold">Install OmnarPRO</p><p class="text-xs opacity-80">Akses cepat dari home screen</p></div>
-                <button onclick="dismissInstallBanner()" class="text-white/60 text-lg px-2"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="flex gap-2 mt-3">
-                <button onclick="promptInstall()" class="flex-1 bg-white text-green-800 font-bold text-xs py-2.5 rounded-lg">Install Sekarang</button>
-                <button onclick="dismissInstallBanner()" class="px-4 bg-white/15 text-white font-semibold text-xs py-2.5 rounded-lg">Nanti</button>
+            <div id="pdv" class="subv">
+                <button onclick="cpd()" class="flex items-center gap-2 text-sm font-bold mb-3" style="color:var(--pri3)"><i class="fas fa-arrow-left"></i> Kembali</button>
+                <div id="pdetail"></div>
             </div>
         </div>
 
-        <!-- MODAL: PROYEK -->
-        <div id="modal-project" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-project')">
-            <div class="modal-sheet">
-                <div class="modal-handle"></div>
-                <h3 class="text-lg font-black mb-5" id="modal-project-title">Tambah Proyek Baru</h3>
-                <input type="hidden" id="project-edit-id">
-                <div class="mb-4"><label class="form-label">Nama Proyek</label><input type="text" id="project-name" class="form-input" placeholder="Contoh: Renovasi Kantor"></div>
-                <div class="mb-4"><label class="form-label">Deskripsi</label><textarea id="project-desc" class="form-input" rows="2" placeholder="Keterangan singkat"></textarea></div>
-                <div class="mb-5"><label class="form-label">Budget (Rp)</label><input type="number" id="project-budget" class="form-input" placeholder="0" min="0"></div>
-                <button onclick="saveProject()" class="btn-primary">Simpan Proyek</button>
-            </div>
+        <!-- PESAN BARANG -->
+        <div id="v-orders" class="view">
+            <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-black">Pesan Barang</h2><button onclick="oom()" class="ba"><i class="fas fa-plus mr-1"></i> Buat Nota</button></div>
+            <div id="olist"></div>
         </div>
 
-        <!-- MODAL: TRANSAKSI -->
-        <div id="modal-transaction" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-transaction')">
-            <div class="modal-sheet">
-                <div class="modal-handle"></div>
-                <h3 class="text-lg font-black mb-5">Tambah Transaksi</h3>
-                <input type="hidden" id="tx-project-id">
-                <div class="mb-4">
-                    <label class="form-label">Jenis</label>
-                    <div class="flex gap-3">
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="income" class="hidden peer"><div class="peer-checked:bg-green-100 peer-checked:border-green-500 peer-checked:text-green-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-down mr-1"></i> Pemasukan</div></label>
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-type" value="expense" class="hidden peer" checked><div class="peer-checked:bg-red-100 peer-checked:border-red-500 peer-checked:text-red-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-up mr-1"></i> Pengeluaran</div></label>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Metode</label>
-                    <div class="flex gap-3">
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-method" value="cash" class="hidden peer" checked><div class="peer-checked:bg-emerald-100 peer-checked:border-emerald-500 peer-checked:text-emerald-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-money-bill-wave mr-1"></i> Cash</div></label>
-                        <label class="flex-1 cursor-pointer"><input type="radio" name="tx-method" value="transfer" class="hidden peer"><div class="peer-checked:bg-blue-100 peer-checked:border-blue-500 peer-checked:text-blue-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-building-columns mr-1"></i> Transfer</div></label>
-                    </div>
-                </div>
-                <div class="mb-4"><label class="form-label">Jumlah (Rp)</label><input type="number" id="tx-amount" class="form-input" placeholder="0" min="0"></div>
-                <div class="mb-4"><label class="form-label">Keterangan</label><input type="text" id="tx-desc" class="form-input" placeholder="Contoh: Beli semen"></div>
-                <div class="mb-5"><label class="form-label">Tanggal</label><input type="date" id="tx-date" class="form-input"></div>
-                <button onclick="saveTransaction()" class="btn-primary">Simpan Transaksi</button>
-            </div>
+        <!-- LAPORAN -->
+        <div id="v-reports" class="view">
+            <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-black">Laporan Harian</h2><button onclick="orm()" class="ba"><i class="fas fa-plus mr-1"></i> Tambah</button></div>
+            <div id="rlist"></div>
         </div>
 
-        <!-- MODAL: PESAN BARANG -->
-        <div id="modal-order" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-order')">
-            <div class="modal-sheet">
-                <div class="modal-handle"></div>
-                <h3 class="text-lg font-black mb-5">Buat Nota Pesanan</h3>
-                <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="order-project" class="form-input"></select></div>
-                <div class="mb-4"><label class="form-label">Tahap Pekerjaan</label><input type="text" id="order-tahap" class="form-input" placeholder="Contoh: Pondasi, Plesteran, Atap"></div>
-                <div class="mb-4"><label class="form-label">Nama Pemesan</label><input type="text" id="order-pemesan" class="form-input" placeholder="Contoh: Ahmad, Tim Site"></div>
-                <div class="mb-4"><label class="form-label">Tanggal</label><input type="date" id="order-date" class="form-input"></div>
-
-                <div class="mb-3">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="form-label mb-0">Daftar Barang</label>
-                        <button onclick="addOrderItem()" class="btn-sm bg-amber-500 text-white"><i class="fas fa-plus mr-1"></i>Tambah</button>
-                    </div>
-                    <div id="order-items-container"></div>
-                </div>
-
-                <button onclick="saveOrder()" class="btn-primary mt-4">Simpan Nota Pesanan</button>
-            </div>
-        </div>
-
-        <!-- MODAL: LIHAT NOTA -->
-        <div id="modal-nota" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-nota')">
-            <div class="modal-sheet" style="max-height:95dvh;">
-                <div class="modal-handle"></div>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-black">Detail Nota</h3>
-                    <div class="flex gap-2">
-                        <button onclick="printNota()" class="btn-sm bg-blue-600 text-white"><i class="fas fa-print mr-1"></i>Cetak</button>
-                        <button onclick="closeModal('modal-nota')" class="btn-sm bg-gray-200 text-gray-600"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-                <div id="nota-content"></div>
-            </div>
-        </div>
-
-        <!-- MODAL: LAPORAN -->
-        <div id="modal-report" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-report')">
-            <div class="modal-sheet">
-                <div class="modal-handle"></div>
-                <h3 class="text-lg font-black mb-5">Tambah Laporan Harian</h3>
-                <input type="hidden" id="report-edit-id">
-                <div class="mb-4"><label class="form-label">Pilih Proyek</label><select id="report-project" class="form-input"></select></div>
-                <div class="mb-4"><label class="form-label">Judul Laporan</label><input type="text" id="report-title" class="form-input" placeholder="Contoh: Progress pondasi"></div>
-                <div class="mb-4"><label class="form-label">Isi Laporan</label><textarea id="report-content" class="form-input" rows="4" placeholder="Deskripsikan pekerjaan..."></textarea></div>
-                <div class="mb-4"><label class="form-label">Tanggal</label><input type="date" id="report-date" class="form-input"></div>
+        <!-- EXPORT -->
+        <div id="v-export" class="view">
+            <h2 class="text-xl font-black mb-4">Export & Kirim PDF</h2>
+            <div class="card p-5 mb-4">
+                <div class="mb-4"><label class="flbl">Pilih Proyek</label><select id="ep" class="finp"></select></div>
+                <div class="grid grid-cols-2 gap-3 mb-4"><div><label class="flbl">Dari</label><input type="date" id="ef" class="finp"></div><div><label class="flbl">Sampai</label><input type="date" id="et" class="finp"></div></div>
                 <div class="mb-5">
-                    <label class="form-label">Upload Foto</label>
-                    <div id="upload-area" class="upload-area" onclick="document.getElementById('report-image').click()">
-                        <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
-                        <p class="text-sm font-semibold text-gray-500">Tap untuk ambil foto / pilih galeri</p>
+                    <label class="flbl">Jenis Laporan</label>
+                    <div class="flex gap-2 mt-1 flex-wrap">
+                        <label class="flex items-center gap-2 cursor-pointer bg-green-50 px-3 py-2.5 rounded-lg border-2 border-green-200 has-[:checked]:border-green-500 has-[:checked]:bg-green-100 transition"><input type="radio" name="etp" value="finance" checked class="accent-green-600"><span class="text-xs font-bold">Keuangan</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-2.5 rounded-lg border-2 border-amber-200 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-100 transition"><input type="radio" name="etp" value="daily" class="accent-amber-600"><span class="text-xs font-bold">Harian</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-purple-50 px-3 py-2.5 rounded-lg border-2 border-purple-200 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-100 transition"><input type="radio" name="etp" value="orders" class="accent-purple-600"><span class="text-xs font-bold">Pesanan</span></label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-blue-50 px-3 py-2.5 rounded-lg border-2 border-blue-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-100 transition"><input type="radio" name="etp" value="full" class="accent-blue-600"><span class="text-xs font-bold">Lengkap</span></label>
                     </div>
-                    <input type="file" id="report-image" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this)">
-                </div>
-                <button onclick="saveReport()" class="btn-primary">Simpan Laporan</button>
-            </div>
-        </div>
-
-        <!-- MODAL: IMAGE VIEWER -->
-        <div id="modal-image" class="modal-overlay" onclick="closeModal('modal-image')" style="align-items:center;background:rgba(0,0,0,.92);">
-            <img id="image-viewer-img" src="" style="max-width:96%;max-height:88dvh;border-radius:14px;object-fit:contain;">
-            <button onclick="closeModal('modal-image')" class="absolute top-5 right-5 w-11 h-11 bg-white/20 rounded-full flex items-center justify-center text-white text-lg"><i class="fas fa-times"></i></button>
-        </div>
-
-        <!-- MODAL: KONFIRMASI -->
-        <div id="modal-confirm" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-confirm')" style="align-items:center;">
-            <div class="modal-sheet" style="border-radius:22px;max-width:360px;margin:20px;">
-                <div class="text-center mb-5">
-                    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4"><i class="fas fa-trash text-red-500 text-2xl"></i></div>
-                    <h3 class="text-lg font-black mb-1">Hapus Data?</h3>
-                    <p class="text-sm text-gray-500" id="confirm-msg">Data yang dihapus tidak dapat dikembalikan.</p>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="closeModal('modal-confirm')" class="btn-outline flex-1 py-3">Batal</button>
-                    <button id="confirm-btn" class="flex-1 py-3 rounded-xl font-bold text-white text-sm" style="background:var(--danger);">Hapus</button>
+                    <button onclick="gPDF(true)" class="bp flex-1 flex items-center justify-center gap-2"><i class="fas fa-share"></i> Kirim PDF</button>
+                    <button onclick="gPDF(false)" class="bo flex-1 flex items-center justify-center gap-2"><i class="fas fa-download"></i> Download</button>
                 </div>
             </div>
+            <div class="card p-5" style="border-left:4px solid var(--pri3)"><h3 class="font-black text-sm mb-3 flex items-center gap-2" style="color:var(--pri)"><i class="fas fa-mobile-alt"></i> Install di Android</h3><div id="iguide"></div></div>
+        </div>
+
+    </main>
+
+    <nav class="bnav">
+        <div class="bnav-i on" onclick="st('dashboard')"><i class="fas fa-home"></i><span>Beranda</span></div>
+        <div class="bnav-i" onclick="st('projects')"><i class="fas fa-building"></i><span>Proyek</span></div>
+        <div class="bnav-i" onclick="st('orders')"><i class="fas fa-boxes-stacked"></i><span>Pesan</span></div>
+        <div class="bnav-i" onclick="st('reports')"><i class="fas fa-clipboard-list"></i><span>Laporan</span></div>
+        <div class="bnav-i" onclick="st('export')"><i class="fas fa-file-pdf"></i><span>Export</span></div>
+    </nav>
+
+    <div id="ibnr" class="ibnr">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-chart-line text-amber-400 text-lg"></i></div>
+            <div class="flex-1 min-w-0"><p class="font-bold">Install OmnarPRO</p><p class="text-xs opacity-80">Akses cepat dari home screen</p></div>
+            <button onclick="dib()" class="text-white/60 text-lg px-2"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="flex gap-2 mt-3">
+            <button onclick="pi()" class="flex-1 bg-white text-green-800 font-bold text-xs py-2.5 rounded-lg">Install Sekarang</button>
+            <button onclick="dib()" class="px-4 bg-white/15 text-white font-semibold text-xs py-2.5 rounded-lg">Nanti</button>
         </div>
     </div>
 
+    <!-- MODAL: PROYEK -->
+    <div id="m-proj" class="movl" onclick="if(event.target===this)cm(this.id)"><div class="msht"><div class="mhdl"></div><h3 class="text-lg font-black mb-5" id="mp-t">Tambah Proyek Baru</h3><input type="hidden" id="mp-eid"><div class="mb-4"><label class="flbl">Nama Proyek</label><input type="text" id="mp-nm" class="finp" placeholder="Contoh: Renovasi Kantor"></div><div class="mb-4"><label class="flbl">Deskripsi</label><textarea id="mp-ds" class="finp" rows="2" placeholder="Keterangan singkat"></textarea></div><div class="mb-5"><label class="flbl">Budget (Rp)</label><input type="number" id="mp-bg" class="finp" placeholder="0" min="0"></div><button onclick="sp()" class="bp">Simpan Proyek</button></div></div>
+
+    <!-- MODAL: TRANSAKSI -->
+    <div id="m-tx" class="movl" onclick="if(event.target===this)cm(this.id)"><div class="msht"><div class="mhdl"></div><h3 class="text-lg font-black mb-5">Tambah Transaksi</h3><input type="hidden" id="mt-pid"><div class="mb-4"><label class="flbl">Jenis</label><div class="flex gap-3"><label class="flex-1 cursor-pointer"><input type="radio" name="mt-tp" value="income" class="hidden peer"><div class="peer-checked:bg-green-100 peer-checked:border-green-500 peer-checked:text-green-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-down mr-1"></i> Pemasukan</div></label><label class="flex-1 cursor-pointer"><input type="radio" name="mt-tp" value="expense" class="hidden peer" checked><div class="peer-checked:bg-red-100 peer-checked:border-red-500 peer-checked:text-red-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-arrow-up mr-1"></i> Pengeluaran</div></label></div></div><div class="mb-4"><label class="flbl">Metode</label><div class="flex gap-3"><label class="flex-1 cursor-pointer"><input type="radio" name="mt-mt" value="cash" class="hidden peer" checked><div class="peer-checked:bg-emerald-100 peer-checked:border-emerald-500 peer-checked:text-emerald-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-money-bill-wave mr-1"></i> Cash</div></label><label class="flex-1 cursor-pointer"><input type="radio" name="mt-mt" value="transfer" class="hidden peer"><div class="peer-checked:bg-blue-100 peer-checked:border-blue-500 peer-checked:text-blue-800 border-2 border-gray-200 rounded-xl p-3.5 text-center text-sm font-bold transition bg-gray-50"><i class="fas fa-building-columns mr-1"></i> Transfer</div></label></div></div><div class="mb-4"><label class="flbl">Jumlah (Rp)</label><input type="number" id="mt-am" class="finp" placeholder="0" min="0"></div><div class="mb-4"><label class="flbl">Keterangan</label><input type="text" id="mt-ds" class="finp" placeholder="Contoh: Beli semen"></div><div class="mb-5"><label class="flbl">Tanggal</label><input type="date" id="mt-dt" class="finp"></div><button onclick="stx()" class="bp">Simpan Transaksi</button></div></div>
+
+    <!-- MODAL: PESAN BARANG -->
+    <div id="m-ord" class="movl" onclick="if(event.target===this)cm(this.id)"><div class="msht"><div class="mhdl"></div><h3 class="text-lg font-black mb-5">Buat Nota Pesanan</h3><div class="mb-4"><label class="flbl">Pilih Proyek</label><select id="mo-pid" class="finp"></select></div><div class="mb-4"><label class="flbl">Tahap Pekerjaan</label><input type="text" id="mo-th" class="finp" placeholder="Contoh: Pondasi, Plesteran, Atap"></div><div class="mb-4"><label class="flbl">Nama Pemesan</label><input type="text" id="mo-pm" class="finp" placeholder="Contoh: Ahmad, Tim Site"></div><div class="mb-4"><label class="flbl">Tanggal</label><input type="date" id="mo-dt" class="finp"></div><div class="mb-3"><div class="flex items-center justify-between mb-3"><label class="flbl mb-0">Daftar Barang</label><button onclick="aoi()" class="bs bg-amber-500 text-white"><i class="fas fa-plus mr-1"></i>Tambah Baris</button></div><div id="oic"></div></div><button onclick="so()" class="bp mt-4">Simpan Nota Pesanan</button></div></div>
+
+    <!-- MODAL: LIHAT NOTA -->
+    <div id="m-nota" class="movl" onclick="if(event.target===this)cm(this.id)"><div class="msht" style="max-height:95dvh"><div class="mhdl"></div><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-black">Detail Nota</h3><div class="flex gap-2"><button onclick="pnt()" class="bs bg-blue-600 text-white"><i class="fas fa-print mr-1"></i>Cetak</button><button onclick="cm('m-nota')" class="bs bg-gray-200 text-gray-600"><i class="fas fa-times"></i></button></div></div><div id="nc"></div></div></div>
+
+    <!-- MODAL: LAPORAN -->
+    <div id="m-rep" class="movl" onclick="if(event.target===this)cm(this.id)"><div class="msht"><div class="mhdl"></div><h3 class="text-lg font-black mb-5">Tambah Laporan Harian</h3><div class="mb-4"><label class="flbl">Pilih Proyek</label><select id="mr-pid" class="finp"></select></div><div class="mb-4"><label class="flbl">Judul Laporan</label><input type="text" id="mr-tl" class="finp" placeholder="Contoh: Progress pondasi"></div><div class="mb-4"><label class="flbl">Isi Laporan</label><textarea id="mr-ct" class="finp" rows="4" placeholder="Deskripsikan pekerjaan..."></textarea></div><div class="mb-4"><label class="flbl">Tanggal</label><input type="date" id="mr-dt" class="finp"></div><div class="mb-5"><label class="flbl">Upload Foto</label><div id="upl" class="upl" onclick="document.getElementById('mr-img').click()"><i class="fas fa-camera text-3xl text-gray-400 mb-2"></i><p class="text-sm font-semibold text-gray-500">Tap untuk ambil foto</p></div><input type="file" id="mr-img" accept="image/*" capture="environment" class="hidden" onchange="hiu(this)"></div><button onclick="sr()" class="bp">Simpan Laporan</button></div></div>
+
+    <!-- MODAL: IMAGE -->
+    <div id="m-img" class="movl" onclick="cm(this.id)" style="align-items:center;background:rgba(0,0,0,.92)"><img id="ivi" src="" style="max-width:96%;max-height:88dvh;border-radius:14px;object-fit:contain"><button onclick="cm('m-img')" class="absolute top-5 right-5 w-11 h-11 bg-white/20 rounded-full flex items-center justify-center text-white text-lg"><i class="fas fa-times"></i></button></div>
+
+    <!-- MODAL: KONFIRMASI -->
+    <div id="m-cf" class="movl" onclick="if(event.target===this)cm(this.id)" style="align-items:center"><div class="msht" style="border-radius:22px;max-width:360px;margin:20px"><div class="text-center mb-5"><div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4"><i class="fas fa-trash text-red-500 text-2xl"></i></div><h3 class="text-lg font-black mb-1">Hapus Data?</h3><p class="text-sm text-gray-500" id="cf-msg">Data yang dihapus tidak dapat dikembalikan.</p></div><div class="flex gap-3"><button onclick="cm('m-cf')" class="bo flex-1 py-3">Batal</button><button id="cf-btn" class="flex-1 py-3 rounded-xl font-bold text-white" style="background:var(--dng)">Hapus</button></div></div></div>
+
+</div>
+
 <script>
-// ==================== PWA ====================
-(function(){function makeIcon(s){const c=document.createElement('canvas');c.width=s;c.height=s;const ctx=c.getContext('2d');const g=ctx.createLinearGradient(0,0,s,s);g.addColorStop(0,'#14532D');g.addColorStop(1,'#166534');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(0,0,s,s,s*.2);ctx.fill();ctx.fillStyle='#F59E0B';ctx.font='bold '+s*.35+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('OP',s/2,s*.5);return c.toDataURL('image/png');}const i192=makeIcon(192),i512=makeIcon(512);const m={name:'OmnarPRO',short_name:'OmnarPRO',description:'Keuangan Proyek & Laporan',start_url:'./index.html',scope:'./',display:'standalone',orientation:'portrait',background_color:'#14532D',theme_color:'#14532D',icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};const b=new Blob([JSON.stringify(m)],{type:'application/json'});const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);document.head.appendChild(l);document.head.appendChild(Object.assign(document.createElement('link'),{rel:'apple-touch-icon',href:i192}));document.head.appendChild(Object.assign(document.createElement('link'),{rel:'icon',type:'image/png',href:i192}));})();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
-let deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').classList.remove('hide');const h=document.getElementById('install-btn-header');h.classList.remove('hidden');h.style.display='flex';});
-window.addEventListener('appinstalled',()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');showToast('OmnarPRO berhasil di-install!','success');});
-function promptInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('install-banner').classList.add('hide');});}else{showToast('Buka Chrome → menu → "Install App"','info');}}
-function dismissInstallBanner(){document.getElementById('install-banner').classList.add('hide');}
+// ========== PWA ==========
+(function(){function mi(s){var c=document.createElement('canvas');c.width=s;c.height=s;var x=c.getContext('2d');var g=x.createLinearGradient(0,0,s,s);g.addColorStop(0,'#14532D');g.addColorStop(1,'#166534');x.fillStyle=g;x.beginPath();x.roundRect(0,0,s,s,s*.2);x.fill();x.fillStyle='#F59E0B';x.font='bold '+s*.35+'px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('OP',s/2,s*.5);return c.toDataURL('image/png')}var a=mi(192),b=mi(512);var m={name:'OmnarPRO',short_name:'OmnarPRO',description:'Keuangan Proyek & Laporan',start_url:'./index.html',scope:'./',display:'standalone',orientation:'portrait',background_color:'#14532D',theme_color:'#14532D',icons:[{src:a,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:b,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};var bl=new Blob([JSON.stringify(m)],{type:'application/json'});var lk=document.createElement('link');lk.rel='manifest';lk.href=URL.createObjectURL(bl);document.head.appendChild(lk);document.head.appendChild(Object.assign(document.createElement('link'),{rel:'apple-touch-icon',href:a}));document.head.appendChild(Object.assign(document.createElement('link'),{rel:'icon',type:'image/png',href:a}))})();
+if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})})}
 
-// ==================== DATABASE ====================
-const DB={get(k){try{return JSON.parse(localStorage.getItem('op_'+k)||'[]');}catch{return[];}},set(k,d){try{localStorage.setItem('op_'+k,JSON.stringify(d));}catch{showToast('Penyimpanan penuh!','error');}},id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}};
-let currentTab='dashboard',currentProjectId=null,uploadedImage=null,orderItemCount=1;
+var dp=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('ibnr').classList.add('show');var h=document.getElementById('ibh');h.classList.remove('hidden');h.style.display='flex'});
+window.addEventListener('appinstalled',function(){dp=null;document.getElementById('ibnr').classList.remove('show');document.getElementById('ibh').classList.add('hidden');toast('OmnarPRO berhasil di-install!','s')});
+function pi(){if(dp){dp.prompt();dp.userChoice.then(function(){dp=null;document.getElementById('ibnr').classList.remove('show')})}else{toast('Buka Chrome → menu → Install App','i')}}
+function dib(){document.getElementById('ibnr').classList.remove('show')}
 
-// ==================== UTILS ====================
-function formatRp(n){return'Rp '+(Number(n)||0).toLocaleString('id-ID');}
-function formatDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});}
-function formatDateFull(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
-function todayStr(){return new Date().toISOString().slice(0,10);}
-function showToast(msg,type='info'){const old=document.querySelector('.toast');if(old)old.remove();const ic={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};const t=document.createElement('div');t.className='toast '+type;t.innerHTML='<i class="fas '+ic[type]+'"></i> '+msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},2800);}
-function openModal(id){document.getElementById(id).classList.add('show');}
-function closeModal(id){document.getElementById(id).classList.remove('show');}
-function confirmDelete(msg,cb){document.getElementById('confirm-msg').textContent=msg;const btn=document.getElementById('confirm-btn');const nb=btn.cloneNode(true);btn.parentNode.replaceChild(nb,btn);nb.textContent='Hapus';nb.style.background='var(--danger)';nb.addEventListener('click',()=>{cb();closeModal('modal-confirm');});openModal('modal-confirm');}
+// ========== DB ==========
+var DB={
+    g:function(k){try{return JSON.parse(localStorage.getItem('op_'+k)||'[]')}catch(e){return[]}},
+    s:function(k,d){try{localStorage.setItem('op_'+k,JSON.stringify(d))}catch(e){toast('Penyimpanan penuh!','e')}},
+    id:function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+};
 
-// ==================== NAVIGASI ====================
-function switchTab(tab){currentTab=tab;document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+tab).classList.add('active');const tabs=['dashboard','projects','orders','reports','export'];document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',tabs[i]===tab));const st={dashboard:'Keuangan & Laporan Proyek',projects:'Kelola Proyek Anda',orders:'Nota Pesanan Barang',reports:'Catatan Aktivitas Harian',export:'Export & Kirim PDF'};document.getElementById('header-subtitle').textContent=st[tab];renderCurrentView();}
-function renderCurrentView(){switch(currentTab){case'dashboard':renderDashboard();break;case'projects':renderProjectList();break;case'orders':renderOrderList();break;case'reports':renderReportList();break;case'export':populateExportSelect();renderInstallGuide();break;}}
-function showExportView(){switchTab('export');}
+var cTab='dashboard',cPid=null,uImg=null,oic=1;
 
-// ==================== DASHBOARD ====================
-function renderDashboard(){
-    const projects=DB.get('projects'),txs=DB.get('transactions'),reports=DB.get('reports'),orders=DB.get('orders');
-    let tB=0,tI=0,tE=0;
-    projects.forEach(p=>{tB+=Number(p.budget)||0;txs.filter(t=>t.projectId===p.id).forEach(t=>{if(t.type==='income')tI+=Number(t.amount)||0;else tE+=Number(t.amount)||0;});});
-    const bal=tI-tE;
-    let h=`<div class="grid grid-cols-2 gap-3 mb-5">
-        <div class="card stat-card teal p-5"><p class="text-xs font-bold text-gray-400 uppercase">Total Budget</p><p class="text-xl font-black mt-1" style="color:var(--primary)">${formatRp(tB)}</p></div>
-        <div class="card stat-card green p-5"><p class="text-xs font-bold text-gray-400 uppercase">Pemasukan</p><p class="text-xl font-black mt-1 text-green-600">${formatRp(tI)}</p></div>
-        <div class="card stat-card red p-5"><p class="text-xs font-bold text-gray-400 uppercase">Pengeluaran</p><p class="text-xl font-black mt-1 text-red-600">${formatRp(tE)}</p></div>
-        <div class="card stat-card amber p-5"><p class="text-xs font-bold text-gray-400 uppercase">Saldo</p><p class="text-xl font-black mt-1" style="color:${bal>=0?'var(--success)':'var(--danger)'}">${formatRp(bal)}</p></div></div>`;
+// ========== UTILS ==========
+function fRp(n){return'Rp '+(Number(n)||0).toLocaleString('id-ID')}
+function fDt(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
+function fDtF(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+function tS(){return new Date().toISOString().slice(0,10)}
+function toast(m,t){var o=document.querySelector('.tst');if(o)o.remove();var ic={s:'fa-check-circle',e:'fa-exclamation-circle',i:'fa-info-circle'};var el=document.createElement('div');el.className='tst '+t;el.innerHTML='<i class="fas '+ic[t]+'"></i> '+m;document.body.appendChild(el);setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove()},300)},2800)}
+function om(id){document.getElementById(id).classList.add('show')}
+function cm(id){document.getElementById(id).classList.remove('show')}
+function cfd(msg,cb){document.getElementById('cf-msg').textContent=msg;var btn=document.getElementById('cf-btn');var nb=btn.cloneNode(true);btn.parentNode.replaceChild(nb,btn);nb.textContent='Hapus';nb.style.background='var(--dng)';nb.addEventListener('click',function(){cb();cm('m-cf')});om('m-cf')}
 
-    if(projects.length>0){
-        h+=`<h3 class="text-sm font-black mb-3 text-gray-500 uppercase tracking-wider">Progress Proyek</h3>`;
-        projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let sp=0;pt.forEach(t=>{if(t.type==='expense')sp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(sp/p.budget)*100):0;const bc=pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500';h+=`<div class="card p-5 mb-3 cursor-pointer" onclick="switchTab('projects');setTimeout(()=>openProjectDetail('${p.id}'),200)"><div class="flex justify-between items-start mb-2"><div><p class="font-bold text-base">${p.name}</p><p class="text-sm text-gray-400">${formatRp(sp)} / ${formatRp(p.budget)}</p></div><span class="text-sm font-black ${pc>90?'text-red-500':pc>70?'text-amber-500':'text-green-500'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${bc}" style="width:${pc}%"></div></div></div>`;});
+// ========== NAVIGASI ==========
+function st(tab){
+    cTab=tab;
+    var tabs=['dashboard','projects','orders','reports','export'];
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+    document.getElementById('v-'+tab).classList.add('active');
+    document.querySelectorAll('.bnav-i').forEach(function(n,i){n.classList.toggle('on',tabs[i]===tab)});
+    var subs={dashboard:'Keuangan & Laporan Proyek',projects:'Kelola Proyek Anda',orders:'Nota Pesanan Barang',reports:'Catatan Aktivitas Harian',export:'Export & Kirim PDF'};
+    document.getElementById('hsub').textContent=subs[tab]||'';
+    rv();
+}
+function rv(){
+    if(cTab==='dashboard')rDash();
+    else if(cTab==='projects')rPL();
+    else if(cTab==='orders')rOL();
+    else if(cTab==='reports')rRL();
+    else if(cTab==='export'){pES();rIG()}
+}
+
+// ========== DASHBOARD ==========
+function rDash(){
+    var ps=DB.g('projects'),txs=DB.g('transactions'),rps=DB.g('reports'),ors=DB.g('orders');
+    var tB=0,tI=0,tE=0;
+    for(var i=0;i<ps.length;i++){tB+=Number(ps[i].budget)||0;var pt=[];for(var j=0;j<txs.length;j++){if(txs[j].projectId===ps[i].id)pt.push(txs[j])}for(var k=0;k<pt.length;k++){if(pt[k].type==='income')tI+=Number(pt[k].amount)||0;else tE+=Number(pt[k].amount)||0}}
+    var bal=tI-tE;
+    var h='<div class="grid grid-cols-2 gap-3 mb-5">';
+    h+='<div class="card stcard p-5" style="--c:var(--pri)"><p class="text-xs font-bold text-gray-400 uppercase">Total Budget</p><p class="text-xl font-black mt-1" style="color:var(--pri)">'+fRp(tB)+'</p></div>';
+    h+='<div class="card stcard p-5" style="--c:#16A34A"><p class="text-xs font-bold text-gray-400 uppercase">Pemasukan</p><p class="text-xl font-black mt-1 text-green-600">'+fRp(tI)+'</p></div>';
+    h+='<div class="card stcard p-5" style="--c:#DC2626"><p class="text-xs font-bold text-gray-400 uppercase">Pengeluaran</p><p class="text-xl font-black mt-1 text-red-600">'+fRp(tE)+'</p></div>';
+    h+='<div class="card stcard p-5" style="--c:var(--acc)"><p class="text-xs font-bold text-gray-400 uppercase">Saldo</p><p class="text-xl font-black mt-1" style="color:'+(bal>=0?'var(--suc)':'var(--dng)')+'">'+fRp(bal)+'</p></div></div>';
+
+    if(ps.length>0){
+        h+='<h3 class="text-sm font-black mb-3 text-gray-500 uppercase tracking-wider">Progress Proyek</h3>';
+        for(var i=0;i<ps.length;i++){var p=ps[i];var sp=0;for(var j=0;j<txs.length;j++){if(txs[j].projectId===p.id&&txs[j].type==='expense')sp+=Number(txs[j].amount)||0}var pc=p.budget>0?Math.min(100,(sp/p.budget)*100):0;var bc=pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500';
+        h+='<div class="card p-5 mb-3 cursor-pointer" onclick="st(\'projects\');setTimeout(function(){opd(\''+p.id+'\')},200)"><div class="flex justify-between items-start mb-2"><div><p class="font-bold text-base">'+p.name+'</p><p class="text-sm text-gray-400">'+fRp(sp)+' / '+fRp(p.budget)+'</p></div><span class="text-sm font-black '+(pc>90?'text-red-500':pc>70?'text-amber-500':'text-green-500')+'">'+Math.round(pc)+'%</span></div><div class="pbar"><div class="pfill '+bc+'" style="width:'+pc+'%"></div></div></div>'}
     }
 
     // Pesanan terbaru
-    const recentOrders=[...orders].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
-    if(recentOrders.length>0){
-        h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Pesanan Terbaru</h3>`;
-        recentOrders.forEach(o=>{const pj=projects.find(p=>p.id===o.projectId);const itemCount=o.items?o.items.length:0;h+=`<div class="card p-4 mb-2 cursor-pointer" onclick="switchTab('orders');setTimeout(()=>viewNota('${o.id}'),300)"><div class="flex items-center justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-base">${o.tahap}</p><p class="text-sm text-gray-400">${pj?pj.name:'-'} · ${itemCount} barang · ${formatDate(o.date)}</p></div><span class="tag" style="background:#f3e8ff;color:#6b21a8;"><i class="fas fa-boxes-stacked mr-1"></i>${o.pemesan}</span></div></div>`;});
+    var ro=ors.slice().sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,3);
+    if(ro.length>0){
+        h+='<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Pesanan Terbaru</h3>';
+        for(var i=0;i<ro.length;i++){var o=ro[i];var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===o.projectId){pj=ps[j];break}}var ic=o.items?o.items.length:0;
+        h+='<div class="card p-4 mb-2 cursor-pointer" onclick="st(\'orders\');setTimeout(function(){vn(\''+o.id+'\')},300)"><div class="flex items-center justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-base">'+o.tahap+'</p><p class="text-sm text-gray-400">'+(pj?pj.name:'-')+' · '+ic+' barang · '+fDt(o.date)+'</p></div><span class="tag" style="background:#f3e8ff;color:#6b21a8"><i class="fas fa-user mr-1"></i>'+o.pemesan+'</span></div></div>'}
     }
 
-    const recentTx=[...txs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
-    if(recentTx.length>0){
-        h+=`<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>`;
-        recentTx.forEach(tx=>{const pj=projects.find(p=>p.id===tx.projectId);const mIcon=tx.method==='transfer'?'<i class="fas fa-building-columns text-blue-500 ml-1"></i>':'<i class="fas fa-money-bill-wave text-emerald-500 ml-1"></i>';h+=`<div class="card card-accent p-4 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-base">${tx.description||'-'}</p><p class="text-sm text-gray-400">${pj?pj.name:'-'} · ${formatDate(tx.date)} ${mIcon}</p></div><span class="tag ${tx.type==='income'?'tag-income':'tag-expense'} ml-2 whitespace-nowrap">${tx.type==='income'?'+':'-'} ${formatRp(tx.amount)}</span></div>`;});
+    // Transaksi terakhir
+    var rt=txs.slice().sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,4);
+    if(rt.length>0){
+        h+='<h3 class="text-sm font-black mb-3 mt-5 text-gray-500 uppercase tracking-wider">Transaksi Terakhir</h3>';
+        for(var i=0;i<rt.length;i++){var tx=rt[i];var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===tx.projectId){pj=ps[j];break}}var mi=tx.method==='transfer'?'<i class="fas fa-building-columns text-blue-500 ml-1"></i>':'<i class="fas fa-money-bill-wave text-emerald-500 ml-1"></i>';
+        h+='<div class="card card-acc p-4 mb-2 flex items-center justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-base">'+( tx.description||'-')+'</p><p class="text-sm text-gray-400">'+(pj?pj.name:'-')+' · '+fDt(tx.date)+' '+mi+'</p></div><span class="tag '+(tx.type==='income'?'tag-i':'tag-e')+' ml-2 whitespace-nowrap">'+(tx.type==='income'?'+':'-')+' '+fRp(tx.amount)+'</span></div>'}
     }
 
-    if(!projects.length){h+=`<div class="empty-state mt-8"><i class="fas fa-folder-open"></i><h3>Belum Ada Proyek</h3><p>Mulai dengan menambahkan proyek pertama</p><button onclick="switchTab('projects');setTimeout(openProjectModal,300)" class="btn-accent mt-5 text-sm px-8 py-4"><i class="fas fa-plus mr-2"></i>Buat Proyek</button></div>`;}
-    document.getElementById('dashboard-content').innerHTML=h;
+    if(!ps.length){h+='<div class="empt mt-8"><i class="fas fa-folder-open"></i><h3>Belum Ada Proyek</h3><p>Mulai dengan menambahkan proyek pertama</p><button onclick="st(\'projects\');setTimeout(opm,300)" class="ba mt-5 text-sm px-8 py-4"><i class="fas fa-plus mr-2"></i>Buat Proyek</button></div>'}
+    document.getElementById('c-dash').innerHTML=h;
 }
 
-// ==================== PROYEK ====================
-function renderProjectList(){const projects=DB.get('projects'),txs=DB.get('transactions'),list=document.getElementById('project-list');if(!projects.length){list.innerHTML='<div class="empty-state"><i class="fas fa-building"></i><h3>Belum Ada Proyek</h3><p>Tambahkan proyek untuk mulai mencatat</p></div>';return;}let h='';projects.forEach(p=>{const pt=txs.filter(t=>t.projectId===p.id);let inc=0,exp=0;pt.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else exp+=Number(t.amount)||0;});const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;h+=`<div class="card p-5 mb-3 cursor-pointer" onclick="openProjectDetail('${p.id}')"><div class="flex justify-between items-start mb-2"><div class="flex-1 min-w-0"><p class="font-bold text-lg">${p.name}</p><p class="text-sm text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div><button onclick="event.stopPropagation();editProject('${p.id}')" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-pen text-sm"></i></button></div><div class="grid grid-cols-3 gap-2 mt-4 text-center"><div class="bg-green-50 rounded-xl p-3"><p class="text-xs text-green-600 font-bold">Masuk</p><p class="text-sm font-black text-green-700">${formatRp(inc)}</p></div><div class="bg-red-50 rounded-xl p-3"><p class="text-xs text-red-600 font-bold">Keluar</p><p class="text-sm font-black text-red-700">${formatRp(exp)}</p></div><div class="bg-amber-50 rounded-xl p-3"><p class="text-xs text-amber-600 font-bold">Sisa</p><p class="text-sm font-black text-amber-700">${formatRp(p.budget-exp)}</p></div></div><div class="progress-bar mt-4"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div><p class="text-sm text-gray-400 mt-2 text-right font-bold">${Math.round(pc)}% terpakai</p></div>`;});list.innerHTML=h;}
-function openProjectModal(editId){document.getElementById('project-edit-id').value='';document.getElementById('project-name').value='';document.getElementById('project-desc').value='';document.getElementById('project-budget').value='';document.getElementById('modal-project-title').textContent='Tambah Proyek Baru';if(editId){const p=DB.get('projects').find(x=>x.id===editId);if(p){document.getElementById('project-edit-id').value=p.id;document.getElementById('project-name').value=p.name;document.getElementById('project-desc').value=p.description||'';document.getElementById('project-budget').value=p.budget||'';document.getElementById('modal-project-title').textContent='Edit Proyek';}}openModal('modal-project');}
-function editProject(id){openProjectModal(id);}
-function saveProject(){const nm=document.getElementById('project-name').value.trim(),ds=document.getElementById('project-desc').value.trim(),bg=Number(document.getElementById('project-budget').value)||0,ei=document.getElementById('project-edit-id').value;if(!nm){showToast('Nama proyek wajib diisi','error');return;}let ps=DB.get('projects');if(ei){const idx=ps.findIndex(p=>p.id===ei);if(idx>=0){ps[idx].name=nm;ps[idx].description=ds;ps[idx].budget=bg;}}else{ps.push({id:DB.id(),name:nm,description:ds,budget:bg,createdAt:todayStr()});}DB.set('projects',ps);closeModal('modal-project');showToast(ei?'Proyek diperbarui':'Proyek ditambahkan','success');renderCurrentView();}
-function deleteProject(id){confirmDelete('Proyek dan semua data terkait akan dihapus.',()=>{DB.set('projects',DB.get('projects').filter(p=>p.id!==id));DB.set('transactions',DB.get('transactions').filter(t=>t.projectId!==id));DB.set('reports',DB.get('reports').filter(r=>r.projectId!==id));DB.set('orders',DB.get('orders').filter(o=>o.projectId!==id));showToast('Proyek dihapus','success');closeProjectDetail();renderCurrentView();});}
+// ========== PROYEK ==========
+function rPL(){
+    var ps=DB.g('projects'),txs=DB.g('transactions'),el=document.getElementById('plist');
+    if(!ps.length){el.innerHTML='<div class="empt"><i class="fas fa-building"></i><h3>Belum Ada Proyek</h3><p>Tambahkan proyek untuk mulai mencatat</p></div>';return}
+    var h='';
+    for(var i=0;i<ps.length;i++){var p=ps[i];var inc=0,exp=0;for(var j=0;j<txs.length;j++){if(txs[j].projectId===p.id){if(txs[j].type==='income')inc+=Number(txs[j].amount)||0;else exp+=Number(txs[j].amount)||0}}var pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
+    h+='<div class="card p-5 mb-3 cursor-pointer" onclick="opd(\''+p.id+'\')"><div class="flex justify-between items-start mb-2"><div class="flex-1 min-w-0"><p class="font-bold text-lg">'+p.name+'</p><p class="text-sm text-gray-400 mt-1">'+(p.description||'Tanpa deskripsi')+'</p></div><button onclick="event.stopPropagation();epm(\''+p.id+'\')" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-pen text-sm"></i></button></div><div class="grid grid-cols-3 gap-2 mt-4 text-center"><div class="bg-green-50 rounded-xl p-3"><p class="text-xs text-green-600 font-bold">Masuk</p><p class="text-sm font-black text-green-700">'+fRp(inc)+'</p></div><div class="bg-red-50 rounded-xl p-3"><p class="text-xs text-red-600 font-bold">Keluar</p><p class="text-sm font-black text-red-700">'+fRp(exp)+'</p></div><div class="bg-amber-50 rounded-xl p-3"><p class="text-xs text-amber-600 font-bold">Sisa</p><p class="text-sm font-black text-amber-700">'+fRp(p.budget-exp)+'</p></div></div><div class="pbar mt-4"><div class="pfill '+(pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500')+'" style="width:'+pc+'%"></div></div><p class="text-sm text-gray-400 mt-2 text-right font-bold">'+Math.round(pc)+'% terpakai</p></div>'}
+    el.innerHTML=h;
+}
+function opm(eid){document.getElementById('mp-eid').value='';document.getElementById('mp-nm').value='';document.getElementById('mp-ds').value='';document.getElementById('mp-bg').value='';document.getElementById('mp-t').textContent='Tambah Proyek Baru';if(eid){var p=null;var ps=DB.g('projects');for(var i=0;i<ps.length;i++){if(ps[i].id===eid){p=ps[i];break}}if(p){document.getElementById('mp-eid').value=p.id;document.getElementById('mp-nm').value=p.name;document.getElementById('mp-ds').value=p.description||'';document.getElementById('mp-bg').value=p.budget||'';document.getElementById('mp-t').textContent='Edit Proyek'}}om('m-proj')}
+function epm(id){opm(id)}
+function sp(){var nm=document.getElementById('mp-nm').value.trim(),ds=document.getElementById('mp-ds').value.trim(),bg=Number(document.getElementById('mp-bg').value)||0,ei=document.getElementById('mp-eid').value;if(!nm){toast('Nama proyek wajib diisi','e');return}var ps=DB.g('projects');if(ei){for(var i=0;i<ps.length;i++){if(ps[i].id===ei){ps[i].name=nm;ps[i].description=ds;ps[i].budget=bg;break}}}else{ps.push({id:DB.id(),name:nm,description:ds,budget:bg,createdAt:tS()})}DB.s('projects',ps);cm('m-proj');toast(ei?'Proyek diperbarui':'Proyek ditambahkan','s');rv()}
+function dpj(id){cfd('Proyek dan semua data terkait akan dihapus.',function(){var ps=DB.g('projects').filter(function(p){return p.id!==id});var txs=DB.g('transactions').filter(function(t){return t.projectId!==id});var rps=DB.g('reports').filter(function(r){return r.projectId!==id});var ors=DB.g('orders').filter(function(o){return o.projectId!==id});DB.s('projects',ps);DB.s('transactions',txs);DB.s('reports',rps);DB.s('orders',ors);toast('Proyek dihapus','s');cpd();rv()})}
 
-// ==================== DETAIL PROYEK ====================
-function openProjectDetail(id){currentProjectId=id;document.getElementById('project-list-view').style.display='none';document.getElementById('project-detail-view').classList.add('active');renderProjectDetail();}
-function closeProjectDetail(){document.getElementById('project-list-view').style.display='block';document.getElementById('project-detail-view').classList.remove('active');currentProjectId=null;renderProjectList();}
+// ========== DETAIL PROYEK ==========
+function opd(id){cPid=id;document.getElementById('plv').style.display='none';document.getElementById('pdv').classList.add('active');rPD()}
+function cpd(){document.getElementById('plv').style.display='block';document.getElementById('pdv').classList.remove('active');cPid=null;rPL()}
+function rPD(){
+    var ps=DB.g('projects'),p=null;for(var i=0;i<ps.length;i++){if(ps[i].id===cPid){p=ps[i];break}}if(!p)return;
+    var txs=DB.g('transactions').filter(function(t){return t.projectId===p.id}).sort(function(a,b){return a.date.localeCompare(b.date)});
+    var inc=0,exp=0,cI=0,cO=0,tI=0,tO=0;
+    for(var i=0;i<txs.length;i++){var t=txs[i];var a=Number(t.amount)||0;if(t.type==='income'){inc+=a;if(t.method==='transfer')tI+=a;else cI+=a}else{exp+=a;if(t.method==='transfer')tO+=a;else cO+=a}}
+    var pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
+    var h='<div class="card p-5 mb-4" style="border-left:5px solid var(--pri3)"><div class="flex justify-between items-start"><div><h3 class="font-black text-xl">'+p.name+'</h3><p class="text-sm text-gray-400 mt-1">'+(p.description||'Tanpa deskripsi')+'</p></div><button onclick="dpj(\''+p.id+'\')" class="bd text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button></div></div>';
+    h+='<div class="grid grid-cols-2 gap-3 mb-4"><div class="card p-4 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Total Pemasukan</p><p class="text-lg font-black text-green-700">'+fRp(inc)+'</p></div><div class="card p-4 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Total Pengeluaran</p><p class="text-lg font-black text-red-700">'+fRp(exp)+'</p></div></div>';
+    h+='<div class="card p-4 mb-4"><p class="text-xs font-black text-gray-500 uppercase mb-2">Metode Pembayaran</p><div class="grid grid-cols-2 gap-2"><div class="bg-emerald-50 rounded-xl p-3"><p class="text-sm font-bold text-emerald-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Masuk</p><p class="text-sm font-black text-emerald-800">'+fRp(cI)+'</p></div><div class="bg-blue-50 rounded-xl p-3"><p class="text-sm font-bold text-blue-700"><i class="fas fa-building-columns mr-1"></i>Transfer Masuk</p><p class="text-sm font-black text-blue-800">'+fRp(tI)+'</p></div><div class="bg-red-50 rounded-xl p-3"><p class="text-sm font-bold text-red-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Keluar</p><p class="text-sm font-black text-red-800">'+fRp(cO)+'</p></div><div class="bg-orange-50 rounded-xl p-3"><p class="text-sm font-bold text-orange-700"><i class="fas fa-building-columns mr-1"></i>Transfer Keluar</p><p class="text-sm font-black text-orange-800">'+fRp(tO)+'</p></div></div></div>';
+    h+='<div class="card p-4 mb-4"><div class="flex justify-between text-sm mb-1"><span class="font-bold text-gray-500">Budget: '+fRp(p.budget)+'</span><span class="font-black '+(pc>90?'text-red-500':'text-green-600')+'">'+Math.round(pc)+'%</span></div><div class="pbar"><div class="pfill '+(pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500')+'" style="width:'+pc+'%"></div></div><p class="text-sm text-gray-400 mt-2">Sisa: '+fRp(p.budget-exp)+'</p></div>';
+    h+='<div class="flex items-center justify-between mb-3"><h4 class="text-sm font-black text-gray-500 uppercase">Laporan Keuangan</h4><button onclick="otm(\''+p.id+'\')" class="ba text-xs"><i class="fas fa-plus mr-1"></i>Tambah</button></div>';
 
-function renderProjectDetail(){
-    const ps=DB.get('projects'),p=ps.find(x=>x.id===currentProjectId);
-    if(!p)return;
-    const txs=DB.get('transactions').filter(t=>t.projectId===p.id).sort((a,b)=>a.date.localeCompare(b.date));
-    let inc=0,exp=0,cIn=0,cOut=0,tIn=0,tOut=0;
-    txs.forEach(t=>{const a=Number(t.amount)||0;if(t.type==='income'){inc+=a;if(t.method==='transfer')tIn+=a;else cIn+=a;}else{exp+=a;if(t.method==='transfer')tOut+=a;else cOut+=a;}});
-    const pc=p.budget>0?Math.min(100,(exp/p.budget)*100):0;
-
-    let h=`<div class="card p-5 mb-4" style="border-left:5px solid var(--primary-ll);"><div class="flex justify-between items-start"><div><h3 class="font-black text-xl">${p.name}</h3><p class="text-sm text-gray-400 mt-1">${p.description||'Tanpa deskripsi'}</p></div><button onclick="deleteProject('${p.id}')" class="btn-danger text-xs"><i class="fas fa-trash mr-1"></i>Hapus</button></div></div>
-    <div class="grid grid-cols-2 gap-3 mb-4"><div class="card p-4 text-center bg-green-50"><p class="text-xs font-bold text-green-600">Total Pemasukan</p><p class="text-lg font-black text-green-700">${formatRp(inc)}</p></div><div class="card p-4 text-center bg-red-50"><p class="text-xs font-bold text-red-600">Total Pengeluaran</p><p class="text-lg font-black text-red-700">${formatRp(exp)}</p></div></div>
-    <div class="card p-4 mb-4"><p class="text-xs font-black text-gray-500 uppercase mb-2">Metode Pembayaran</p><div class="grid grid-cols-2 gap-2"><div class="bg-emerald-50 rounded-xl p-3"><p class="text-sm font-bold text-emerald-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Masuk</p><p class="text-sm font-black text-emerald-800">${formatRp(cIn)}</p></div><div class="bg-blue-50 rounded-xl p-3"><p class="text-sm font-bold text-blue-700"><i class="fas fa-building-columns mr-1"></i>Transfer Masuk</p><p class="text-sm font-black text-blue-800">${formatRp(tIn)}</p></div><div class="bg-red-50 rounded-xl p-3"><p class="text-sm font-bold text-red-700"><i class="fas fa-money-bill-wave mr-1"></i>Cash Keluar</p><p class="text-sm font-black text-red-800">${formatRp(cOut)}</p></div><div class="bg-orange-50 rounded-xl p-3"><p class="text-sm font-bold text-orange-700"><i class="fas fa-building-columns mr-1"></i>Transfer Keluar</p><p class="text-sm font-black text-orange-800">${formatRp(tOut)}</p></div></div></div>
-    <div class="card p-4 mb-4"><div class="flex justify-between text-sm mb-1"><span class="font-bold text-gray-500">Budget: ${formatRp(p.budget)}</span><span class="font-black ${pc>90?'text-red-500':'text-green-600'}">${Math.round(pc)}%</span></div><div class="progress-bar"><div class="progress-fill ${pc>90?'bg-red-500':pc>70?'bg-amber-500':'bg-green-500'}" style="width:${pc}%"></div></div><p class="text-sm text-gray-400 mt-2">Sisa: ${formatRp(p.budget-exp)}</p></div>
-    <div class="flex items-center justify-between mb-3"><h4 class="text-sm font-black text-gray-500 uppercase">Laporan Keuangan</h4><button onclick="openTransactionModal('${p.id}')" class="btn-accent text-xs"><i class="fas fa-plus mr-1"></i>Tambah</button></div>`;
-
-    if(!txs.length){h+='<div class="empty-state py-8"><i class="fas fa-receipt" style="font-size:36px;"></i><h3 style="font-size:16px;">Belum ada transaksi</h3></div>';}
+    if(!txs.length){h+='<div class="empt py-8"><i class="fas fa-receipt" style="font-size:36px"></i><h3 style="font-size:16px">Belum ada transaksi</h3></div>'}
     else{
-        h+=`<div class="fin-table-wrap mb-3"><table class="fin-table"><thead><tr><th style="text-align:left;border-radius:12px 0 0 0;">Tanggal</th><th style="text-align:left;">Keterangan</th><th style="text-align:center;">Metode</th><th style="text-align:right;">Pemasukan</th><th style="text-align:right;border-radius:0 12px 0 0;">Pengeluaran</th></tr></thead><tbody>`;
-        txs.forEach(tx=>{
-            const mB=tx.method==='transfer'?'<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:800;">TF</span>':'<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:800;">CS</span>';
-            h+=`<tr><td style="white-space:nowrap;font-size:12px;color:#64748b;">${formatDate(tx.date)}</td><td style="font-weight:700;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${tx.description||'-'}</td><td style="text-align:center;">${mB}</td><td class="${tx.type==='income'?'col-income':'col-empty'}">${tx.type==='income'?formatRp(tx.amount):'-'}</td><td class="${tx.type==='expense'?'col-expense':'col-empty'}">${tx.type==='expense'?formatRp(tx.amount):'-'}</td></tr>`;
-        });
-        const saldo=inc-exp;
-        h+=`<tr class="row-total"><td colspan="3" style="text-align:right;font-weight:900;color:var(--primary);">TOTAL</td><td class="col-income" style="font-size:15px;">${formatRp(inc)}</td><td class="col-expense" style="font-size:15px;">${formatRp(exp)}</td></tr>`;
-        h+=`<tr class="row-total" style="background:#fffbeb!important;"><td colspan="3" style="text-align:right;font-weight:900;color:var(--accent);">SALDO</td><td colspan="2" style="text-align:right;font-weight:900;font-size:15px;color:${saldo>=0?'#16A34A':'#DC2626'};">${formatRp(saldo)}</td></tr>`;
-        h+=`</tbody></table></div>`;
+        h+='<div class="ftbl-w mb-3"><table class="ftbl"><thead><tr><th style="text-align:left;border-radius:12px 0 0 0">Tanggal</th><th style="text-align:left">Keterangan</th><th style="text-align:center">Metode</th><th style="text-align:right">Pemasukan</th><th style="text-align:right;border-radius:0 12px 0 0">Pengeluaran</th></tr></thead><tbody>';
+        for(var i=0;i<txs.length;i++){var t=txs[i];var mb=t.method==='transfer'?'<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:800">TF</span>':'<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:800">CS</span>';
+        h+='<tr><td style="white-space:nowrap;font-size:12px;color:#64748b">'+fDt(t.date)+'</td><td style="font-weight:700;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(t.description||'-')+'</td><td style="text-align:center">'+mb+'</td><td class="'+(t.type==='income'?'ci':'cd')+'">'+(t.type==='income'?fRp(t.amount):'-')+'</td><td class="'+(t.type==='expense'?'ce':'cd')+'">'+(t.type==='expense'?fRp(t.amount):'-')+'</td></tr>'}
+        var sal=inc-exp;
+        h+='<tr class="rt"><td colspan="3" style="text-align:right;font-weight:900;color:var(--pri)">TOTAL</td><td class="ci" style="font-size:15px">'+fRp(inc)+'</td><td class="ce" style="font-size:15px">'+fRp(exp)+'</td></tr>';
+        h+='<tr class="rt" style="background:#fffbeb!important"><td colspan="3" style="text-align:right;font-weight:900;color:var(--acc)">SALDO</td><td colspan="2" style="text-align:right;font-weight:900;font-size:15px;color:'+(sal>=0?'#16A34A':'#DC2626')+'">'+fRp(sal)+'</td></tr>';
+        h+='</tbody></table></div>'
     }
-    document.getElementById('project-detail-content').innerHTML=h;
+    document.getElementById('pdetail').innerHTML=h;
 }
 
-// ==================== TRANSAKSI ====================
-function openTransactionModal(pid){document.getElementById('tx-project-id').value=pid;document.getElementById('tx-amount').value='';document.getElementById('tx-desc').value='';document.getElementById('tx-date').value=todayStr();document.querySelectorAll('input[name="tx-type"]')[1].checked=true;document.querySelectorAll('input[name="tx-method"]')[0].checked=true;openModal('modal-transaction');}
-function saveTransaction(){const pid=document.getElementById('tx-project-id').value,tp=document.querySelector('input[name="tx-type"]:checked').value,mt=document.querySelector('input[name="tx-method"]:checked').value,am=Number(document.getElementById('tx-amount').value)||0,ds=document.getElementById('tx-desc').value.trim(),dt=document.getElementById('tx-date').value;if(!am){showToast('Jumlah wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let txs=DB.get('transactions');txs.push({id:DB.id(),projectId:pid,type:tp,method:mt,amount:am,description:ds,date:dt});DB.set('transactions',txs);closeModal('modal-transaction');showToast('Transaksi ditambahkan','success');renderProjectDetail();}
-function deleteTransaction(id){confirmDelete('Hapus transaksi ini?',()=>{DB.set('transactions',DB.get('transactions').filter(t=>t.id!==id));showToast('Transaksi dihapus','success');renderProjectDetail();});}
+// ========== TRANSAKSI ==========
+function otm(pid){document.getElementById('mt-pid').value=pid;document.getElementById('mt-am').value='';document.getElementById('mt-ds').value='';document.getElementById('mt-dt').value=tS();document.querySelectorAll('input[name="mt-tp"]')[1].checked=true;document.querySelectorAll('input[name="mt-mt"]')[0].checked=true;om('m-tx')}
+function stx(){var pid=document.getElementById('mt-pid').value;var tp=document.querySelector('input[name="mt-tp"]:checked').value;var mt=document.querySelector('input[name="mt-mt"]:checked').value;var am=Number(document.getElementById('mt-am').value)||0;var ds=document.getElementById('mt-ds').value.trim();var dt=document.getElementById('mt-dt').value;if(!am){toast('Jumlah wajib diisi','e');return}if(!dt){toast('Tanggal wajib diisi','e');return}var txs=DB.g('transactions');txs.push({id:DB.id(),projectId:pid,type:tp,method:mt,amount:am,description:ds,date:dt});DB.s('transactions',txs);cm('m-tx');toast('Transaksi ditambahkan','s');rPD()}
+function dtx(id){cfd('Hapus transaksi ini?',function(){DB.s('transactions',DB.g('transactions').filter(function(t){return t.id!==id}));toast('Transaksi dihapus','s');rPD()})}
 
-// ==================== PESAN BARANG ====================
-function renderOrderList(){
-    const orders=DB.get('orders').sort((a,b)=>b.date.localeCompare(a.date));
-    const projects=DB.get('projects');
-    const list=document.getElementById('order-list');
-
-    if(!orders.length){list.innerHTML='<div class="empty-state"><i class="fas fa-boxes-stacked"></i><h3>Belum Ada Pesanan</h3><p>Buat nota pesanan barang untuk proyek</p></div>';return;}
-
-    let h='';
-    orders.forEach(o=>{
-        const pj=projects.find(p=>p.id===o.projectId);
-        const itemCount=o.items?o.items.length:0;
-        h+=`<div class="card p-5 mb-3 cursor-pointer" onclick="viewNota('${o.id}')">
-            <div class="flex items-start justify-between">
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-lg">${o.tahap}</p>
-                    <p class="text-sm text-gray-400 mt-1">${pj?pj.name:'-'}</p>
-                    <div class="flex items-center gap-3 mt-2">
-                        <span class="text-sm font-bold text-amber-600"><i class="fas fa-user mr-1"></i>${o.pemesan}</span>
-                        <span class="text-sm text-gray-400"><i class="fas fa-calendar mr-1"></i>${formatDate(o.date)}</span>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="tag" style="background:#f3e8ff;color:#6b21a8;font-size:13px;padding:5px 14px;"><i class="fas fa-box mr-1"></i>${itemCount} barang</span>
-                </div>
-            </div>
-        </div>`;
-    });
-    list.innerHTML=h;
+// ========== PESAN BARANG ==========
+function rOL(){
+    var ors=DB.g('orders').sort(function(a,b){return b.date.localeCompare(a.date)});
+    var ps=DB.g('projects');var el=document.getElementById('olist');
+    if(!ors.length){el.innerHTML='<div class="empt"><i class="fas fa-boxes-stacked"></i><h3>Belum Ada Pesanan</h3><p>Buat nota pesanan barang untuk proyek</p></div>';return}
+    var h='';
+    for(var i=0;i<ors.length;i++){var o=ors[i];var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===o.projectId){pj=ps[j];break}}var ic=o.items?o.items.length:0;
+    h+='<div class="card p-5 mb-3 cursor-pointer" onclick="vn(\''+o.id+'\')"><div class="flex items-start justify-between"><div class="flex-1 min-w-0"><p class="font-bold text-lg">'+o.tahap+'</p><p class="text-sm text-gray-400 mt-1">'+(pj?pj.name:'-')+'</p><div class="flex items-center gap-3 mt-2"><span class="text-sm font-bold text-amber-600"><i class="fas fa-user mr-1"></i>'+o.pemesan+'</span><span class="text-sm text-gray-400"><i class="fas fa-calendar mr-1"></i>'+fDt(o.date)+'</span></div></div><div class="text-right"><span class="tag" style="background:#f3e8ff;color:#6b21a8;font-size:13px;padding:6px 14px"><i class="fas fa-box mr-1"></i>'+ic+' barang</span></div></div></div>'}
+    el.innerHTML=h;
 }
 
-function openOrderModal(){
-    const ps=DB.get('projects');
-    if(!ps.length){showToast('Buat proyek terlebih dahulu','error');return;}
-    document.getElementById('order-tahap').value='';
-    document.getElementById('order-pemesan').value='';
-    document.getElementById('order-date').value=todayStr();
-    document.getElementById('order-project').innerHTML=ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-
-    // Reset items
-    orderItemCount=1;
-    document.getElementById('order-items-container').innerHTML='';
-    addOrderItem();
-
-    openModal('modal-order');
+function oom(){
+    var ps=DB.g('projects');if(!ps.length){toast('Buat proyek terlebih dahulu','e');return}
+    document.getElementById('mo-th').value='';document.getElementById('mo-pm').value='';document.getElementById('mo-dt').value=tS();
+    var sh='';for(var i=0;i<ps.length;i++){sh+='<option value="'+ps[i].id+'">'+ps[i].name+'</option>'}
+    document.getElementById('mo-pid').innerHTML=sh;
+    oic=1;document.getElementById('oic').innerHTML='';aoi();
+    om('m-ord');
 }
 
-function addOrderItem(){
-    const container=document.getElementById('order-items-container');
-    const row=document.createElement('div');
-    row.className='item-row';
-    row.id='item-row-'+orderItemCount;
-    const num=orderItemCount;
-    row.innerHTML=`
-        <span class="text-sm font-black text-gray-300 w-6 text-center flex-shrink-0">${num}</span>
-        <input type="text" class="form-input" style="flex:2;padding:10px 12px;font-size:14px;" placeholder="Nama barang" id="item-name-${num}">
-        <input type="number" class="form-input" style="flex:0.6;padding:10px 12px;font-size:14px;text-align:center;" placeholder="Qty" min="1" id="item-qty-${num}">
-        <input type="text" class="form-input" style="flex:0.8;padding:10px 12px;font-size:14px;text-align:center;" placeholder="Satuan" id="item-sat-${num}">
-        <button onclick="removeOrderItem(${num})" class="w-9 h-9 rounded-lg bg-red-50 text-red-400 flex items-center justify-center flex-shrink-0"><i class="fas fa-times text-xs"></i></button>
-    `;
-    container.appendChild(row);
-    orderItemCount++;
+function aoi(){
+    var c=document.getElementById('oic');var r=document.createElement('div');r.className='irow';r.id='ir-'+oic;var n=oic;
+    r.innerHTML='<span class="text-sm font-black text-gray-300 w-7 text-center flex-shrink-0">'+n+'</span><input type="text" class="finp" style="flex:2;padding:10px 12px" placeholder="Nama barang" id="in-'+n+'"><input type="number" class="finp" style="flex:0.5;padding:10px 8px;text-align:center" placeholder="Qty" min="1" id="iq-'+n+'"><input type="text" class="finp" style="flex:0.7;padding:10px 8px;text-align:center" placeholder="Satuan" id="is-'+n+'"><button onclick="roi('+n+')" class="w-9 h-9 rounded-lg bg-red-50 text-red-400 flex items-center justify-center flex-shrink-0"><i class="fas fa-times text-xs"></i></button>';
+    c.appendChild(r);oic++;
 }
 
-function removeOrderItem(num){
-    const row=document.getElementById('item-row-'+num);
-    if(row)row.remove();
-    // Renomor ulang
-    const rows=document.querySelectorAll('#order-items-container .item-row');
-    rows.forEach((r,i)=>{r.querySelector('span').textContent=i+1;});
+function roi(n){var r=document.getElementById('ir-'+n);if(r)r.remove();var rs=document.querySelectorAll('#oic .irow');for(var i=0;i<rs.length;i++){rs[i].querySelector('span').textContent=i+1}}
+
+function so(){
+    var pid=document.getElementById('mo-pid').value;var th=document.getElementById('mo-th').value.trim();var pm=document.getElementById('mo-pm').value.trim();var dt=document.getElementById('mo-dt').value;
+    if(!th){toast('Tahap pekerjaan wajib diisi','e');return}if(!pm){toast('Nama pemesan wajib diisi','e');return}if(!dt){toast('Tanggal wajib diisi','e');return}
+    var items=[];var rs=document.querySelectorAll('#oic .irow');
+    for(var i=0;i<rs.length;i++){var inp=rs[i].querySelectorAll('input');var nm=inp[0].value.trim();var qt=Number(inp[1].value)||0;var st=inp[2].value.trim()||'pcs';if(nm&&qt>0)items.push({nama:nm,qty:qt,satuan:st})}
+    if(!items.length){toast('Tambahkan minimal 1 barang','e');return}
+    var ors=DB.g('orders');ors.push({id:DB.id(),projectId:pid,tahap:th,pemesan:pm,items:items,date:dt,createdAt:tS()});DB.s('orders',ors);cm('m-ord');toast('Nota pesanan disimpan','s');rOL();
 }
 
-function saveOrder(){
-    const pid=document.getElementById('order-project').value;
-    const tahap=document.getElementById('order-tahap').value.trim();
-    const pemesan=document.getElementById('order-pemesan').value.trim();
-    const dt=document.getElementById('order-date').value;
-
-    if(!tahap){showToast('Tahap pekerjaan wajib diisi','error');return;}
-    if(!pemesan){showToast('Nama pemesan wajib diisi','error');return;}
-    if(!dt){showToast('Tanggal wajib diisi','error');return;}
-
-    // Kumpulkan items
-    const items=[];
-    const rows=document.querySelectorAll('#order-items-container .item-row');
-    rows.forEach(r=>{
-        const inputs=r.querySelectorAll('input');
-        const nama=inputs[0].value.trim();
-        const qty=Number(inputs[1].value)||0;
-        const satuan=inputs[2].value.trim()||'pcs';
-        if(nama&&qty>0){items.push({nama,qty,satuan});}
-    });
-
-    if(!items.length){showToast('Tambahkan minimal 1 barang','error');return;}
-
-    let orders=DB.get('orders');
-    orders.push({id:DB.id(),projectId:pid,tahap,pemesan,items,date:dt,createdAt:todayStr()});
-    DB.set('orders',orders);
-    closeModal('modal-order');
-    showToast('Nota pesanan disimpan','success');
-    renderOrderList();
+function vn(id){
+    var ors=DB.g('orders');var o=null;for(var i=0;i<ors.length;i++){if(ors[i].id===id){o=ors[i];break}}if(!o)return;
+    var ps=DB.g('projects');var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===o.projectId){pj=ps[j];break}}
+    var ih='';if(o.items&&o.items.length){for(var k=0;k<o.items.length;k++){var it=o.items[k];ih+='<tr><td class="cn">'+(k+1)+'</td><td style="font-weight:700">'+it.nama+'</td><td class="cq">'+it.qty+'</td><td class="cs">'+it.satuan+'</td></tr>'}}
+    var h='<div class="nota" id="npr"><div class="nota-t">NOTA PESANAN BARANG</div><div class="nota-st">OMNARPRO — PROJECT MANAGEMENT</div><div class="nota-r"><span class="nota-l">Proyek</span><span class="nota-v">: '+(pj?pj.name:'-')+'</span></div><div class="nota-r"><span class="nota-l">Tahap</span><span class="nota-v">: '+o.tahap+'</span></div><div class="nota-r"><span class="nota-l">Pemesan</span><span class="nota-v">: '+o.pemesan+'</span></div><div class="nota-r"><span class="nota-l">Tanggal</span><span class="nota-v">: '+fDtF(o.date)+'</span></div><hr class="nota-sep"><table class="nota-tb"><thead><tr><th class="cn">No</th><th>Nama Barang</th><th class="cq">Qty</th><th class="cs">Satuan</th></tr></thead><tbody>'+ih+'</tbody></table><hr class="nota-sep"><div class="nota-sg"><div class="nota-sb"><p style="font-size:14px;font-weight:700">Pemesan,</p><div class="nota-sl"></div><p class="nota-sn">'+o.pemesan+'</p></div><div class="nota-sb"><p style="font-size:14px;font-weight:700">Mengetahui,</p><div class="nota-sl"></div><p class="nota-sn">____________</p></div></div></div>';
+    h+='<div class="flex gap-2 mt-4"><button onclick="pnt()" class="bp flex-1 flex items-center justify-center gap-2"><i class="fas fa-print"></i> Cetak Nota</button><button onclick="dor(\''+o.id+'\')" class="bd flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fas fa-trash"></i> Hapus</button></div>';
+    document.getElementById('nc').innerHTML=h;om('m-nota');
 }
 
-function viewNota(id){
-    const orders=DB.get('orders');
-    const o=orders.find(x=>x.id===id);
-    if(!o)return;
-    const projects=DB.get('projects');
-    const pj=projects.find(p=>p.id===o.projectId);
-
-    let itemsHtml='';
-    if(o.items&&o.items.length){
-        o.items.forEach((item,i)=>{
-            itemsHtml+=`<tr><td class="col-no">${i+1}</td><td style="font-weight:700;">${item.nama}</td><td class="col-qty">${item.qty}</td><td class="col-sat">${item.satuan}</td></tr>`;
-        });
-    }
-
-    const html=`
-    <div class="nota" id="nota-print">
-        <div class="nota-title">NOTA PESANAN BARANG</div>
-        <div class="nota-subtitle">OMNARPRO — PROJECT MANAGEMENT</div>
-
-        <div class="nota-row"><span class="nota-label">Proyek</span><span class="nota-value">: ${pj?pj.name:'-'}</span></div>
-        <div class="nota-row"><span class="nota-label">Tahap</span><span class="nota-value">: ${o.tahap}</span></div>
-        <div class="nota-row"><span class="nota-label">Pemesan</span><span class="nota-value">: ${o.pemesan}</span></div>
-        <div class="nota-row"><span class="nota-label">Tanggal</span><span class="nota-value">: ${formatDateFull(o.date)}</span></div>
-
-        <hr class="nota-separator">
-
-        <table class="nota-table">
-            <thead><tr><th class="col-no">No</th><th>Nama Barang</th><th class="col-qty">Qty</th><th class="col-sat">Satuan</th></tr></thead>
-            <tbody>${itemsHtml}</tbody>
-        </table>
-
-        <hr class="nota-separator">
-
-        <div class="nota-sign">
-            <div class="nota-sign-box">
-                <p style="font-size:13px;font-weight:700;">Pemesan,</p>
-                <div class="nota-sign-line"></div>
-                <p class="nota-sign-name">${o.pemesan}</p>
-            </div>
-            <div class="nota-sign-box">
-                <p style="font-size:13px;font-weight:700;">Mengetahui,</p>
-                <div class="nota-sign-line"></div>
-                <p class="nota-sign-name">____________</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="flex gap-2 mt-4">
-        <button onclick="printNota()" class="btn-primary flex-1 flex items-center justify-center gap-2"><i class="fas fa-print"></i> Cetak Nota</button>
-        <button onclick="deleteOrder('${o.id}')" class="btn-danger flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><i class="fas fa-trash"></i> Hapus</button>
-    </div>`;
-
-    document.getElementById('nota-content').innerHTML=html;
-    openModal('modal-nota');
+function pnt(){
+    var n=document.getElementById('npr');if(!n)return;
+    var w=window.open('','','width=400,height=700');
+    w.document.write('<html><head><title>Nota Pesanan</title><style>body{font-family:sans-serif;padding:10px;margin:0}.nota{border:2px solid #000;padding:16px;max-width:350px;margin:0 auto}.nota-t{text-align:center;font-size:16px;font-weight:900;letter-spacing:2px;margin-bottom:2px}.nota-st{text-align:center;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:12px}.nota-r{display:flex;padding:2px 0;font-size:12px}.nota-l{width:80px;font-weight:700;color:#666}.nota-v{font-weight:700}.nota-sep{border:none;border-top:1px dashed #999;margin:8px 0}table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}th{background:#f0f0f0;padding:6px;text-align:left;font-size:10px;border-bottom:2px solid #000}td{padding:5px;border-bottom:1px solid #ddd}.cn{width:30px;text-align:center}.cq{width:50px;text-align:center;font-weight:700}.cs{width:60px;text-align:center;color:#666}.nota-sg{display:flex;justify-content:space-between;margin-top:30px;padding:0 10px}.nota-sb{text-align:center;min-width:100px}.nota-sl{border-bottom:1px solid #000;margin-bottom:2px;height:40px}.nota-sn{font-size:11px;font-weight:700}</style></head><body>');
+    w.document.write(n.outerHTML);w.document.write('</body></html>');w.document.close();
+    setTimeout(function(){w.print();w.close()},300);
 }
 
-function printNota(){
-    const nota=document.getElementById('nota-print');
-    if(!nota)return;
-    const w=window.open('','','width=400,height=700');
-    w.document.write('<html><head><title>Nota Pesanan</title><style>body{font-family:sans-serif;padding:10px;} .nota{border:2px solid #000;padding:16px;max-width:350px;margin:0 auto;} .nota-title{text-align:center;font-size:16px;font-weight:900;letter-spacing:2px;margin-bottom:2px;} .nota-subtitle{text-align:center;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:12px;} .nota-row{display:flex;padding:2px 0;font-size:12px;} .nota-label{width:80px;font-weight:700;color:#666;} .nota-value{font-weight:700;} .nota-separator{border:none;border-top:1px dashed #999;margin:8px 0;} table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0;} th{background:#f0f0f0;padding:6px;text-align:left;font-size:10px;border-bottom:2px solid #000;} td{padding:5px;border-bottom:1px solid #ddd;} .col-no{width:30px;text-align:center;} .col-qty{width:50px;text-align:center;font-weight:700;} .col-sat{width:60px;text-align:center;color:#666;} .nota-sign{display:flex;justify-content:space-between;margin-top:30px;padding:0 10px;} .nota-sign-box{text-align:center;min-width:100px;} .nota-sign-line{border-bottom:1px solid #000;margin-bottom:2px;height:40px;} .nota-sign-name{font-size:11px;font-weight:700;}</style></head><body>');
-    w.document.write(nota.outerHTML);
-    w.document.write('</body></html>');
-    w.document.close();
-    setTimeout(()=>{w.print();w.close();},300);
-}
+function dor(id){cfd('Hapus nota pesanan ini?',function(){DB.s('orders',DB.g('orders').filter(function(o){return o.id!==id}));toast('Nota dihapus','s');cm('m-nota');rOL()})}
 
-function deleteOrder(id){confirmDelete('Hapus nota pesanan ini?',()=>{DB.set('orders',DB.get('orders').filter(o=>o.id!==id));showToast('Nota dihapus','success');closeModal('modal-nota');renderOrderList();});}
+// ========== LAPORAN ==========
+function rRL(){var rps=DB.g('reports').sort(function(a,b){return b.date.localeCompare(a.date)}),ps=DB.g('projects'),el=document.getElementById('rlist');if(!rps.length){el.innerHTML='<div class="empt"><i class="fas fa-clipboard-list"></i><h3>Belum Ada Laporan</h3><p>Catat aktivitas harian proyek</p></div>';return}var g={};for(var i=0;i<rps.length;i++){if(!g[rps[i].date])g[rps[i].date]=[];g[rps[i].date].push(rps[i])}var h='';var dk=Object.keys(g).sort(function(a,b){return b.localeCompare(a)});for(var d=0;d<dk.length;d++){h+='<p class="text-sm font-black text-gray-400 uppercase mb-2 mt-4 '+(d===0?'first:mt-0':'')+'">'+fDtF(dk[d])+'</p>';var dr=g[dk[d]];for(var i=0;i<dr.length;i++){var r=dr[i];var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===r.projectId){pj=ps[j];break}}h+='<div class="card p-5 mb-3"><div class="flex items-start gap-3">'+(r.image?'<img src="'+r.image+'" class="imth flex-shrink-0" onclick="vib(this.src)">':'<div class="w-16 h-16 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-green-300 text-xl"></i></div>')+'<div class="flex-1 min-w-0"><div class="flex justify-between items-start"><p class="font-bold text-base">'+r.title+'</p><button onclick="drp(\''+r.id+'\')" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-trash text-sm"></i></button></div><p class="text-sm text-amber-600 font-bold mt-1">'+(pj?pj.name:'-')+'</p><p class="text-sm text-gray-500 mt-1 leading-relaxed">'+r.content+'</p></div></div></div>'}}el.innerHTML=h}
+function orm(){var ps=DB.g('projects');if(!ps.length){toast('Buat proyek terlebih dahulu','e');return}document.getElementById('mr-tl').value='';document.getElementById('mr-ct').value='';document.getElementById('mr-dt').value=tS();uImg=null;var sh='';for(var i=0;i<ps.length;i++){sh+='<option value="'+ps[i].id+'">'+ps[i].name+'</option>'}document.getElementById('mr-pid').innerHTML=sh;var a=document.getElementById('upl');a.classList.remove('has');a.innerHTML='<i class="fas fa-camera text-3xl text-gray-400 mb-2"></i><p class="text-sm font-semibold text-gray-500">Tap untuk ambil foto</p>';document.getElementById('mr-img').value='';om('m-rep')}
+function hiu(inp){if(!inp.files||!inp.files[0])return;var f=inp.files[0];if(!f.type.startsWith('image/')){toast('File harus gambar','e');return}var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=img.width,h=img.height;var mx=800;if(w>mx){h=(h*mx)/w;w=mx}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);uImg=c.toDataURL('image/jpeg',0.7);var a=document.getElementById('upl');a.classList.add('has');a.innerHTML='<img src="'+uImg+'" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover"><p class="text-sm font-semibold text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>Foto dipilih — tap untuk ganti</p>'};img.src=e.target.result};rd.readAsDataURL(f)}
+function sr(){var pid=document.getElementById('mr-pid').value,tl=document.getElementById('mr-tl').value.trim(),ct=document.getElementById('mr-ct').value.trim(),dt=document.getElementById('mr-dt').value;if(!tl){toast('Judul wajib diisi','e');return}if(!dt){toast('Tanggal wajib diisi','e');return}var rs=DB.g('reports');rs.push({id:DB.id(),projectId:pid,title:tl,content:ct,image:uImg,date:dt,createdAt:tS()});DB.s('reports',rs);cm('m-rep');uImg=null;toast('Laporan disimpan','s');rRL()}
+function drp(id){cfd('Hapus laporan ini?',function(){DB.s('reports',DB.g('reports').filter(function(r){return r.id!==id}));toast('Laporan dihapus','s');rRL()})}
+function vib(src){document.getElementById('ivi').src=src;om('m-img')}
 
-// ==================== LAPORAN ====================
-function renderReportList(){const reports=DB.get('reports').sort((a,b)=>b.date.localeCompare(a.date)),projects=DB.get('projects'),list=document.getElementById('report-list');if(!reports.length){list.innerHTML='<div class="empty-state"><i class="fas fa-clipboard-list"></i><h3>Belum Ada Laporan</h3><p>Catat aktivitas harian proyek</p></div>';return;}const g={};reports.forEach(r=>{if(!g[r.date])g[r.date]=[];g[r.date].push(r);});let h='';Object.keys(g).sort((a,b)=>b.localeCompare(a)).forEach(d=>{h+=`<p class="text-sm font-black text-gray-400 uppercase mb-2 mt-4 first:mt-0">${formatDateFull(d)}</p>`;g[d].forEach(r=>{const pj=projects.find(p=>p.id===r.projectId);h+=`<div class="card p-5 mb-3"><div class="flex items-start gap-3">${r.image?`<img src="${r.image}" class="img-thumb flex-shrink-0" onclick="viewImageBySrc(this.src)">`:'<div class="w-16 h-16 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-alt text-green-300 text-xl"></i></div>'}<div class="flex-1 min-w-0"><div class="flex justify-between items-start"><p class="font-bold text-base">${r.title}</p><button onclick="deleteReport('${r.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500"><i class="fas fa-trash text-sm"></i></button></div><p class="text-sm text-amber-600 font-bold mt-1">${pj?pj.name:'-'}</p><p class="text-sm text-gray-500 mt-1 leading-relaxed">${r.content}</p></div></div></div>`;});});list.innerHTML=h;}
-function openReportModal(){const ps=DB.get('projects');if(!ps.length){showToast('Buat proyek terlebih dahulu','error');return;}document.getElementById('report-edit-id').value='';document.getElementById('report-title').value='';document.getElementById('report-content').value='';document.getElementById('report-date').value=todayStr();uploadedImage=null;document.getElementById('report-project').innerHTML=ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');const a=document.getElementById('upload-area');a.classList.remove('has-image');a.innerHTML='<i class="fas fa-camera text-3xl text-gray-400 mb-2"></i><p class="text-sm font-semibold text-gray-500">Tap untuk ambil foto / pilih galeri</p>';document.getElementById('report-image').value='';openModal('modal-report');}
-function handleImageUpload(input){if(!input.files||!input.files[0])return;const file=input.files[0];if(!file.type.startsWith('image/')){showToast('File harus gambar','error');return;}const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;const mx=800;if(w>mx){h=(h*mx)/w;w=mx;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);uploadedImage=c.toDataURL('image/jpeg',0.7);const a=document.getElementById('upload-area');a.classList.add('has-image');a.innerHTML=`<img src="${uploadedImage}" style="width:100%;border-radius:10px;max-height:200px;object-fit:cover;"><p class="text-sm font-semibold text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>Foto dipilih — tap untuk ganti</p>`;};img.src=e.target.result;};reader.readAsDataURL(file);}
-function saveReport(){const pid=document.getElementById('report-project').value,tl=document.getElementById('report-title').value.trim(),ct=document.getElementById('report-content').value.trim(),dt=document.getElementById('report-date').value;if(!tl){showToast('Judul wajib diisi','error');return;}if(!dt){showToast('Tanggal wajib diisi','error');return;}let rs=DB.get('reports');rs.push({id:DB.id(),projectId:pid,title:tl,content:ct,image:uploadedImage,date:dt,createdAt:todayStr()});DB.set('reports',rs);closeModal('modal-report');uploadedImage=null;showToast('Laporan disimpan','success');renderReportList();}
-function deleteReport(id){confirmDelete('Hapus laporan ini?',()=>{DB.set('reports',DB.get('reports').filter(r=>r.id!==id));showToast('Laporan dihapus','success');renderReportList();});}
-function viewImageBySrc(src){document.getElementById('image-viewer-img').src=src;openModal('modal-image');}
+// ========== EXPORT ==========
+function pES(){var ps=DB.g('projects');var h='<option value="">-- Semua Proyek --</option>';for(var i=0;i<ps.length;i++){h+='<option value="'+ps[i].id+'">'+ps[i].name+'</option>'}document.getElementById('ep').innerHTML=h;document.getElementById('ef').value='';document.getElementById('et').value=''}
+function rIG(){var g=document.getElementById('iguide');g.innerHTML='<div class="space-y-4 mt-2"><div class="flex gap-3 items-start"><div class="w-8 h-8 rounded-full bg-green-800 text-white flex items-center justify-center font-black text-sm flex-shrink-0">1</div><div><p class="font-bold">Host di HTTPS</p><p class="text-sm text-gray-500">GitHub Pages, Netlify, Vercel</p></div></div><div class="flex gap-3 items-start"><div class="w-8 h-8 rounded-full bg-green-800 text-white flex items-center justify-center font-black text-sm flex-shrink-0">2</div><div><p class="font-bold">Buka di Chrome Android</p><p class="text-sm text-gray-500">Tap menu → Install app</p></div></div><div class="flex gap-3 items-start"><div class="w-8 h-8 rounded-full bg-green-800 text-white flex items-center justify-center font-black text-sm flex-shrink-0">3</div><div><p class="font-bold">Siap!</p><p class="text-sm text-gray-500">Fullscreen & offline</p></div></div></div>'}
 
-// ==================== EXPORT PDF ====================
-function populateExportSelect(){const ps=DB.get('projects');document.getElementById('export-project').innerHTML='<option value="">-- Semua Proyek --</option>'+ps.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');document.getElementById('export-from').value='';document.getElementById('export-to').value='';}
+function splL(){var o=document.getElementById('pfl');if(!o){o=document.createElement('div');o.id='pfl';o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center';o.innerHTML='<div style="background:#fff;border-radius:22px;padding:30px 26px;text-align:center;max-width:320px;width:90%"><div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div><p style="font-weight:800;font-size:16px;color:#1E293B;margin:0 0 6px">Membuat PDF...</p><p style="font-size:13px;color:#94A3B8;margin:0" id="pfs">Memulai</p></div>';document.body.appendChild(o)}else{o.style.display='flex'}}
+function uS(m){var e=document.getElementById('pfs');if(e)e.textContent=m}
+function hL(){var o=document.getElementById('pfl');if(o)o.style.display='none'}
 
-function showPDFLoading(){let ov=document.getElementById('pdf-loading-overlay');if(!ov){ov=document.createElement('div');ov.id='pdf-loading-overlay';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML=`<div style="background:white;border-radius:22px;padding:30px 26px;text-align:center;max-width:320px;width:90%;"><div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#22C55E;border-radius:50%;animation:pdfspin .8s linear infinite;margin:0 auto 16px;"></div><p style="font-weight:800;font-size:16px;color:#1E293B;margin:0 0 6px;">Membuat PDF...</p><p style="font-size:13px;color:#94A3B8;margin:0;" id="pdf-loading-status">Memulai</p></div><style>@keyframes pdfspin{to{transform:rotate(360deg)}}</style>`;document.body.appendChild(ov);}else{ov.style.display='flex';}}
-function updatePDFStatus(msg){const el=document.getElementById('pdf-loading-status');if(el)el.textContent=msg;}
-function hidePDFLoading(){const ov=document.getElementById('pdf-loading-overlay');if(ov)ov.style.display='none';}
+async function eJ(){if(window.jspdf&&window.jspdf.jsPDF)return true;uS('Memuat library...');try{await lS('js/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true}catch(e){}try{await lS('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true}catch(e){}return false}
+async function eA(){if(window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API&&window.jspdf.jsPDF.API.autoTable)return true;try{await lS('js/jspdf-autotable.min.js');return true}catch(e){}try{await lS('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');return true}catch(e){}return false}
+function lS(src){return new Promise(function(res,rej){var ex=document.querySelector('script[src="'+src+'"]');if(ex){res();return}var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function rI(b){return new Promise(function(res){if(!b||b.length<100){res(null);return}try{var img=new Image();img.onload=function(){var mx=350;var w=img.width,h=img.height;if(w>mx||h>mx){if(w>h){h=Math.round(h*mx/w);w=mx}else{w=Math.round(w*mx/h);h=mx}}var c=document.createElement('canvas');c.width=Math.max(1,w);c.height=Math.max(1,h);c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',0.5))};img.onerror=function(){res(null)};img.src=b}catch(e){res(null)}})}
+function tDL(blob,fn){return new Promise(function(res,rej){try{var u=URL.createObjectURL(blob);var a=document.createElement('a');a.href=u;a.download=fn;a.style.cssText='position:fixed;left:-9999px';document.body.appendChild(a);setTimeout(function(){a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove();res(true)},3000)},100)}catch(e){rej(e)}})}
+async function sPDF(blob,fn){try{var f=new File([blob],fn,{type:'application/pdf'});if(navigator.share){var cs=navigator.canShare?navigator.canShare({files:[f]}):true;if(cs){await navigator.share({title:'Laporan OmnarPRO',files:[f]});return{ok:true,m:'share'}}}}catch(e){if(e.name==='AbortError')return{ok:true,m:'cancel'}}await tDL(blob,fn);return{ok:true,m:'dl'}}
 
-async function ensureJSPDF(){if(window.jspdf&&window.jspdf.jsPDF)return true;updatePDFStatus('Memuat library PDF...');try{await loadScript('js/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true;}catch(e){}try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');if(window.jspdf&&window.jspdf.jsPDF)return true;}catch(e){}return false;}
-async function ensureAutoTable(){if(window.jspdf&&window.jspdf.jsPDF&&window.jspdf.jsPDF.API&&window.jspdf.jsPDF.API.autoTable)return true;try{await loadScript('js/jspdf-autotable.min.js');return true;}catch(e){try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');return true;}catch(e2){return false;}}}
-function loadScript(src){return new Promise((resolve,reject)=>{const existing=document.querySelector('script[src="'+src+'"]');if(existing){resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
-function resizeImgForPDF(base64){return new Promise((resolve)=>{if(!base64||base64.length<100){resolve(null);return;}try{const img=new Image();img.onload=()=>{const maxD=350;let w=img.width,h=img.height;if(w>maxD||h>maxD){if(w>h){h=Math.round(h*maxD/w);w=maxD;}else{w=Math.round(w*maxD/h);h=maxD;}}const c=document.createElement('canvas');c.width=Math.max(1,w);c.height=Math.max(1,h);c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.5));};img.onerror=()=>resolve(null);img.src=base64;}catch(e){resolve(null);}});}
-function triggerDownload(blob,filename){return new Promise((resolve,reject)=>{try{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.cssText='position:fixed;left:-9999px;';document.body.appendChild(a);setTimeout(()=>{a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();resolve(true);},3000);},100);}catch(e){reject(e);}});}
-async function sharePDFBlob(blob,filename){try{const file=new File([blob],filename,{type:'application/pdf'});if(navigator.share){const cs=navigator.canShare?navigator.canShare({files:[file]}):true;if(cs){await navigator.share({title:'Laporan OmnarPRO',text:'Laporan keuangan dan harian proyek',files:[file]});return{ok:true,method:'share'};}}}catch(e){if(e.name==='AbortError')return{ok:true,method:'cancelled'};}await triggerDownload(blob,filename,'application/pdf');return{ok:true,method:'download'};}
-
-async function generatePDF(share){
-    const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;
-    const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports'),ors=DB.get('orders');
-    let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId!==pid),fors=ors.filter(o=>!pid||o.projectId===pid);
-    if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);fors=fors.filter(o=>o.date>=fd);}
-    if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);fors=fors.filter(o=>o.date<=fd);}
-    if(!fps.length){showToast('Tidak ada data','error');return;}
-    showPDFLoading();updatePDFStatus('Memeriksa library...');await new Promise(r=>setTimeout(r,300));
-    const hasJSPDF=await ensureJSPDF();if(!hasJSPDF){hidePDFLoading();showToast('Library PDF gagal. Export teks.','error');setTimeout(()=>exportAsText(),500);return;}
-    const hasAT=await ensureAutoTable();
-    updatePDFStatus('Menyiapkan dokumen...');await new Promise(r=>setTimeout(r,200));
-
+async function gPDF(share){
+    var pid=document.getElementById('ep').value,fd=document.getElementById('ef').value,td=document.getElementById('et').value,tp=document.querySelector('input[name="etp"]:checked').value;
+    var ps=DB.g('projects'),txs=DB.g('transactions'),rps=DB.g('reports'),ors=DB.g('orders');
+    var fps=pid?ps.filter(function(p){return p.id===pid}):ps;
+    var ftx=txs.filter(function(t){return!pid||t.projectId===pid});
+    var frp=rps.filter(function(r){return!pid||r.projectId===pid});
+    var fors=ors.filter(function(o){return!pid||o.projectId===pid});
+    if(fd){ftx=ftx.filter(function(t){return t.date>=fd});frp=frp.filter(function(r){return r.date>=fd});fors=fors.filter(function(o){return o.date>=fd})}
+    if(td){ftx=ftx.filter(function(t){return t.date<=td});frp=frp.filter(function(r){return r.date<=td});fors=fors.filter(function(o){return o.date<=td})}
+    if(!fps.length){toast('Tidak ada data','e');return}
+    splL();uS('Memeriksa library...');await new Promise(function(r){setTimeout(r,300)});
+    var hj=await eJ();if(!hj){hL();toast('Library PDF gagal','e');return}
+    var ha=await eA();uS('Menyiapkan...');await new Promise(function(r){setTimeout(r,200)});
     try{
-        const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});const pw=doc.internal.pageSize.getWidth();const mg=14;let y=12;
-        function hdr(t){doc.setFillColor(20,83,45);doc.rect(0,0,pw,28,'F');doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('OmnarPRO',mg,11);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(t,mg,18);doc.setFontSize(7);doc.text(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),mg,24);doc.setTextColor(0,0,0);y=34;}
-        function ckp(n){if(y+n>278){doc.addPage();y=12;}}
-        function sep(){doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(mg,y,pw-mg,y);y+=3;}
+        var jsPDF=window.jspdf.jsPDF;var doc=new jsPDF({orientation:'p',unit:'mm',format:'a4',compress:true});var pw=doc.internal.pageSize.getWidth();var mg=14;var y=12;
+        function hd(t){doc.setFillColor(20,83,45);doc.rect(0,0,pw,28,'F');doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('OmnarPRO',mg,11);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(t,mg,18);doc.setFontSize(7);doc.text(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),mg,24);doc.setTextColor(0,0,0);y=34}
+        function ck(n){if(y+n>278){doc.addPage();y=12}}
+        function sp(){doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(mg,y,pw-mg,y);y+=3}
 
-        // KEUANGAN
-        if(tp==='finance'||tp==='full'){updatePDFStatus('Membuat laporan keuangan...');await new Promise(r=>setTimeout(r,150));hdr('Laporan Keuangan Proyek');
-            for(let i=0;i<fps.length;i++){const p=fps[i];ckp(55);doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);doc.text(p.name,mg,y);y+=4;if(p.description){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(120,120,120);doc.text(p.description.substring(0,80),mg,y);y+=4;}
-            const pt=ftx.filter(t=>t.projectId===p.id);let inc=0,exp=0;pt.forEach(t=>{if(t.type==='income')inc+=Number(t.amount)||0;else exp+=Number(t.amount)||0;});const sisa=p.budget-exp;const pct=p.budget>0?Math.round((exp/p.budget)*100):0;
-            ckp(24);doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,18,2,2,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(22,101,52);doc.text('Budget: '+formatRp(p.budget),mg+3,y+5);doc.setTextColor(22,163,74);doc.text('Pemasukan: '+formatRp(inc),mg+3,y+10);doc.setTextColor(185,28,28);doc.text('Pengeluaran: '+formatRp(exp),mg+3,y+15);doc.setTextColor(180,83,9);doc.text('Sisa: '+formatRp(sisa),mg+75,y+5);doc.setTextColor(30,41,59);doc.text('Terpakai: '+pct+'%',mg+75,y+10);y+=21;
-            if(pt.length>0){const sorted=pt.sort((a,b)=>a.date.localeCompare(b.date));const tdata=sorted.map(t=>[formatDate(t.date),(t.description||'-').substring(0,28),t.method==='transfer'?'TF':'CS',t.type==='income'?formatRp(t.amount):'',t.type==='expense'?formatRp(t.amount):'']);tdata.push(['','TOTAL','',formatRp(inc),formatRp(exp)]);
-            if(hasAT&&doc.autoTable){doc.autoTable({startY:y,head:[['Tanggal','Keterangan','Metode','Pemasukan','Pengeluaran']],body:tdata,margin:{left:mg,right:mg},styles:{fontSize:7,cellPadding:1.5},headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7},columnStyles:{0:{cellWidth:20},1:{cellWidth:42},2:{cellWidth:12,halign:'center'},3:{halign:'right',cellWidth:28},4:{halign:'right',cellWidth:28}},didParseCell:function(d){if(d.row.index===tdata.length-1){d.cell.styles.fontStyle='bold';d.cell.styles.fillColor=[240,248,240];}}});y=doc.lastAutoTable.finalY+3;const saldo=inc-exp;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setFillColor(255,251,235);doc.roundedRect(mg+60,y,pw-2*mg-60,6,1,1,1,1,'F');doc.setTextColor(180,83,9);doc.text('SALDO',mg+62,y+4);doc.setTextColor(saldo>=0?22:185,saldo>=0?163:28,saldo>=0?74:28);doc.text(formatRp(saldo),mg+90,y+4);y+=10;}else y+=8;}else{doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Belum ada transaksi.',mg,y+3);y+=8;}sep();y+=2;}}
+        if(tp==='finance'||tp==='full'){uS('Laporan keuangan...');await new Promise(function(r){setTimeout(r,150)});hd('Laporan Keuangan Proyek');
+            for(var i=0;i<fps.length;i++){var p=fps[i];ck(55);doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);doc.text(p.name,mg,y);y+=4;
+            var pt=ftx.filter(function(t){return t.projectId===p.id});var inc=0,exp=0;for(var j=0;j<pt.length;j++){if(pt[j].type==='income')inc+=Number(pt[j].amount)||0;else exp+=Number(pt[j].amount)||0}
+            ck(24);doc.setFillColor(240,248,240);doc.roundedRect(mg,y,pw-2*mg,18,2,2,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(22,101,52);doc.text('Budget: '+fRp(p.budget),mg+3,y+5);doc.setTextColor(22,163,74);doc.text('Pemasukan: '+fRp(inc),mg+3,y+10);doc.setTextColor(185,28,28);doc.text('Pengeluaran: '+fRp(exp),mg+3,y+15);doc.setTextColor(180,83,9);doc.text('Sisa: '+fRp(p.budget-exp),mg+75,y+5);doc.setTextColor(30,41,59);doc.text('Terpakai: '+(p.budget>0?Math.round(exp/p.budget*100):0)+'%',mg+75,y+10);y+=21;
+            if(pt.length>0){var sd=pt.sort(function(a,b){return a.date.localeCompare(b.date)});var td2=sd.map(function(t){return[fDt(t.date),(t.description||'-').substring(0,28),t.method==='transfer'?'TF':'CS',t.type==='income'?fRp(t.amount):'',t.type==='expense'?fRp(t.amount):'']});td2.push(['','TOTAL','',fRp(inc),fRp(exp)]);
+            if(ha&&doc.autoTable){doc.autoTable({startY:y,head:[['Tanggal','Keterangan','Metode','Pemasukan','Pengeluaran']],body:td2,margin:{left:mg,right:mg},styles:{fontSize:7,cellPadding:1.5},headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold',fontSize:7},columnStyles:{0:{cellWidth:20},1:{cellWidth:42},2:{cellWidth:12,halign:'center'},3:{halign:'right',cellWidth:28},4:{halign:'right',cellWidth:28}},didParseCell:function(d){if(d.row.index===td2.length-1){d.cell.styles.fontStyle='bold';d.cell.styles.fillColor=[240,248,240]}}});y=doc.lastAutoTable.finalY+3;var sal=inc-exp;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setFillColor(255,251,235);doc.roundedRect(mg+60,y,pw-2*mg-60,6,1,1,1,1,'F');doc.setTextColor(180,83,9);doc.text('SALDO',mg+62,y+4);doc.setTextColor(sal>=0?22:185,sal>=0?163:28,sal>=0?74:28);doc.text(fRp(sal),mg+90,y+4);y+=10}else{y+=8}}else{doc.setFontSize(8);doc.setTextColor(160,160,160);doc.text('Belum ada transaksi.',mg,y+3);y+=8}sp();y+=2}}
 
-        // PESANAN
-        if(tp==='orders'||tp==='full'){if(tp==='full'){doc.addPage();y=12;}updatePDFStatus('Membuat nota pesanan...');await new Promise(r=>setTimeout(r,150));hdr('Nota Pesanan Barang');
-            for(let i=0;i<fors.length;i++){const o=fors[i];ckp(50);const pj=ps.find(p=>p.id===o.projectId);
+        if(tp==='orders'||tp==='full'){if(tp==='full'){doc.addPage();y=12}uS('Nota pesanan...');await new Promise(function(r){setTimeout(r,150)});hd('Nota Pesanan Barang');
+            for(var i=0;i<fors.length;i++){var o=fors[i];ck(50);var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===o.projectId){pj=ps[j];break}}
             doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(20,83,45);doc.text(o.tahap,mg,y);y+=5;
-            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=4;doc.text('Pemesan: '+o.pemesan,mg,y);y+=4;doc.text('Tanggal: '+formatDateFull(o.date),mg,y);y+=6;
-            if(o.items&&o.items.length){const idata=o.items.map((it,idx)=>[String(idx+1),it.nama,String(it.qty),it.satuan]);
-            if(hasAT&&doc.autoTable){doc.autoTable({startY:y,head:[['No','Nama Barang','Qty','Satuan']],body:idata,margin:{left:mg,right:mg},styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:12,halign:'center'},2:{cellWidth:18,halign:'center'},3:{cellWidth:25,halign:'center'}}});y=doc.lastAutoTable.finalY+8;}else y+=6+idata.length*5;}
-            // Tanda tangan
-            ckp(30);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.text('Pemesan,',mg+10,y);doc.text('Mengetahui,',pw-mg-50,y);y+=25;doc.line(mg+5,y,mg+45,y);doc.line(pw-mg-55,y,pw-mg-15,y);y+=3;doc.setFont('helvetica','bold');doc.text(o.pemesan,mg+10,y);doc.text('____________',pw-mg-55,y);y+=12;sep();y+=4;}}
+            doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=4;doc.text('Pemesan: '+o.pemesan,mg,y);y+=4;doc.text('Tanggal: '+fDtF(o.date),mg,y);y+=6;
+            if(o.items&&o.items.length){var id=o.items.map(function(it,idx){return[String(idx+1),it.nama,String(it.qty),it.satuan]});
+            if(ha&&doc.autoTable){doc.autoTable({startY:y,head:[['No','Nama Barang','Qty','Satuan']],body:id,margin:{left:mg,right:mg},styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[20,83,45],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:12,halign:'center'},2:{cellWidth:18,halign:'center'},3:{cellWidth:25,halign:'center'}}});y=doc.lastAutoTable.finalY+8}else{y+=6+id.length*5}}
+            ck(30);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.text('Pemesan,',mg+10,y);doc.text('Mengetahui,',pw-mg-50,y);y+=25;doc.line(mg+5,y,mg+45,y);doc.line(pw-mg-55,y,pw-mg-15,y);y+=3;doc.setFont('helvetica','bold');doc.text(o.pemesan,mg+10,y);doc.text('____________',pw-mg-55,y);y+=12;sp();y+=4}}
 
-        // HARIAN
-        if(tp==='daily'||tp==='full'){if(tp==='full'){doc.addPage();y=12;}updatePDFStatus('Membuat laporan harian...');await new Promise(r=>setTimeout(r,150));hdr('Laporan Harian Proyek');
-            if(!frp.length){doc.setFontSize(9);doc.setTextColor(160,160,160);doc.text('Tidak ada laporan.',mg,y+5);}
-            const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});
-            Object.keys(gp).sort((a,b)=>b.localeCompare(a)).forEach(dk=>{const dr=gp[dk];ckp(20);doc.setFillColor(217,119,6);doc.roundedRect(mg,y,pw-2*mg,6,1.5,1.5,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text(formatDateFull(dk),mg+2,y+4);doc.setTextColor(0,0,0);y+=9;
-            for(let ri=0;ri<dr.length;ri++){const r=dr[ri];ckp(25);const pj=ps.find(p=>p.id===r.projectId);doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);doc.text(r.title,mg,y);y+=3.5;doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(217,119,6);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=3.5;if(r.content){doc.setTextColor(60,60,60);const ln=doc.splitTextToSize(r.content.substring(0,400),pw-2*mg);doc.text(ln.slice(0,10),mg,y);y+=ln.slice(0,10).length*3+2;}if(r.image){try{const sm=await resizeImgForPDF(r.image);if(sm){ckp(40);doc.addImage(sm,'JPEG',mg,y,45,34);y+=38;}}catch(e){}}sep();}y+=3;});}
+        if(tp==='daily'||tp==='full'){if(tp==='full'){doc.addPage();y=12}uS('Laporan harian...');await new Promise(function(r){setTimeout(r,150)});hd('Laporan Harian Proyek');
+            var gp={};frp.sort(function(a,b){return b.date.localeCompare(a.date)});for(var i=0;i<frp.length;i++){if(!gp[frp[i].date])gp[frp[i].date]=[];gp[frp[i].date].push(frp[i])}
+            var dk=Object.keys(gp).sort(function(a,b){return b.localeCompare(a)});
+            for(var d=0;d<dk.length;d++){var dr=gp[dk[d]];ck(20);doc.setFillColor(217,119,6);doc.roundedRect(mg,y,pw-2*mg,6,1.5,1.5,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text(fDtF(dk[d]),mg+2,y+4);doc.setTextColor(0,0,0);y+=9;
+            for(var ri=0;ri<dr.length;ri++){var r=dr[ri];ck(25);var pj=null;for(var j=0;j<ps.length;j++){if(ps[j].id===r.projectId){pj=ps[j];break}}doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(30,41,59);doc.text(r.title,mg,y);y+=3.5;doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(217,119,6);doc.text('Proyek: '+(pj?pj.name:'-'),mg,y);y+=3.5;if(r.content){doc.setTextColor(60,60,60);var ln=doc.splitTextToSize(r.content.substring(0,400),pw-2*mg);doc.text(ln.slice(0,10),mg,y);y+=ln.slice(0,10).length*3+2}if(r.image){try{var sm=await rI(r.image);if(sm){ck(40);doc.addImage(sm,'JPEG',mg,y,45,34);y+=38}}catch(e){}}sp()}y+=3}}
 
-        updatePDFStatus('Menyelesaikan...');await new Promise(r=>setTimeout(r,100));
-        const totalP=doc.internal.getNumberOfPages();for(let i=1;i<=totalP;i++){doc.setPage(i);doc.setFontSize(6.5);doc.setTextColor(180,180,180);doc.text('OmnarPRO - Laporan otomatis | Hal. '+i+'/'+totalP,mg,291);}
-        updatePDFStatus(share?'Membuka menu kirim...':'Mengunduh...');await new Promise(r=>setTimeout(r,400));hidePDFLoading();
-        const fn='Laporan-OmnarPRO-'+todayStr()+'.pdf';let pdfBlob;try{pdfBlob=doc.output('blob');}catch(e1){try{const ab=doc.output('arraybuffer');pdfBlob=new Blob([ab],{type:'application/pdf'});}catch(e2){hidePDFLoading();showToast('Gagal membuat PDF','error');return;}}
-        if(!pdfBlob||pdfBlob.size<100){hidePDFLoading();showToast('File PDF tidak valid','error');return;}
-        if(share){const result=await sharePDFBlob(pdfBlob,fn);showToast(result.method==='share'?'PDF berhasil dikirim!':'PDF diunduh','success');}else{try{await triggerDownload(pdfBlob,fn,'application/pdf');showToast('PDF berhasil diunduh! ('+Math.round(pdfBlob.size/1024)+' KB)','success');}catch(e){showToast('Gagal mengunduh PDF','error');}}
-    }catch(e){console.error('PDF Error:',e);hidePDFLoading();showToast('Gagal membuat PDF: '+(e.message||'Error').substring(0,50),'error');}
+        uS('Menyelesaikan...');await new Promise(function(r){setTimeout(r,100)});
+        var tp2=doc.internal.getNumberOfPages();for(var i=1;i<=tp2;i++){doc.setPage(i);doc.setFontSize(6.5);doc.setTextColor(180,180,180);doc.text('OmnarPRO - Hal. '+i+'/'+tp2,mg,291)}
+        uS(share?'Membuka kirim...':'Mengunduh...');await new Promise(function(r){setTimeout(r,400)});hL();
+        var fn='Laporan-OmnarPRO-'+tS()+'.pdf';var bl;try{bl=doc.output('blob')}catch(e1){try{var ab=doc.output('arraybuffer');bl=new Blob([ab],{type:'application/pdf'})}catch(e2){hL();toast('Gagal membuat PDF','e');return}}
+        if(!bl||bl.size<100){hL();toast('File PDF tidak valid','e');return}
+        if(share){var rs=await sPDF(bl,fn);toast(rs.m==='share'?'PDF berhasil dikirim!':'PDF diunduh','s')}else{try{await tDL(bl,fn);toast('PDF berhasil diunduh! ('+Math.round(bl.size/1024)+' KB)','s')}catch(e){toast('Gagal mengunduh PDF','e')}}
+    }catch(e){console.error('PDF Error:',e);hL();toast('Gagal: '+(e.message||'Error').substring(0,50),'e')}
 }
 
-function exportAsText(){const pid=document.getElementById('export-project').value,fd=document.getElementById('export-from').value,td=document.getElementById('export-to').value,tp=document.querySelector('input[name="export-type"]:checked').value;const ps=DB.get('projects'),txs=DB.get('transactions'),rps=DB.get('reports'),ors=DB.get('orders');let fps=pid?ps.filter(p=>p.id===pid):ps,ftx=txs.filter(t=>!pid||t.projectId===pid),frp=rps.filter(r=>!pid||r.projectId===pid),fors=ors.filter(o=>!pid||o.projectId===pid);if(fd){ftx=ftx.filter(t=>t.date>=fd);frp=frp.filter(r=>r.date>=fd);fors=fors.filter(o=>o.date>=fd);}if(td){ftx=ftx.filter(t=>t.date<=td);frp=frp.filter(r=>r.date<=td);fors=fors.filter(o=>o.date<=td);}
-let t='=== OMNARPRO - LAPORAN ===\nDicetak: '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+'\n\n';
-if(tp==='finance'||tp==='full'){t+='--- KEUANGAN ---\n\n';fps.forEach(p=>{const pt=ftx.filter(tx=>tx.projectId===p.id);let ic=0,ex=0;pt.forEach(tx=>{if(tx.type==='income')ic+=Number(tx.amount)||0;else ex+=Number(tx.amount)||0;});t+='>> '+p.name.toUpperCase()+'\n  Budget: '+formatRp(p.budget)+' | Masuk: '+formatRp(ic)+' | Keluar: '+formatRp(ex)+' | Sisa: '+formatRp(p.budget-ex)+'\n';if(pt.length){t+='  Tanggal       Keterangan       Met  Pemasukan        Pengeluaran\n';pt.sort((a,b)=>a.date.localeCompare(b.date)).forEach(tx=>{const d=formatDate(tx.date).padEnd(14);const desc=(tx.description||'-').substring(0,16).padEnd(18);const m=(tx.method==='transfer'?'TF':'CS').padEnd(4);const inc=tx.type==='income'?formatRp(tx.amount).padEnd(17):'-'.padEnd(17);const exp=tx.type==='expense'?formatRp(tx.amount):'-';t+='  '+d+desc+m+inc+exp+'\n';});t+='  '+''.padEnd(36)+'TOTAL  '+formatRp(ic).padEnd(17)+formatRp(ex)+'\n\n';}});}
-if(tp==='orders'||tp==='full'){t+='--- PESANAN BARANG ---\n\n';fors.forEach(o=>{const pj=ps.find(p=>p.id===o.projectId);t+='>> '+o.tahap+' | Proyek: '+(pj?pj.name:'-')+' | Pemesan: '+o.pemesan+' | '+formatDate(o.date)+'\n';if(o.items&&o.items.length){t+='  No  Nama Barang          Qty  Satuan\n';o.items.forEach((it,i)=>{t+='  '+String(i+1).padEnd(4)+(it.nama).substring(0,20).padEnd(21)+String(it.qty).padEnd(5)+it.satuan+'\n';});}t+='\n';});}
-if(tp==='daily'||tp==='full'){t+='--- LAPORAN HARIAN ---\n\n';const gp={};frp.sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{if(!gp[r.date])gp[r.date]=[];gp[r.date].push(r);});Object.keys(gp).sort((a,b)=>b.localeCompare(a)).forEach(d=>{t+='>> '+formatDateFull(d)+'\n';gp[d].forEach(r=>{const pj=ps.find(p=>p.id===r.projectId);t+='  - '+r.title+' ['+(pj?pj.name:'-')+']\n    '+(r.content||'-').replace(/\n/g,'\n    ')+'\n';});t+='\n';});}
-t+='\n=== Dicetak oleh OmnarPRO ===\n';
-try{const blob=new Blob([t],{type:'text/plain;charset=utf-8'});triggerDownload(blob,'Laporan-OmnarPRO-'+todayStr()+'.txt','text/plain');showToast('Laporan teks berhasil diunduh!','success');}catch(e){showToast('Gagal export','error');}}
+// ========== OFFLINE ==========
+function uOS(){var b=document.getElementById('ibar');if(!navigator.onLine)b.classList.add('show');else b.classList.remove('show')}
+window.addEventListener('online',function(){uOS();toast('Kembali online!','s')});
+window.addEventListener('offline',function(){uOS();toast('Mode offline — data tersimpan','i')});
+if(!navigator.onLine)setTimeout(uOS,1500);
 
-// ==================== PANDUAN INSTALL ====================
-function renderInstallGuide(){const isSA=window.matchMedia('(display-mode:standalone)').matches;const g=document.getElementById('install-guide');if(isSA){g.innerHTML='<div class="bg-green-50 rounded-xl p-5 text-center"><i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i><p class="font-bold text-green-800">OmnarPRO Sudah Terinstall</p></div>';return;}g.innerHTML=`<div class="space-y-4 mt-2"><div class="flex gap-3 items-start"><div class="step-num">1</div><div><p class="font-bold">Host di Web Server HTTPS</p><p class="text-sm text-gray-500">Upload ke GitHub Pages, Netlify, atau Vercel</p></div></div><div class="flex gap-3 items-start"><div class="step-num">2</div><div><p class="font-bold">Buka di Chrome Android</p><p class="text-sm text-gray-500">Tap menu → "Install app"</p></div></div><div class="flex gap-3 items-start"><div class="step-num">3</div><div><p class="font-bold">Siap! Akses dari Home Screen</p><p class="text-sm text-gray-500">Berjalan fullscreen & offline</p></div></div></div>`;}
-
-// ==================== OFFLINE DETECTION ====================
-function updateOnlineStatus(){const bar=document.getElementById('offline-bar');if(!navigator.onLine)bar.classList.add('show');else bar.classList.remove('show');}
-window.addEventListener('online',()=>{updateOnlineStatus();showToast('Kembali online!','success');});
-window.addEventListener('offline',()=>{updateOnlineStatus();showToast('Mode offline — data tersimpan lokal','info');});
-if(!navigator.onLine)setTimeout(()=>updateOnlineStatus(),1500);
-
-// ==================== INIT ====================
-window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash').classList.add('fade-out');document.getElementById('app').style.opacity='1';setTimeout(()=>{document.getElementById('splash').style.display='none';},500);},1200);renderDashboard();if(localStorage.getItem('op_install_dismissed')==='1')document.getElementById('install-banner').classList.add('hide');});
+// ========== INIT ==========
+window.addEventListener('load',function(){setTimeout(function(){document.getElementById('splash').classList.add('fo');document.getElementById('app').style.opacity='1';setTimeout(function(){document.getElementById('splash').style.display='none'},500)},1200);rDash()});
 </script>
 </body>
 </html>
